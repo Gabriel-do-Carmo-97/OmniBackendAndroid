@@ -13,7 +13,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * Implementação de [StorageRepository] enviando arquivos para Cloudflare R2 via Worker R2 endpoint (`/r2/*`).
+ * Implementação de [StorageRepository] enviando arquivos para Cloudflare R2 via Worker R2 endpoint.
  */
 internal class CloudflareStorageRepositoryImpl(
     private val context: Context,

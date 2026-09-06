@@ -17,7 +17,7 @@ import java.net.URL
 import java.util.UUID
 
 /**
- * Implementação de [AuthRepository] delegando autenticação para Cloudflare Worker endpoints (`/auth/*`).
+ * Implementação de [AuthRepository] delegando autenticação para Cloudflare Worker endpoints.
  */
 internal class CloudflareAuthRepositoryImpl(
     private val workerBaseUrl: String,

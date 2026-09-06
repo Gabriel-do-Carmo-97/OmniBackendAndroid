@@ -1,6 +1,11 @@
 package br.wgc.omnibackend.cloudflare
 
 import android.content.Context
+import br.wgc.omnibackend.cloudflare.data.repository.CloudflareAuthRepositoryImpl
+import br.wgc.omnibackend.cloudflare.data.repository.CloudflareDatabaseRepositoryImpl
+import br.wgc.omnibackend.cloudflare.data.repository.CloudflareStorageRepositoryImpl
+import br.wgc.omnibackend.core.repository.AuthRepository
+import br.wgc.omnibackend.core.repository.FirestoreRepository
 import br.wgc.omnibackend.core.repository.StorageRepository
 
 /**
@@ -17,6 +22,10 @@ import br.wgc.omnibackend.core.repository.StorageRepository
  *     accountId = "seu-account-id",
  *     workerBaseUrl = "https://meu-worker.workers.dev"
  * )
+ *
+ * val auth = OmniCloudflare.auth
+ * val db = OmniCloudflare.database
+ * val storage = OmniCloudflare.storage
  * ```
  */
 object OmniCloudflare {
@@ -26,6 +35,7 @@ object OmniCloudflare {
 
     private lateinit var cloudflareAccountId: String
     private lateinit var cloudflareWorkerUrl: String
+    private var appContext: Context? = null
 
     /**
      * Inicializa a configuração dos serviços Cloudflare.
@@ -42,6 +52,7 @@ object OmniCloudflare {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
+                    appContext = context.applicationContext
                     cloudflareAccountId = accountId
                     cloudflareWorkerUrl = workerBaseUrl
                     isInitialized = true
@@ -74,4 +85,33 @@ object OmniCloudflare {
             check(isInitialized) { "OmniCloudflare deve ser inicializado antes do uso. Chame OmniCloudflare.initialize(...)" }
             return cloudflareWorkerUrl
         }
+
+    /** Implementação de [AuthRepository] para Cloudflare (Workers Auth). */
+    val auth: AuthRepository by lazy {
+        check(isInitialized) { "OmniCloudflare deve ser inicializado antes do uso." }
+        CloudflareAuthRepositoryImpl(cloudflareWorkerUrl)
+    }
+
+    /** Implementação de [FirestoreRepository] para Cloudflare D1. */
+    val database: FirestoreRepository by lazy {
+        check(isInitialized) { "OmniCloudflare deve ser inicializado antes do uso." }
+        CloudflareDatabaseRepositoryImpl(cloudflareWorkerUrl)
+    }
+
+    /** Implementação de [StorageRepository] para Cloudflare R2. */
+    val storage: StorageRepository by lazy {
+        check(isInitialized) { "OmniCloudflare deve ser inicializado antes do uso." }
+        CloudflareStorageRepositoryImpl(
+            context = appContext ?: error("OmniCloudflare deve ser inicializado antes do uso."),
+            workerBaseUrl = cloudflareWorkerUrl
+        )
+    }
+
+    /** Reinicia estado singleton para testes. */
+    internal fun resetForTesting() {
+        synchronized(this) {
+            isInitialized = false
+            appContext = null
+        }
+    }
 }

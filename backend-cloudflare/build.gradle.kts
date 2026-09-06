@@ -16,6 +16,10 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.javax.inject)
 
+    // Ktor Client & Gson para Cloudflare Workers, D1 e R2 REST/S3 API
+    implementation(libs.ktor.client.android)
+    implementation(libs.google.gson)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)

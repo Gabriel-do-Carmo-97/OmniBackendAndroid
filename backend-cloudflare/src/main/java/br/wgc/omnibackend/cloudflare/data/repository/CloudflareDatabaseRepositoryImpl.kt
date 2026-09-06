@@ -13,7 +13,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * Implementação de [FirestoreRepository] integrando com Cloudflare D1 via Worker REST API (`/d1/{collection}/*`).
+ * Implementação de [FirestoreRepository] integrando com Cloudflare D1 via Worker REST API.
  */
 internal class CloudflareDatabaseRepositoryImpl(
     private val workerBaseUrl: String,
