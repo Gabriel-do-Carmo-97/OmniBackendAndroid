@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="br.wgc.omnibackend.firebase.data.repository.AnalyticsRepositoryTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-09-06T15:09:30.733Z" hostname="DESKTOP-UADTKH3" time="3.772">
+  <properties/>
+  <testcase name="setUserProperty delegates to FirebaseAnalytics" classname="br.wgc.omnibackend.firebase.data.repository.AnalyticsRepositoryTest" time="3.755"/>
+  <testcase name="setUserId delegates to FirebaseAnalytics" classname="br.wgc.omnibackend.firebase.data.repository.AnalyticsRepositoryTest" time="0.005"/>
+  <testcase name="logEvent delegates to FirebaseAnalytics with bundle" classname="br.wgc.omnibackend.firebase.data.repository.AnalyticsRepositoryTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[WARNING: A Java agent has been loaded dynamically (C:\Users\gcarm\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy-agent\1.14.17\e3c251a39dc90badaf71c83427ba46840f219d8d\byte-buddy-agent-1.14.17.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+</testsuite>

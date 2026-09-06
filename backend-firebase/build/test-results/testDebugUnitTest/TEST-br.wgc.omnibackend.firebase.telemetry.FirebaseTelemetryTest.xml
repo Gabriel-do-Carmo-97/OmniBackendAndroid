@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="br.wgc.omnibackend.firebase.telemetry.FirebaseTelemetryTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-06T15:09:41.214Z" hostname="DESKTOP-UADTKH3" time="0.779">
+  <properties/>
+  <testcase name="trace starts and stops trace" classname="br.wgc.omnibackend.firebase.telemetry.FirebaseTelemetryTest" time="0.693"/>
+  <testcase name="recordError with domain error logs and records AppErrorException" classname="br.wgc.omnibackend.firebase.telemetry.FirebaseTelemetryTest" time="0.051"/>
+  <testcase name="traceAsync starts and stops trace" classname="br.wgc.omnibackend.firebase.telemetry.FirebaseTelemetryTest" time="0.018"/>
+  <testcase name="recordError with Unknown unrolls and records original throwable" classname="br.wgc.omnibackend.firebase.telemetry.FirebaseTelemetryTest" time="0.011"/>
+  <testcase name="recordError with Auth Generic unrolls and records original exception" classname="br.wgc.omnibackend.firebase.telemetry.FirebaseTelemetryTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

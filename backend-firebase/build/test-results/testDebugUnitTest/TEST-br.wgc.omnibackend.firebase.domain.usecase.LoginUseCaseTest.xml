@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="br.wgc.omnibackend.firebase.domain.usecase.LoginUseCaseTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-06T15:09:40.584Z" hostname="DESKTOP-UADTKH3" time="0.61">
+  <properties/>
+  <testcase name="invoke desloga e emite Failure quando updatePresence e true mas presenca falha" classname="br.wgc.omnibackend.firebase.domain.usecase.LoginUseCaseTest" time="0.543"/>
+  <testcase name="invoke emit Loading e Failure quando auth falha" classname="br.wgc.omnibackend.firebase.domain.usecase.LoginUseCaseTest" time="0.013"/>
+  <testcase name="loginAnonymous emit Loading e Success quando login e bem sucedido sem presenca" classname="br.wgc.omnibackend.firebase.domain.usecase.LoginUseCaseTest" time="0.02"/>
+  <testcase name="invoke emit Loading e Success quando auth e bem sucedida sem atualizar presenca" classname="br.wgc.omnibackend.firebase.domain.usecase.LoginUseCaseTest" time="0.017"/>
+  <testcase name="invoke emit Loading e Success quando auth e presenca sao bem sucedidas" classname="br.wgc.omnibackend.firebase.domain.usecase.LoginUseCaseTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

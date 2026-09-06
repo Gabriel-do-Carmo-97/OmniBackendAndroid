@@ -1,0 +1,9 @@
+br.wgc.omnibackend.firebase.backend-firebase-pngs-0 C:\Users\gcarm\AndroidStudioProjects\OmniBackendAndroid\backend-firebase\build\generated\res\pngs\debug
+br.wgc.omnibackend.firebase.backend-firebase-updated_navigation_xml-1 C:\Users\gcarm\AndroidStudioProjects\OmniBackendAndroid\backend-firebase\build\generated\updated_navigation_xml\debug
+br.wgc.omnibackend.firebase.backend-firebase-mergeDebugResources-2 C:\Users\gcarm\AndroidStudioProjects\OmniBackendAndroid\backend-firebase\build\intermediates\incremental\debug\mergeDebugResources\merged.dir
+br.wgc.omnibackend.firebase.backend-firebase-mergeDebugResources-3 C:\Users\gcarm\AndroidStudioProjects\OmniBackendAndroid\backend-firebase\build\intermediates\incremental\debug\mergeDebugResources\stripped.dir
+br.wgc.omnibackend.firebase.backend-firebase-debug-4 C:\Users\gcarm\AndroidStudioProjects\OmniBackendAndroid\backend-firebase\build\intermediates\merged_res\debug\mergeDebugResources
+br.wgc.omnibackend.firebase.backend-firebase-debug-5 C:\Users\gcarm\AndroidStudioProjects\OmniBackendAndroid\backend-firebase\build\intermediates\packaged_res\debug\packageDebugResources
+br.wgc.omnibackend.firebase.backend-firebase-debug-6 C:\Users\gcarm\AndroidStudioProjects\OmniBackendAndroid\backend-firebase\src\debug\res
+br.wgc.omnibackend.firebase.backend-firebase-main-7 C:\Users\gcarm\AndroidStudioProjects\OmniBackendAndroid\backend-firebase\src\main\res
+gradleHome-0 C:\Users\gcarm\.gradle
