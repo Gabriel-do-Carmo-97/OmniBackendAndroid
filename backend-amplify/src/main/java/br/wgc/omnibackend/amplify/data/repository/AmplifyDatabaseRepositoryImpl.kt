@@ -50,7 +50,8 @@ internal class AmplifyDatabaseRepositoryImpl(
     ): DataResult<Unit> = runCatchingDb {
         val collectionStore = storageMap[collection]
             ?: return DataResult.Failure(br.wgc.omnibackend.core.utils.AppError.Firestore.DocumentNotFound)
-        val existing = collectionStore[documentId]
+        @Suppress("UNCHECKED_CAST")
+        val existing = (collectionStore[documentId] as? MutableMap<String, Any>)
             ?: return DataResult.Failure(br.wgc.omnibackend.core.utils.AppError.Firestore.DocumentNotFound)
         existing.putAll(data)
         Unit

@@ -1,8 +1,11 @@
 package br.wgc.omnibackend.amplify
 
 import android.content.Context
-import br.wgc.omnibackend.core.repository.AnalyticsRepository
+import br.wgc.omnibackend.amplify.data.repository.AmplifyAuthRepositoryImpl
+import br.wgc.omnibackend.amplify.data.repository.AmplifyDatabaseRepositoryImpl
+import br.wgc.omnibackend.amplify.data.repository.AmplifyStorageRepositoryImpl
 import br.wgc.omnibackend.core.repository.AuthRepository
+import br.wgc.omnibackend.core.repository.FirestoreRepository
 import br.wgc.omnibackend.core.repository.StorageRepository
 
 /**
@@ -18,12 +21,15 @@ import br.wgc.omnibackend.core.repository.StorageRepository
  *
  * // Nos ViewModels ou UseCases:
  * val auth = OmniAmplify.auth
+ * val db = OmniAmplify.database
+ * val storage = OmniAmplify.storage
  * ```
  */
 object OmniAmplify {
 
     @Volatile
     private var isInitialized = false
+    private var appContext: Context? = null
 
     /**
      * Inicializa a configuração do AWS Amplify.
@@ -34,6 +40,7 @@ object OmniAmplify {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
+                    appContext = context.applicationContext
                     isInitialized = true
                 }
             }
@@ -42,4 +49,32 @@ object OmniAmplify {
 
     /** Retorna `true` caso o SDK já tenha sido inicializado. */
     val initialized: Boolean get() = isInitialized
+
+    /** Implementação de [AuthRepository] para AWS Cognito via Amplify. */
+    val auth: AuthRepository by lazy {
+        check(isInitialized) { "OmniAmplify deve ser inicializado antes do uso." }
+        AmplifyAuthRepositoryImpl()
+    }
+
+    /** Implementação de [FirestoreRepository] para AWS DynamoDB/AppSync via Amplify. */
+    val database: FirestoreRepository by lazy {
+        check(isInitialized) { "OmniAmplify deve ser inicializado antes do uso." }
+        AmplifyDatabaseRepositoryImpl()
+    }
+
+    /** Implementação de [StorageRepository] para AWS S3 via Amplify. */
+    val storage: StorageRepository by lazy {
+        check(isInitialized) { "OmniAmplify deve ser inicializado antes do uso." }
+        AmplifyStorageRepositoryImpl(
+            context = appContext ?: error("OmniAmplify deve ser inicializado antes do uso.")
+        )
+    }
+
+    /** Reinicia estado singleton para testes. */
+    internal fun resetForTesting() {
+        synchronized(this) {
+            isInitialized = false
+            appContext = null
+        }
+    }
 }
