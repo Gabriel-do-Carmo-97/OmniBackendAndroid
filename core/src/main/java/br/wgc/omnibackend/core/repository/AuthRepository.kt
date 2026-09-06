@@ -133,6 +133,16 @@ interface AuthRepository {
     suspend fun signInWithGoogle(idToken: String): DataResult<OmniUser>
 
     /**
+     * Autentica o usuário via Passkeys ou Credential Manager API.
+     *
+     * @param credentialResponse Objeto de credencial retornado pelo Android Credential Manager.
+     * @return [DataResult.Success] com o [OmniUser] autenticado.
+     */
+    suspend fun signInWithCredential(credentialResponse: Any): DataResult<OmniUser> {
+        return DataResult.Failure(AppError.Auth.Generic(UnsupportedOperationException("Passkeys credential auth não implementado neste provedor")))
+    }
+
+    /**
      * Encerra a sessão ativa do usuário no dispositivo atual.
      *
      * @return [DataResult.Success] ao finalizar a sessão com sucesso.
