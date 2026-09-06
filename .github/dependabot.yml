@@ -1,0 +1,46 @@
+version: 2
+updates:
+  # Monitoramento de dependências Gradle (Version Catalog & Wrapper)
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    target-branch: "master"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "gradle"
+    commit-message:
+      prefix: "build(deps)"
+      include: "scope"
+
+  # Monitoramento do composite build 'build-logic'
+  - package-ecosystem: "gradle"
+    directory: "/build-logic"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    target-branch: "master"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "build-logic"
+    commit-message:
+      prefix: "build(deps-build-logic)"
+      include: "scope"
+
+  # Monitoramento de GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    target-branch: "master"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci(deps)"
+      include: "scope"
