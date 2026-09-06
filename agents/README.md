@@ -1,29 +1,62 @@
-# 🤖 Suíte de Agentes Especialistas — OmniBackend Android
+# 🤖 Sistema Multi-Agente — OmniBackend Android
 
-Esta pasta contém as especificações, prompts, regras invioláveis e protocolos de trabalho dos **Agentes Especialistas de IA** do framework **OmniBackend Android**.
-
----
-
-## 🏛️ Filosofia Operacional
-
-O ecossistema adota a **Segregação Estrita de Responsabilidades** (Single Responsibility Principle) e **Arquitetura Hexagonal**:
-- O **Orquestrador** nunca gera código diretamente; sua função é coordenar fluxos cross-module e acionar os especialistas.
-- O **Core Domain Agent** é o guardião da camada de domínio pura (`:core`), garantindo zero acoplamento com fornecedores de nuvem.
-- Cada provedor de nuvem tem seu próprio **Driver Agent Especialista** (`firebase`, `supabase`, `appwrite`), preservando o contexto nativo de cada SDK.
-- O **Code Reviewer** é um auditor independente: nunca altera o código, reportando falhas técnicas com linha e severidade para o agente responsável corrigir.
+Este diretório define a equipe de agentes autônomos e especialistas projetados para colaborar no desenvolvimento, manutenção, expansão e garantia de qualidade do **OmniBackend Android**.
 
 ---
 
-## 👥 Mapa de Agentes
+## 📋 Catálogo de Agentes
 
-| Agente | Arquivo | Responsabilidade Principal |
-| :--- | :--- | :--- |
-| **Orquestrador Geral** | [`omni-backend-orchestrator.md`](./omni-backend-orchestrator.md) | Coordenação cross-module, planejamento arquitetural e delegação. |
-| **Domínio Agnóstico** | [`core-domain-agent.md`](./core-domain-agent.md) | Contratos de repositório, `OmniUser`, `DataResult` e hierarquia `AppError`. |
-| **Driver Firebase** | [`firebase-driver-agent.md`](./firebase-driver-agent.md) | Implementação Firebase (BoM 33.9.0), App Check, Telemetria e Mappers. |
-| **Driver Supabase** | [`supabase-driver-agent.md`](./supabase-driver-agent.md) | Implementação Supabase Kotlin SDK (PostgREST, GoTrue, Realtime, Storage). |
-| **Driver Appwrite** | [`appwrite-driver-agent.md`](./appwrite-driver-agent.md) | Implementação Appwrite Android SDK (Account, Databases, Storage). |
-| **Casos de Uso & Testes** | [`usecase-testing-agent.md`](./usecase-testing-agent.md) | UseCases de negócio, Fakes em memória e testes unitários com MockK. |
-| **Code Review & Qualidade** | [`code-reviewer-agent.md`](./code-reviewer-agent.md) | Checklists de Anti-Leak, OWASP Mobile, Concorrência e Hexagonal. |
-| **Engenheiro de Build** | [`gradle-agent.md`](./gradle-agent.md) | `build-logic`, convention plugins, `libs.versions.toml` e tarefas Gradle. |
-| **Workflow & CI/CD** | [`github-agent.md`](./github-agent.md) | PRs semânticos, automação de GitHub Actions e publicação de AARs. |
+### 🧠 1. Domínio & Orquestração
+- **[`backend-orchestrator-agent.md`](./backend-orchestrator-agent.md)**: Maestro central responsável pela triagem de demandas, coordenação de fluxos e validação da governança arquitetural.
+- **[`core-domain-agent.md`](./core-domain-agent.md)**: Guardião da camada agnóstica (`:core`). Garante que nenhum SDK ou tipo de nuvem entre nos contratos de repositório, modelos ou tratamento de erro.
+
+### ☁️ 2. Drivers de Provedores em Nuvem
+- **[`firebase-driver-agent.md`](./firebase-driver-agent.md)**: Especialista no SDK oficial do Firebase (Auth, Firestore, RTDB, Storage, Vertex AI, Telemetria).
+- **[`supabase-driver-agent.md`](./supabase-driver-agent.md)**: Especialista no Supabase Kotlin SDK (GoTrue Auth, PostgREST, Realtime, Storage).
+- **[`appwrite-driver-agent.md`](./appwrite-driver-agent.md)**: Especialista no Appwrite Android SDK (Account, Databases, Storage, Session cookies).
+- **[`aws-amplify-driver-agent.md`](./aws-amplify-driver-agent.md)**: Especialista no AWS Amplify Android SDK (Cognito, S3 Storage, AppSync GraphQL, DynamoDB).
+- **[`pocketbase-driver-agent.md`](./pocketbase-driver-agent.md)**: Especialista no PocketBase (RecordAuth, Collections, Server-Sent Events, Files).
+- **[`custom-rest-driver-agent.md`](./custom-rest-driver-agent.md)**: Especialista em integração com APIs corporativas proprietárias via Ktor Client / Retrofit com JWT e RFC 7807.
+- **[`cloudflare-driver-agent.md`](./cloudflare-driver-agent.md)**: Especialista em soluções de computação e armazenamento em borda da Cloudflare (Workers, R2, D1, Turnstile).
+
+### 🛡️ 3. Qualidade, Build & Governança
+- **[`usecase-testing-agent.md`](./usecase-testing-agent.md)**: Especialista em testes unitários com MockK, isolamento de corrotinas com Coroutines Test e testes de UseCases.
+- **[`code-reviewer-agent.md`](./code-reviewer-agent.md)**: Inspetor de qualidade de código, conformidade com Detekt, validação de Anti-Leak de fornecedores e garantia de 100% KDoc.
+- **[`gradle-agent.md`](./gradle-agent.md)**: Especialista no sistema de build Gradle, catálogo `libs.versions.toml`, composite build `build-logic`, Dokka V2 e publicação Maven.
+- **[`github-agent.md`](./github-agent.md)**: Especialista em CI/CD, Workflows do GitHub Actions, convenções de commits semânticos e diretrizes de PR.
+
+---
+
+## 🔄 Fluxo de Colaboração dos Agentes
+
+```
+[Demanda do Usuário]
+         │
+         ▼
+[backend-orchestrator-agent]
+   ├── Contrato no :core necessário? ──► [core-domain-agent]
+   │                                              │
+   ▼                                              ▼
+[Driver Especialista] (Firebase / Supabase / Appwrite / AWS / PocketBase / REST / Cloudflare)
+         │
+         ▼
+[usecase-testing-agent] ───► Validação de Testes Unitários
+         │
+         ▼
+[code-reviewer-agent]   ───► KDoc 100% & Detekt Compliance
+         │
+         ▼
+[gradle-agent]          ───► Build-logic & Configuração Maven/Dokka
+         │
+         ▼
+[github-agent]          ───► CI/CD & Commit Semântico
+```
+
+---
+
+## ⚖️ Princípios Invioláveis do Sistema
+
+1. **Pureza do `:core`**: O módulo central jamais conhecerá a existência de SDKs de fornecedores.
+2. **Anti-Leak Estrito**: Os drivers são cascas descartáveis; todo tipo proprietário deve ser convertido para `OmniUser` e os erros para `AppError`.
+3. **100% KDoc**: Toda função, classe ou parâmetro exposto deve ser documentado.
+4. **Zero Regressão**: Toda modificação deve manter 100% de testes unitários aprovados (`./gradlew testDebugUnitTest`).
