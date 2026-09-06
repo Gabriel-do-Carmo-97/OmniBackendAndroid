@@ -15,14 +15,19 @@ Sua missão é coordenar o ciclo de vida, a delegação de tarefas e a governan�
 | **Drivers de Nuvem** | `firebase-driver-agent` | Módulo `:backend-firebase` (Auth, Firestore, Storage, RTDB, Vertex AI) |
 | | `supabase-driver-agent` | Módulo `:backend-supabase` (PostgREST, GoTrue Auth, Realtime, Storage) |
 | | `appwrite-driver-agent` | Módulo `:backend-appwrite` (Account, Databases, Storage, Session) |
+| | `back4app-driver-agent` | Módulo `:backend-back4app` (ParseUser, ParseObject, LiveQuery, ParseFile) |
 | | `aws-amplify-driver-agent` | Módulo `:backend-amplify` (Cognito, S3, AppSync, DynamoDB) |
 | | `pocketbase-driver-agent` | Módulo `:backend-pocketbase` (RecordAuth, Collections, SSE, Files) |
 | | `custom-rest-driver-agent` | Módulo `:backend-rest` (APIs REST corporativas, Ktor Client, JWT) |
 | | `cloudflare-driver-agent` | Módulo `:backend-cloudflare` (Workers, R2 Storage, D1 Database) |
+| **Resiliência & Segurança** | `security-agent` | Criptografia Keystore, SSL Pinning, App Check / Play Integrity, Zero Secrets |
+| | `offline-first-agent` | Cache local, resolução de conflitos (LWW), filas de mutação offline |
 | **Garantia de Qualidade** | `usecase-testing-agent` | Testes unitários com MockK, testes de UseCases e cobertura |
 | | `code-reviewer-agent` | KDoc 100%, verificação de Anti-Leak de nuvem, conformidade Detekt |
 | | `gradle-agent` | Build-logic convention plugins, dependências, Dokka, Maven Publish |
+| | `release-publisher-agent` | SemVer, assinaturas GPG, metadados POM e publicação Maven Central |
 | | `github-agent` | CI/CD, Workflows do GitHub Actions, governança e PRs |
+| | `docs-techwriter-agent` | DX, guias de início rápido, tutoriais de migração e diagramas |
 
 ---
 
