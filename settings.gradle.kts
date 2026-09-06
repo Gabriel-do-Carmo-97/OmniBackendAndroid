@@ -20,6 +20,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
@@ -27,5 +28,13 @@ rootProject.name = "OmniBackendAndroid"
 include(":app")
 include(":core")
 include(":backend-firebase")
+include(":backend-supabase")
+include(":backend-appwrite")
+include(":backend-back4app")
+include(":backend-amplify")
+include(":backend-pocketbase")
+include(":backend-rest")
+include(":backend-cloudflare")
+
 
  
