@@ -17,7 +17,7 @@ import java.net.URL
 import java.util.UUID
 
 /**
- * Implementação de [AuthRepository] interagindo com endpoints REST de autenticação (`/auth/*`).
+ * Implementação de [AuthRepository] interagindo com endpoints REST de autenticação.
  */
 internal class RestAuthRepositoryImpl(
     private val baseUrl: String,

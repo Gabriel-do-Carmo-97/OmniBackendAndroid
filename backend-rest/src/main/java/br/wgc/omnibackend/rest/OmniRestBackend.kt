@@ -4,6 +4,9 @@ import android.content.Context
 import br.wgc.omnibackend.core.repository.AuthRepository
 import br.wgc.omnibackend.core.repository.FirestoreRepository
 import br.wgc.omnibackend.core.repository.StorageRepository
+import br.wgc.omnibackend.rest.data.repository.RestAuthRepositoryImpl
+import br.wgc.omnibackend.rest.data.repository.RestDatabaseRepositoryImpl
+import br.wgc.omnibackend.rest.data.repository.RestStorageRepositoryImpl
 
 /**
  * Ponto de entrada e Fachada corporativa do driver Custom REST para o OmniBackend Android.
@@ -18,6 +21,10 @@ import br.wgc.omnibackend.core.repository.StorageRepository
  *     context = this,
  *     baseUrl = "https://api.empresa.com"
  * )
+ *
+ * val auth = OmniRestBackend.auth
+ * val db = OmniRestBackend.database
+ * val storage = OmniRestBackend.storage
  * ```
  */
 object OmniRestBackend {
@@ -26,6 +33,7 @@ object OmniRestBackend {
     private var isInitialized = false
 
     private lateinit var restBaseUrl: String
+    private var appContext: Context? = null
 
     /**
      * Inicializa a configuração do backend REST customizado.
@@ -40,6 +48,7 @@ object OmniRestBackend {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
+                    appContext = context.applicationContext
                     restBaseUrl = baseUrl
                     isInitialized = true
                 }
@@ -60,4 +69,33 @@ object OmniRestBackend {
             check(isInitialized) { "OmniRestBackend deve ser inicializado antes do uso. Chame OmniRestBackend.initialize(...)" }
             return restBaseUrl
         }
+
+    /** Implementação de [AuthRepository] para API REST customizada. */
+    val auth: AuthRepository by lazy {
+        check(isInitialized) { "OmniRestBackend deve ser inicializado antes do uso." }
+        RestAuthRepositoryImpl(restBaseUrl)
+    }
+
+    /** Implementação de [FirestoreRepository] para API REST customizada. */
+    val database: FirestoreRepository by lazy {
+        check(isInitialized) { "OmniRestBackend deve ser inicializado antes do uso." }
+        RestDatabaseRepositoryImpl(restBaseUrl)
+    }
+
+    /** Implementação de [StorageRepository] para API REST customizada. */
+    val storage: StorageRepository by lazy {
+        check(isInitialized) { "OmniRestBackend deve ser inicializado antes do uso." }
+        RestStorageRepositoryImpl(
+            context = appContext ?: error("OmniRestBackend deve ser inicializado antes do uso."),
+            baseUrl = restBaseUrl
+        )
+    }
+
+    /** Reinicia estado singleton para testes. */
+    internal fun resetForTesting() {
+        synchronized(this) {
+            isInitialized = false
+            appContext = null
+        }
+    }
 }
