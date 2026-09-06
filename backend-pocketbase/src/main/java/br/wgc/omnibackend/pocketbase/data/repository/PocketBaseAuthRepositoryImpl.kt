@@ -17,7 +17,7 @@ import java.net.URL
 import java.util.UUID
 
 /**
- * Implementação de [AuthRepository] utilizando a API do PocketBase (`/api/collections/users/*`).
+ * Implementação de [AuthRepository] utilizando a API de usuários do PocketBase.
  */
 internal class PocketBaseAuthRepositoryImpl(
     private val baseUrl: String,
@@ -130,7 +130,7 @@ internal class PocketBaseAuthRepositoryImpl(
 
     override suspend fun reauthenticate(password: String): DataResult<Unit> = runCatchingAuth {
         val user = activeUser ?: return DataResult.Failure(AppError.Auth.UserNotFound)
-        login(user.email, password)
+        login(user.email.orEmpty(), password)
         Unit
     }
 
@@ -170,7 +170,7 @@ internal class PocketBaseAuthRepositoryImpl(
         Unit
     }
 
-    // ─── HTTP Helpers ─────────────────────────────────────────────────────────
+    // --- HTTP Helpers ---
 
     private fun postJson(urlString: String, bodyMap: Map<String, Any?>): Map<String, Any?> {
         return httpRequest("POST", urlString, bodyMap)

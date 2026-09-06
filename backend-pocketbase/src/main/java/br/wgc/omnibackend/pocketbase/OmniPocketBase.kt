@@ -4,6 +4,9 @@ import android.content.Context
 import br.wgc.omnibackend.core.repository.AuthRepository
 import br.wgc.omnibackend.core.repository.FirestoreRepository
 import br.wgc.omnibackend.core.repository.StorageRepository
+import br.wgc.omnibackend.pocketbase.data.repository.PocketBaseAuthRepositoryImpl
+import br.wgc.omnibackend.pocketbase.data.repository.PocketBaseDatabaseRepositoryImpl
+import br.wgc.omnibackend.pocketbase.data.repository.PocketBaseStorageRepositoryImpl
 
 /**
  * Ponto de entrada e Fachada corporativa do driver PocketBase para o OmniBackend Android.
@@ -18,6 +21,10 @@ import br.wgc.omnibackend.core.repository.StorageRepository
  *     context = this,
  *     baseUrl = "https://seu-pocketbase.app"
  * )
+ *
+ * val auth = OmniPocketBase.auth
+ * val db = OmniPocketBase.database
+ * val storage = OmniPocketBase.storage
  * ```
  */
 object OmniPocketBase {
@@ -26,6 +33,7 @@ object OmniPocketBase {
     private var isInitialized = false
 
     private lateinit var pocketBaseUrl: String
+    private var appContext: Context? = null
 
     /**
      * Inicializa a configuração do PocketBase.
@@ -40,6 +48,7 @@ object OmniPocketBase {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
+                    appContext = context.applicationContext
                     pocketBaseUrl = baseUrl
                     isInitialized = true
                 }
@@ -60,4 +69,33 @@ object OmniPocketBase {
             check(isInitialized) { "OmniPocketBase deve ser inicializado antes do uso. Chame OmniPocketBase.initialize(...)" }
             return pocketBaseUrl
         }
+
+    /** Implementação de [AuthRepository] para PocketBase (RecordAuth). */
+    val auth: AuthRepository by lazy {
+        check(isInitialized) { "OmniPocketBase deve ser inicializado antes do uso." }
+        PocketBaseAuthRepositoryImpl(pocketBaseUrl)
+    }
+
+    /** Implementação de [FirestoreRepository] para banco de dados PocketBase. */
+    val database: FirestoreRepository by lazy {
+        check(isInitialized) { "OmniPocketBase deve ser inicializado antes do uso." }
+        PocketBaseDatabaseRepositoryImpl(pocketBaseUrl)
+    }
+
+    /** Implementação de [StorageRepository] para arquivos PocketBase. */
+    val storage: StorageRepository by lazy {
+        check(isInitialized) { "OmniPocketBase deve ser inicializado antes do uso." }
+        PocketBaseStorageRepositoryImpl(
+            context = appContext ?: error("OmniPocketBase deve ser inicializado antes do uso."),
+            baseUrl = pocketBaseUrl
+        )
+    }
+
+    /** Reinicia estado singleton para testes. */
+    internal fun resetForTesting() {
+        synchronized(this) {
+            isInitialized = false
+            appContext = null
+        }
+    }
 }
