@@ -1,4 +1,4 @@
-﻿package br.wgc.omnibackend.firebase.data.repository
+package br.wgc.omnibackend.firebase.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -25,6 +25,8 @@ class AuthRepositoryTest {
 
     @Test
     fun `authState emits current Firebase user from listener`() = runTest {
+        every { mockUser.uid } returns "user_123"
+        every { mockUser.email } returns "test@example.com"
         val listenerSlot = slot<FirebaseAuth.AuthStateListener>()
         every { firebaseAuth.addAuthStateListener(capture(listenerSlot)) } answers {
             every { firebaseAuth.currentUser } returns mockUser
@@ -34,7 +36,8 @@ class AuthRepositoryTest {
 
         val user = repository.authState.first()
 
-        assertEquals(mockUser, user)
+        assertEquals("user_123", user?.uid)
+        assertEquals("test@example.com", user?.email)
         verify { firebaseAuth.addAuthStateListener(any()) }
     }
 }

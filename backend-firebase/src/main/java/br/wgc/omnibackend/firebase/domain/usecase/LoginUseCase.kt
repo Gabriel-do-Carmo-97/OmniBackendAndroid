@@ -1,37 +1,39 @@
-﻿package br.wgc.omnibackend.firebase.domain.usecase
+package br.wgc.omnibackend.firebase.domain.usecase
 
 import androidx.credentials.GetCredentialRequest
-import br.wgc.omnibackend.firebase.domain.repository.AuthRepository
-import br.wgc.omnibackend.firebase.domain.repository.RealtimeDatabaseRepository
-import br.wgc.omnibackend.firebase.utils.AppError
-import br.wgc.omnibackend.firebase.utils.DataResult
+import br.wgc.omnibackend.core.repository.AuthRepository
+import br.wgc.omnibackend.core.repository.RealtimeDatabaseRepository
+import br.wgc.omnibackend.core.utils.AppError
+import br.wgc.omnibackend.core.utils.DataResult
 import br.wgc.omnibackend.firebase.utils.UseCaseResult
 import br.wgc.omnibackend.firebase.utils.UseCaseResult.Failure
 import br.wgc.omnibackend.firebase.utils.UseCaseResult.Loading
 import br.wgc.omnibackend.firebase.utils.UseCaseResult.Success
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 /**
- * Caso de uso para executar a lógica de login de um usuário.
+ * Caso de uso corporativo para autenticação e gerenciamento de presença de usuários.
+ *
+ * Suporta autenticação por e-mail/senha, credenciais anônimas e Google Sign-In via Credential Manager.
+ *
+ * @property authRepository Contrato agnóstico de autenticação do módulo `:core`.
+ * @property databaseRepository Repositório do Realtime Database para sincronização de presença.
  */
 class LoginUseCase @Inject constructor(
     private val authRepository: AuthRepository,
     private val databaseRepository: RealtimeDatabaseRepository,
 ) {
     /**
-     * Executa o caso de uso de login.
-     * Retorna um Flow que emite o estado da operação.
+     * Executa a autenticação com e-mail e senha.
      *
-     * @param email Email do usuário
-     * @param password Senha do usuário
+     * @param email Endereço de e-mail do usuário.
+     * @param password Senha secreta de acesso.
      * @param updatePresence Se verdadeiro, marca presença online no Realtime Database. Padrão: false.
-     * @return Um Flow que emite UseCaseResult (Loading, Success, Failure).
+     * @return [Flow] reativo que emite [UseCaseResult] contendo o ID do usuário em caso de sucesso.
      */
     operator fun invoke(
         email: String,
@@ -40,14 +42,15 @@ class LoginUseCase @Inject constructor(
     ): Flow<UseCaseResult<String>> = flow {
         emit(Loading)
 
-        when (val authResult = authRepository.loginEmailWithPassword(email, password)) {
+        when (val authResult = authRepository.login(email, password)) {
             is DataResult.Success -> {
+                val userId = authResult.data.id
                 if (updatePresence) {
                     val presenceResult = databaseRepository
                         .presence()
                         .goOnline(
                             entityType = "users",
-                            entityId = authResult.data
+                            entityId = userId
                         )
                     if (presenceResult is DataResult.Failure) {
                         authRepository.signOut()
@@ -55,7 +58,7 @@ class LoginUseCase @Inject constructor(
                         return@flow
                     }
                 }
-                emit(Success(authResult.data))
+                emit(Success(userId))
             }
 
             is DataResult.Failure -> emit(Failure(authResult.error))
@@ -63,10 +66,10 @@ class LoginUseCase @Inject constructor(
     }
 
     /**
-     * Executa o caso de uso de login anônimo.
+     * Autentica uma sessão temporária anônima (convidado).
      *
      * @param updatePresence Se verdadeiro, marca presença online no Realtime Database. Padrão: false.
-     * @return Um Flow que emite o estado da operação.
+     * @return [Flow] que emite [UseCaseResult] contendo o identificador anônimo gerado.
      */
     fun loginAnonymous(updatePresence: Boolean = false): Flow<UseCaseResult<String>> = flow {
         emit(Loading)
@@ -90,17 +93,15 @@ class LoginUseCase @Inject constructor(
         }
     }
 
-
     /**
-     * Cria a requisição para o Credential Manager do Google.
-     * Esta função prepara a solicitação para a UI, que irá executá-la.
+     * Constrói a solicitação para o Android Credential Manager com Google ID Option.
      *
-     * @param serverClientId O Web Client ID do seu projeto Firebase/Google Cloud.
-     *                       Encontrado no seu arquivo google-services.json (client_type: 3).
+     * @param serverClientId Web Client ID obtido do console do Firebase / Google Cloud.
+     * @return [GetCredentialRequest] configurado pronto para ser disparado pelo Credential Manager.
      */
     fun createGoogleSignInRequest(serverClientId: String): GetCredentialRequest {
         val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false) // Permite escolher qualquer conta Google
+            .setFilterByAuthorizedAccounts(false)
             .setServerClientId(serverClientId)
             .build()
 
@@ -110,10 +111,11 @@ class LoginUseCase @Inject constructor(
     }
 
     /**
-     * Processa o resultado do login com Google, autentica no Firebase e atualiza o status de presença.
+     * Processa o token de identidade emitido pelo Credential Manager e autentica o usuário.
      *
-     * @param credential A credencial obtida pela UI através do Credential Manager.
-     * @return Um Flow que emite o estado da operação (Loading, Success, Failure).
+     * @param credential Credencial emitida com o token ID do Google.
+     * @param updatePresence Se verdadeiro, marca presença online no Realtime Database. Padrão: false.
+     * @return [Flow] reativo que emite [UseCaseResult] contendo o ID do usuário autenticado.
      */
     fun handleGoogleSignInSuccess(
         credential: GoogleIdTokenCredential,
@@ -121,15 +123,9 @@ class LoginUseCase @Inject constructor(
     ): Flow<UseCaseResult<String>> = flow {
         emit(Loading)
 
-        val firebaseCredential = GoogleAuthProvider.getCredential(credential.idToken, null)
-
-        when (val signInResult = authRepository.signInWithGoogle(firebaseCredential)) {
+        when (val signInResult = authRepository.signInWithGoogle(credential.idToken)) {
             is DataResult.Success -> {
-                val userId = signInResult.data.user?.uid
-                if (userId == null) {
-                    emit(Failure(AppError.Generic.GenericException("Falha ao obter o ID do usuário após o login.")))
-                    return@flow
-                }
+                val userId = signInResult.data.id
 
                 if (updatePresence) {
                     val presenceResult = databaseRepository.presence().goOnline(
@@ -150,6 +146,5 @@ class LoginUseCase @Inject constructor(
             }
         }
     }
-
 }
 

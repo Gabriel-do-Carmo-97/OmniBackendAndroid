@@ -1,13 +1,13 @@
-﻿package br.wgc.omnibackend.firebase.domain.usecase
+package br.wgc.omnibackend.firebase.domain.usecase
 
-import br.wgc.omnibackend.firebase.data.model.auth.RegisterUserResponse
-import br.wgc.omnibackend.firebase.domain.model.NewUser
-import br.wgc.omnibackend.firebase.domain.model.RegisteredUser
-import br.wgc.omnibackend.firebase.domain.repository.AuthRepository
-import br.wgc.omnibackend.firebase.domain.repository.FirestoreRepository
-import br.wgc.omnibackend.firebase.domain.repository.RealtimeDatabaseRepository
-import br.wgc.omnibackend.firebase.domain.repository.StorageRepository
-import br.wgc.omnibackend.firebase.utils.DataResult
+import br.wgc.omnibackend.core.model.auth.NewUser
+import br.wgc.omnibackend.core.model.auth.RegisterUserResponse
+import br.wgc.omnibackend.core.model.auth.RegisteredUser
+import br.wgc.omnibackend.core.repository.AuthRepository
+import br.wgc.omnibackend.core.repository.FirestoreRepository
+import br.wgc.omnibackend.core.repository.RealtimeDatabaseRepository
+import br.wgc.omnibackend.core.repository.StorageRepository
+import br.wgc.omnibackend.core.utils.DataResult
 import br.wgc.omnibackend.firebase.utils.UseCaseResult
 import br.wgc.omnibackend.firebase.utils.toRegisteredUser
 import kotlinx.coroutines.flow.Flow
@@ -16,8 +16,16 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 /**
- * Caso de uso para executar a lógica de Registro de um usuário.
- * Recebe um modelo de domínio [NewUser] e retorna um Flow com o resultado contendo um [RegisteredUser].
+ * Caso de uso para orquestração de registro de novos usuários.
+ *
+ * Cria a conta no provedor de autenticação, faz upload do avatar para o Cloud Storage (se fornecido),
+ * persiste o perfil no Firestore e sincroniza o status de presença no Realtime Database.
+ * Em caso de falha intermediária, desfaz as operações anteriores (rollback).
+ *
+ * @property auth Contrato de autenticação.
+ * @property firestore Contrato do banco de dados de documentos.
+ * @property database Contrato do banco de dados em tempo real.
+ * @property storage Contrato do serviço de arquivos na nuvem.
  */
 class UserRegisterUseCase @Inject constructor(
     private val auth: AuthRepository,
@@ -27,11 +35,12 @@ class UserRegisterUseCase @Inject constructor(
 ) {
 
     /**
-     * Permite que a classe seja chamada como uma função (ex: userRegisterUseCase(newUser)).
+     * Executa o fluxo transacional de registro de usuário com suporte a rollback.
      *
-     * @param newUser Dados do novo usuário
-     * @param customBasePath Caminho customizado para o documento no Firestore/Database. Opcional.
-     * @param updatePresence Se verdadeiro, marca presença online no Realtime Database. Padrão: false.
+     * @param newUser Dados do novo usuário fornecidos pela interface.
+     * @param customBasePath Caminho base customizado para documentos no banco. Opcional.
+     * @param updatePresence Se verdadeiro, ativa o status online em tempo real. Padrão: false.
+     * @return [Flow] que emite [UseCaseResult] contendo a entidade [RegisteredUser] criada.
      */
     operator fun invoke(
         newUser: NewUser,
@@ -61,7 +70,7 @@ class UserRegisterUseCase @Inject constructor(
             when (uploadResult) {
                 is DataResult.Success -> uploadResult.data
                 is DataResult.Failure -> {
-                    auth.delete()
+                    auth.deleteUser()
                     emit(UseCaseResult.Failure(uploadResult.error))
                     return@flow
                 }
@@ -74,8 +83,8 @@ class UserRegisterUseCase @Inject constructor(
         )
         val firestoreResult = firestore.addDocument(userPath, registeredUser, registeredUser.id)
         if (firestoreResult is DataResult.Failure) {
-            auth.delete()
-            if (photoUri != null) storage.deleteFile(photoPath).first()
+            auth.deleteUser()
+            if (photoUri != null) storage.delete(photoPath)
             emit(UseCaseResult.Failure(firestoreResult.error))
             return@flow
         }
@@ -83,8 +92,8 @@ class UserRegisterUseCase @Inject constructor(
         if (updatePresence) {
             val databaseResult = database.presence().goOnline(basePath, registeredUser.id)
             if (databaseResult is DataResult.Failure) {
-                auth.delete()
-                if (photoUri != null) storage.deleteFile(photoPath).first()
+                auth.deleteUser()
+                if (photoUri != null) storage.delete(photoPath)
                 firestore.deleteDocument(userPath, registeredUser.id)
                 emit(UseCaseResult.Failure(databaseResult.error))
                 return@flow
@@ -93,6 +102,5 @@ class UserRegisterUseCase @Inject constructor(
 
         emit(UseCaseResult.Success(registeredUser))
     }
-
 }
 

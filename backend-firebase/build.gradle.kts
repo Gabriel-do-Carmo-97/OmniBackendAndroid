@@ -1,5 +1,6 @@
 plugins {
     id("omni.android.library")
+    alias(libs.plugins.dokka)
 }
 
 android {

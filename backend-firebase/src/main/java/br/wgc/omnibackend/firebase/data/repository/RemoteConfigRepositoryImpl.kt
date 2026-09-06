@@ -1,8 +1,8 @@
-﻿package br.wgc.omnibackend.firebase.data.repository
+package br.wgc.omnibackend.firebase.data.repository
 
-import br.wgc.omnibackend.firebase.domain.repository.RemoteConfigRepository
-import br.wgc.omnibackend.firebase.utils.AppError
-import br.wgc.omnibackend.firebase.utils.DataResult
+import br.wgc.omnibackend.core.repository.RemoteConfigRepository
+import br.wgc.omnibackend.core.utils.AppError
+import br.wgc.omnibackend.core.utils.DataResult
 import com.google.firebase.remoteconfig.ConfigUpdate
 import com.google.firebase.remoteconfig.ConfigUpdateListener
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
@@ -18,7 +18,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-
+/**
+ * Implementação do contrato [RemoteConfigRepository] utilizando o Firebase Remote Config SDK.
+ *
+ * @property remoteConfig Instância do [FirebaseRemoteConfig] injetada.
+ */
 class RemoteConfigRepositoryImpl @Inject constructor(
     private val remoteConfig: FirebaseRemoteConfig
 ) : RemoteConfigRepository {
@@ -26,25 +30,26 @@ class RemoteConfigRepositoryImpl @Inject constructor(
 
     init {
         val configSettings = remoteConfigSettings {
-            // Em modo de debug, um intervalo baixo é útil para testes.
-            // Em produção, o valor padrão (12 horas) ou um valor alto (ex: 3600s = 1 hora)
-            // é recomendado para evitar throttling (limitação de requisições).
             minimumFetchIntervalInSeconds = 3600
         }
         remoteConfig.setConfigSettingsAsync(configSettings)
     }
 
+    /**
+     * Baixa os parâmetros mais recentes do servidor remoto e os ativa para consumo imediato.
+     */
     override suspend fun fetchAndActivate(): DataResult<Boolean> {
         return runCatching {
             val success = remoteConfig.fetchAndActivate().await()
             DataResult.Success(success)
         }.getOrElse { exception ->
-            DataResult.Failure(
-                error = getRemoteConfigError(exception)
-            )
+            DataResult.Failure(error = getRemoteConfigError(exception))
         }
     }
 
+    /**
+     * Observa atualizações de uma chave remota em tempo real via [Flow].
+     */
     override fun observeKeyUpdates(key: String): Flow<DataResult<Unit>> = callbackFlow {
         val listener = object : ConfigUpdateListener {
             override fun onUpdate(configUpdate: ConfigUpdate) {
@@ -68,6 +73,9 @@ class RemoteConfigRepositoryImpl @Inject constructor(
         awaitClose { registration.remove() }
     }
 
+    /**
+     * Registra callbacks para captura de atualizações em tempo real de uma chave.
+     */
     override fun detectedUpdateFlagInLive(
         key: String,
         updateFlagResult: suspend () -> Unit,
@@ -93,6 +101,7 @@ class RemoteConfigRepositoryImpl @Inject constructor(
         remoteConfig.addOnConfigUpdateListener(configUpdateListener)
     }
 
+    /** Recupera valor [String] para a chave informada. */
     override fun getString(key: String): DataResult<String> {
         return runCatching {
             val value = remoteConfig.getString(key)
@@ -102,6 +111,7 @@ class RemoteConfigRepositoryImpl @Inject constructor(
         }
     }
 
+    /** Recupera valor [Boolean] para a chave informada. */
     override fun getBoolean(key: String): DataResult<Boolean> {
         return runCatching {
             val value = remoteConfig.getBoolean(key)
@@ -111,6 +121,7 @@ class RemoteConfigRepositoryImpl @Inject constructor(
         }
     }
 
+    /** Recupera valor [Long] para a chave informada. */
     override fun getLong(key: String): DataResult<Long> {
         return runCatching {
             val value = remoteConfig.getLong(key)
@@ -120,6 +131,7 @@ class RemoteConfigRepositoryImpl @Inject constructor(
         }
     }
 
+    /** Recupera valor [Double] para a chave informada. */
     override fun getDouble(key: String): DataResult<Double> {
         return runCatching {
             val value = remoteConfig.getDouble(key)

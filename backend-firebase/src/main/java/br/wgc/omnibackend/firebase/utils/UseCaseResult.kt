@@ -1,4 +1,6 @@
-﻿package br.wgc.omnibackend.firebase.utils
+package br.wgc.omnibackend.firebase.utils
+
+import br.wgc.omnibackend.core.utils.AppError
 
 /**
  * Uma classe selada para representar os diferentes estados de uma operação de caso de uso,

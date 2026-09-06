@@ -1,9 +1,9 @@
 package br.wgc.omnibackend.firebase.data.repository.realtime
 
-import br.wgc.omnibackend.firebase.domain.repository.realtime.GeolocationRepository
-import br.wgc.omnibackend.firebase.utils.AppError
-import br.wgc.omnibackend.firebase.utils.DataResult
-import br.wgc.omnibackend.firebase.data.model.database.geo.LocationRequest
+import br.wgc.omnibackend.core.model.database.geo.LocationRequest
+import br.wgc.omnibackend.core.repository.realtime.GeolocationRepository
+import br.wgc.omnibackend.core.utils.AppError
+import br.wgc.omnibackend.core.utils.DataResult
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseException
@@ -17,11 +17,25 @@ import kotlinx.coroutines.tasks.await
 import java.io.IOException
 import javax.inject.Inject
 
+/**
+ * Implementação do contrato [GeolocationRepository] sobre o Firebase Realtime Database.
+ *
+ * @property database Instância do [FirebaseDatabase] configurada.
+ */
 class GeolocationRepositoryImpl @Inject constructor(
     private val database: FirebaseDatabase,
 ) : GeolocationRepository {
+
     private val locationsRef = database.getReference("locations")
 
+    /**
+     * Atualiza as coordenadas geográficas de uma entidade sob o nó /locations/{entityType}/{entityId}.
+     *
+     * @param entityType Tipo da entidade (ex: "users", "drivers").
+     * @param entityId ID exclusivo da entidade.
+     * @param location Modelo com latitude, longitude e timestamp.
+     * @return [DataResult.Success] com mensagem de confirmação.
+     */
     override suspend fun updateLocation(
         entityType: String,
         entityId: String,
@@ -64,17 +78,20 @@ class GeolocationRepositoryImpl @Inject constructor(
         DataResult.Failure(appError)
     }
 
+    /**
+     * Observa a localização contínua de uma entidade em tempo real.
+     *
+     * @param entityType Categoria da entidade.
+     * @param entityId ID da entidade.
+     * @return [Flow] emitindo o [LocationRequest] sempre que a posição mudar.
+     */
     override fun trackLocation(entityType: String, entityId: String): Flow<DataResult<LocationRequest>> =
         callbackFlow {
             val listener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     snapshot.getValue<LocationRequest>()?.let {
-                        trySend(
-                            DataResult.Success(it)
-                        )
-                    } ?: trySend(
-                        DataResult.Failure(AppError.RealtimeDatabase.OperationFailed)
-                    )
+                        trySend(DataResult.Success(it))
+                    } ?: trySend(DataResult.Failure(AppError.RealtimeDatabase.OperationFailed))
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -105,4 +122,3 @@ class GeolocationRepositoryImpl @Inject constructor(
             awaitClose { entityLocationRef.removeEventListener(listener) }
         }
 }
-

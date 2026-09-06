@@ -1,11 +1,11 @@
-﻿package br.wgc.omnibackend.firebase.data.repository.realtime
+package br.wgc.omnibackend.firebase.data.repository.realtime
 
-import br.wgc.omnibackend.firebase.domain.repository.realtime.MessageRepository
-import br.wgc.omnibackend.firebase.utils.AppError
-import br.wgc.omnibackend.firebase.utils.DataResult
-import br.wgc.omnibackend.firebase.data.model.database.message.ConversationRequest
-import br.wgc.omnibackend.firebase.data.model.database.message.MessageRequest
-import br.wgc.omnibackend.firebase.data.model.database.message.MessageStatus
+import br.wgc.omnibackend.core.model.database.message.ConversationRequest
+import br.wgc.omnibackend.core.model.database.message.MessageRequest
+import br.wgc.omnibackend.core.model.database.message.MessageStatus
+import br.wgc.omnibackend.core.repository.realtime.MessageRepository
+import br.wgc.omnibackend.core.utils.AppError
+import br.wgc.omnibackend.core.utils.DataResult
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseException
@@ -19,13 +19,24 @@ import kotlinx.coroutines.tasks.await
 import java.io.IOException
 import javax.inject.Inject
 
+/**
+ * Implementação do contrato [MessageRepository] sobre o Firebase Realtime Database.
+ *
+ * @property database Instância do [FirebaseDatabase] injetada.
+ */
 class MessageRepositoryImpl @Inject constructor(
     private val database: FirebaseDatabase,
 ) : MessageRepository {
     private val messagesRef = database.getReference("messages")
     private val conversationsRef = database.getReference("conversations")
-    private val usersRef = database.getReference("users") // Assumindo um nó 'users' para busca
+    private val usersRef = database.getReference("users")
 
+    /**
+     * Envia uma mensagem e atualiza atomicamente a última mensagem da conversa.
+     *
+     * @param conversationId Identificador da conversa.
+     * @param message Dados da mensagem.
+     */
     override suspend fun sendMessage(
         conversationId: String,
         message: MessageRequest
@@ -47,6 +58,9 @@ class MessageRepositoryImpl @Inject constructor(
         DataResult.Failure(appError)
     }
 
+    /**
+     * Escuta mensagens de uma conversa em tempo real via snapshot listener.
+     */
     override fun getMessages(conversationId: String): Flow<DataResult<List<MessageRequest>>> = callbackFlow {
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -59,10 +73,14 @@ class MessageRepositoryImpl @Inject constructor(
                 close()
             }
         }
-        messagesRef.child(conversationId).addValueEventListener(listener)
-        awaitClose { messagesRef.child(conversationId).removeEventListener(listener) }
+        val conversationMessagesRef = messagesRef.child(conversationId)
+        conversationMessagesRef.addValueEventListener(listener)
+        awaitClose { conversationMessagesRef.removeEventListener(listener) }
     }
 
+    /**
+     * Obtém o histórico paginado de mensagens.
+     */
     override suspend fun getMessageHistory(
         conversationId: String,
         lastMessageId: String?,
@@ -79,11 +97,14 @@ class MessageRepositoryImpl @Inject constructor(
         DataResult.Failure(mapExceptionToAppError(exception))
     }
 
+    /**
+     * Ouve as conversas de um usuário em tempo real.
+     */
     override fun getConversations(userId: String): Flow<DataResult<List<ConversationRequest>>> = callbackFlow {
-        val userConversationsRef = database.getReference("user-conversations").child(userId)
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val conversations = snapshot.children.mapNotNull { it.getValue<ConversationRequest>() }
+                    .filter { it.participants.contains(userId) }
                 trySend(DataResult.Success(conversations))
             }
 
@@ -92,50 +113,43 @@ class MessageRepositoryImpl @Inject constructor(
                 close()
             }
         }
-        userConversationsRef.addValueEventListener(listener)
-        awaitClose { userConversationsRef.removeEventListener(listener) }
+        conversationsRef.addValueEventListener(listener)
+        awaitClose { conversationsRef.removeEventListener(listener) }
     }
 
+    /**
+     * Cria uma nova conversa no Realtime Database.
+     */
     override suspend fun createConversation(conversation: ConversationRequest): DataResult<String> = runCatching {
         val conversationId = conversationsRef.push().key
             ?: throw IllegalStateException("Não foi possível gerar a chave da conversa.")
-        
-        val conversationToCreate = conversation.copy(conversationId = conversationId)
-        
-        val updates = mutableMapOf<String, Any?>()
-        updates["/conversations/$conversationId"] = conversationToCreate
-        conversation.participants.forEach { userId ->
-            updates["/user-conversations/$userId/$conversationId"] = conversationToCreate
-        }
-        
-        database.reference.updateChildren(updates).await()
+        val newConversation = conversation.copy(conversationId = conversationId)
+        conversationsRef.child(conversationId).setValue(newConversation).await()
         DataResult.Success(conversationId)
     }.getOrElse { exception ->
-         DataResult.Failure(mapExceptionToAppError(exception))
+        DataResult.Failure(mapExceptionToAppError(exception))
     }
 
+    /**
+     * Busca participantes por nome ou e-mail.
+     */
     override suspend fun searchUsers(query: String): DataResult<List<Any>> = runCatching {
-        val snapshot = usersRef.orderByChild("name")
-            .startAt(query)
-            .endAt(query + "\uf8ff")
-            .limitToFirst(20)
-            .get().await()
-        
-        val users = snapshot.children.mapNotNull { it.getValue<Any>() }
+        val snapshot = usersRef.orderByChild("name").startAt(query).endAt(query + "\uf8ff").get().await()
+        val users = snapshot.children.mapNotNull { it.value }
         DataResult.Success(users)
     }.getOrElse { exception ->
         DataResult.Failure(mapExceptionToAppError(exception))
     }
 
+    /**
+     * Atualiza o status de entrega de uma mensagem.
+     */
     override suspend fun updateMessageStatus(
         conversationId: String,
         messageId: String,
         status: MessageStatus
     ): DataResult<Unit> = runCatching {
-        val updates = mapOf(
-            "/messages/$conversationId/$messageId/status" to status,
-        )
-        database.reference.updateChildren(updates).await()
+        messagesRef.child(conversationId).child(messageId).child("status").setValue(status).await()
         DataResult.Success(Unit)
     }.getOrElse { exception ->
         DataResult.Failure(mapExceptionToAppError(exception))
@@ -143,13 +157,7 @@ class MessageRepositoryImpl @Inject constructor(
 
     private fun mapExceptionToAppError(exception: Throwable): AppError {
         return when (exception) {
-            is DatabaseException -> {
-                when {
-                    exception.message?.contains("permission_denied", ignoreCase = true) == true ->
-                        AppError.RealtimeDatabase.PermissionDenied
-                    else -> AppError.RealtimeDatabase.OperationFailed
-                }
-            }
+            is DatabaseException -> AppError.RealtimeDatabase.OperationFailed
             is IOException -> AppError.Generic.Network
             else -> AppError.Generic.Unknown(exception)
         }
@@ -172,4 +180,3 @@ class MessageRepositoryImpl @Inject constructor(
         }
     }
 }
-

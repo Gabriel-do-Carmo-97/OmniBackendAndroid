@@ -1,6 +1,7 @@
-﻿package br.wgc.omnibackend.firebase.telemetry
+package br.wgc.omnibackend.firebase.telemetry
 
-import br.wgc.omnibackend.firebase.utils.AppError
+import br.wgc.omnibackend.core.telemetry.TelemetryProvider
+import br.wgc.omnibackend.core.utils.AppError
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.perf.FirebasePerformance
 import com.google.firebase.perf.metrics.Trace
@@ -8,26 +9,26 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * High-level observability and telemetry manager for Firebase.
+ * Implementação do provedor de telemetria [TelemetryProvider] conectada ao Firebase Crashlytics e Performance.
  *
- * Standardizes:
- * - Reporting domain [AppError] failures and non-fatal exceptions to Crashlytics.
- * - Profiling critical synchronous and asynchronous execution blocks using Firebase Performance traces.
+ * Padroniza a captura estruturada de falhas [AppError], exceções de sistema e métricas de desempenho.
+ *
+ * @property crashlytics Instância do Firebase Crashlytics.
+ * @property performance Instância do Firebase Performance Monitoring.
  */
 @Singleton
 class FirebaseTelemetry @Inject constructor(
     private val crashlytics: FirebaseCrashlytics,
     @PublishedApi internal val performance: FirebasePerformance
-) {
+) : TelemetryProvider {
 
     /**
-     * Reports an [AppError] to Firebase Crashlytics as a non-fatal error.
-     * Automatically extracts underlying causes for [AppError.Generic.Unknown] and [AppError.Auth.Generic].
+     * Registra um erro de domínio [AppError] no Firebase Crashlytics como evento não-fatal.
      *
-     * @param error The domain error to record.
-     * @param attributes Optional contextual attributes attached as custom keys.
+     * @param error O erro estruturado a registrar.
+     * @param attributes Atributos contextuais adicionais.
      */
-    fun recordError(error: AppError, attributes: Map<String, Any> = emptyMap()) {
+    override fun recordError(error: AppError, attributes: Map<String, Any>) {
         attributes.forEach { (key, value) -> setAttribute(key, value) }
         when (error) {
             is AppError.Generic.Unknown -> {
@@ -44,31 +45,31 @@ class FirebaseTelemetry @Inject constructor(
     }
 
     /**
-     * Records an unhandled exception or non-fatal throwable to Crashlytics.
+     * Registra uma exceção de sistema ou falha não tratada no Crashlytics.
      */
-    fun recordException(throwable: Throwable, attributes: Map<String, Any> = emptyMap()) {
+    override fun recordException(throwable: Throwable, attributes: Map<String, Any>) {
         attributes.forEach { (key, value) -> setAttribute(key, value) }
         crashlytics.recordException(throwable)
     }
 
     /**
-     * Logs a diagnostic message into the Crashlytics session buffer.
+     * Registra uma mensagem nos breadcrumbs da sessão do Crashlytics.
      */
-    fun log(message: String) {
+    override fun log(message: String) {
         crashlytics.log(message)
     }
 
     /**
-     * Associates a user identifier with Crashlytics reports.
+     * Associa o identificador do usuário logado à sessão de Crashlytics.
      */
-    fun setUserId(userId: String) {
+    override fun setUserId(userId: String) {
         crashlytics.setUserId(userId)
     }
 
     /**
-     * Sets a custom attribute key-value pair in Crashlytics.
+     * Define um atributo customizado chave-valor no Crashlytics.
      */
-    fun setAttribute(key: String, value: Any) {
+    override fun setAttribute(key: String, value: Any) {
         when (value) {
             is String -> crashlytics.setCustomKey(key, value)
             is Boolean -> crashlytics.setCustomKey(key, value)
@@ -81,10 +82,10 @@ class FirebaseTelemetry @Inject constructor(
     }
 
     /**
-     * Measures the execution time of a synchronous block of code using Firebase Performance.
+     * Mede o tempo de execução de um bloco síncrono utilizando o Firebase Performance.
      *
-     * @param traceName Name of the trace metric.
-     * @param block The block to execute and measure.
+     * @param traceName Nome identificador da métrica de rastreio.
+     * @param block Bloco a executar.
      */
     inline fun <T> trace(traceName: String, block: (Trace) -> T): T {
         val trace = performance.newTrace(traceName)
@@ -97,10 +98,10 @@ class FirebaseTelemetry @Inject constructor(
     }
 
     /**
-     * Measures the execution time of a suspending coroutine block of code using Firebase Performance.
+     * Mede o tempo de execução de um bloco de corrotina suspensa via Firebase Performance.
      *
-     * @param traceName Name of the trace metric.
-     * @param block The suspending block to execute and measure.
+     * @param traceName Nome da métrica.
+     * @param block Bloco assíncrono suspenso.
      */
     suspend inline fun <T> traceAsync(traceName: String, crossinline block: suspend (Trace) -> T): T {
         val trace = performance.newTrace(traceName)
@@ -117,7 +118,7 @@ class FirebaseTelemetry @Inject constructor(
         private var instance: FirebaseTelemetry? = null
 
         /**
-         * Obtains the default singleton instance of [FirebaseTelemetry].
+         * Retorna a instância singleton padrão de [FirebaseTelemetry].
          */
         fun get(): FirebaseTelemetry =
             instance ?: synchronized(this) {
@@ -130,7 +131,6 @@ class FirebaseTelemetry @Inject constructor(
 }
 
 /**
- * Exception wrapper for domain [AppError] instances reported as non-fatals.
+ * Encapsulador de exceção para instâncias de [AppError] reportadas como eventos não-fatais.
  */
 class AppErrorException(message: String) : Exception(message)
-

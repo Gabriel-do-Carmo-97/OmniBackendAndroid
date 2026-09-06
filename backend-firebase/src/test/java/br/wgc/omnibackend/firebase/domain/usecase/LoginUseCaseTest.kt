@@ -1,10 +1,11 @@
-﻿package br.wgc.omnibackend.firebase.domain.usecase
+package br.wgc.omnibackend.firebase.domain.usecase
 
-import br.wgc.omnibackend.firebase.domain.repository.AuthRepository
-import br.wgc.omnibackend.firebase.domain.repository.RealtimeDatabaseRepository
-import br.wgc.omnibackend.firebase.domain.repository.realtime.PresenceRepository
-import br.wgc.omnibackend.firebase.utils.AppError
-import br.wgc.omnibackend.firebase.utils.DataResult
+import br.wgc.omnibackend.core.model.OmniUser
+import br.wgc.omnibackend.core.repository.AuthRepository
+import br.wgc.omnibackend.core.repository.RealtimeDatabaseRepository
+import br.wgc.omnibackend.core.repository.realtime.PresenceRepository
+import br.wgc.omnibackend.core.utils.AppError
+import br.wgc.omnibackend.core.utils.DataResult
 import br.wgc.omnibackend.firebase.utils.UseCaseResult
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -35,8 +36,9 @@ class LoginUseCaseTest {
         val email = "test@example.com"
         val password = "password123"
         val userId = "user_123"
+        val omniUser = OmniUser(uid = userId, email = email)
 
-        coEvery { authRepository.loginEmailWithPassword(email, password) } returns DataResult.Success(userId)
+        coEvery { authRepository.login(email, password) } returns DataResult.Success(omniUser)
 
         val results = loginUseCase(email, password, updatePresence = false).toList()
 
@@ -52,8 +54,9 @@ class LoginUseCaseTest {
         val email = "test@example.com"
         val password = "password123"
         val userId = "user_123"
+        val omniUser = OmniUser(uid = userId, email = email)
 
-        coEvery { authRepository.loginEmailWithPassword(email, password) } returns DataResult.Success(userId)
+        coEvery { authRepository.login(email, password) } returns DataResult.Success(omniUser)
         coEvery { presenceRepository.goOnline("users", userId) } returns DataResult.Success(Unit)
 
         val results = loginUseCase(email, password, updatePresence = true).toList()
@@ -69,9 +72,10 @@ class LoginUseCaseTest {
         val email = "test@example.com"
         val password = "password123"
         val userId = "user_123"
+        val omniUser = OmniUser(uid = userId, email = email)
         val error = AppError.RealtimeDatabase.PermissionDenied
 
-        coEvery { authRepository.loginEmailWithPassword(email, password) } returns DataResult.Success(userId)
+        coEvery { authRepository.login(email, password) } returns DataResult.Success(omniUser)
         coEvery { presenceRepository.goOnline("users", userId) } returns DataResult.Failure(error)
         coEvery { authRepository.signOut() } returns DataResult.Success(Unit)
 
@@ -90,7 +94,7 @@ class LoginUseCaseTest {
         val password = "wrong_password"
         val error = AppError.Auth.InvalidCredentials
 
-        coEvery { authRepository.loginEmailWithPassword(email, password) } returns DataResult.Failure(error)
+        coEvery { authRepository.login(email, password) } returns DataResult.Failure(error)
 
         val results = loginUseCase(email, password).toList()
 

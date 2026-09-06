@@ -1,6 +1,6 @@
-﻿package br.wgc.omnibackend.firebase.telemetry
+package br.wgc.omnibackend.firebase.telemetry
 
-import br.wgc.omnibackend.firebase.utils.AppError
+import br.wgc.omnibackend.core.utils.AppError
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.perf.FirebasePerformance
 import com.google.firebase.perf.metrics.Trace

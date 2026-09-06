@@ -1,15 +1,18 @@
-﻿package br.wgc.omnibackend.firebase.data.repository
+package br.wgc.omnibackend.firebase.data.repository
 
 import android.net.Uri
 import android.util.Log
-import br.wgc.omnibackend.firebase.data.model.auth.RegisterUserResponse
-import br.wgc.omnibackend.firebase.domain.repository.AuthRepository
-import br.wgc.omnibackend.firebase.utils.AppError
-import br.wgc.omnibackend.firebase.utils.DataResult
+import br.wgc.omnibackend.core.model.OmniUser
+import br.wgc.omnibackend.core.model.auth.RegisterUserResponse
+import br.wgc.omnibackend.core.repository.AuthRepository
+import br.wgc.omnibackend.core.utils.AppError
+import br.wgc.omnibackend.core.utils.DataResult
+import br.wgc.omnibackend.firebase.utils.toOmniUser
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -24,27 +27,94 @@ import kotlinx.coroutines.tasks.await
 import java.io.IOException
 import javax.inject.Inject
 
-internal class AuthRepositoryImpl @Inject constructor(
+/**
+ * Implementação do contrato [AuthRepository] utilizando o SDK oficial do Firebase Authentication.
+ *
+ * Converte todas as exceções nativas do Firebase em [AppError] e expõe entidades agnósticas [OmniUser].
+ *
+ * @property auth Instância do [FirebaseAuth] utilizada para as chamadas de API.
+ */
+class AuthRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth
 ) : AuthRepository {
 
-    override val authState: Flow<com.google.firebase.auth.FirebaseUser?> = callbackFlow {
+    /**
+     * Fluxo reativo do estado de autenticação em tempo real emitindo [OmniUser] ou `null`.
+     */
+    override val authState: Flow<OmniUser?> = callbackFlow {
         val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            trySend(firebaseAuth.currentUser)
+            trySend(firebaseAuth.currentUser.toOmniUser())
         }
         auth.addAuthStateListener(listener)
         awaitClose { auth.removeAuthStateListener(listener) }
     }
 
+    /**
+     * Retorna o usuário autenticado em memória ou `null` caso desconectado.
+     */
+    override val currentUser: OmniUser?
+        get() = auth.currentUser.toOmniUser()
+
+    /**
+     * Autentica o usuário com e-mail e senha no Firebase Auth.
+     *
+     * @param email Endereço de e-mail do usuário.
+     * @param pass Senha secreta de acesso.
+     * @return [DataResult.Success] contendo a entidade [OmniUser] em caso de autenticação válida.
+     */
+    override suspend fun login(email: String, pass: String): DataResult<OmniUser> = runCatching {
+        val authResult = auth.signInWithEmailAndPassword(email, pass).await()
+        val user = authResult.user?.toOmniUser()
+            ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Usuário não encontrado.")
+        DataResult.Success(user)
+    }.getOrElse { exception ->
+        Log.e(TAG, "Falha no login: ${exception.message}", exception)
+        val error: AppError = when (exception) {
+            is FirebaseAuthInvalidUserException -> AppError.Auth.UserNotFound
+            is FirebaseAuthInvalidCredentialsException -> AppError.Auth.InvalidCredentials
+            is IOException -> AppError.Generic.Network
+            else -> AppError.Generic.Unknown(exception)
+        }
+        DataResult.Failure(error)
+    }
+
+    /**
+     * Cria um novo usuário no Firebase Auth utilizando e-mail e senha.
+     *
+     * @param email Endereço de e-mail para registro.
+     * @param pass Senha secreta.
+     * @return [DataResult.Success] com a entidade [OmniUser] criada.
+     */
+    override suspend fun createUser(email: String, pass: String): DataResult<OmniUser> = runCatching {
+        val authResult = auth.createUserWithEmailAndPassword(email, pass).await()
+        val user = authResult.user?.toOmniUser()
+            ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Falha ao criar usuário.")
+        DataResult.Success(user)
+    }.getOrElse { exception ->
+        Log.e(TAG, "Falha na criação de usuário: ${exception.message}", exception)
+        val error: AppError = when (exception) {
+            is FirebaseAuthWeakPasswordException -> AppError.Auth.WeakPassword
+            is FirebaseAuthUserCollisionException -> AppError.Auth.EmailAlreadyInUse
+            is FirebaseAuthInvalidCredentialsException -> AppError.Auth.InvalidCredentials
+            is IOException -> AppError.Generic.Network
+            is FirebaseAuthException -> AppError.Auth.Generic(exception)
+            else -> AppError.Generic.Unknown(exception)
+        }
+        DataResult.Failure(error)
+    }
+
+    /**
+     * Registra o usuário com e-mail e senha e retorna o resumo estruturado [RegisterUserResponse].
+     *
+     * @param email Endereço de e-mail.
+     * @param pass Senha de acesso.
+     * @return [DataResult.Success] com o [RegisterUserResponse].
+     */
     override suspend fun registerEmailWithPassword(
         email: String,
-        password: String
+        pass: String
     ): DataResult<RegisterUserResponse> = runCatching {
-        val authResult = auth.createUserWithEmailAndPassword(
-            email,
-            password
-        ).await()
-
+        val authResult = auth.createUserWithEmailAndPassword(email, pass).await()
         authResult.user?.sendEmailVerification()?.await()
         DataResult.Success(
             RegisterUserResponse(
@@ -58,7 +128,7 @@ internal class AuthRepositoryImpl @Inject constructor(
             )
         )
     }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha no registro: ${exception.message}", exception)
+        Log.e(TAG, "Falha no registro detalhado: ${exception.message}", exception)
         val error: AppError = when (exception) {
             is FirebaseAuthWeakPasswordException -> AppError.Auth.WeakPassword
             is FirebaseAuthUserCollisionException -> AppError.Auth.EmailAlreadyInUse
@@ -70,76 +140,17 @@ internal class AuthRepositoryImpl @Inject constructor(
         DataResult.Failure(error)
     }
 
-    override suspend fun loginEmailWithPassword(
-        email: String,
-        password: String
-    ): DataResult<String> = runCatching {
-        val authResult = auth.signInWithEmailAndPassword(
-            email,
-            password
-        ).await()
-        val uid = authResult.user?.uid
-            ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Usuário não encontrado.")
-        DataResult.Success(uid)
-    }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha no login: ${exception.message}", exception)
-        val error: AppError = when (exception) {
-            is FirebaseAuthInvalidCredentialsException -> AppError.Auth.InvalidCredentials
-            is IOException -> AppError.Generic.Network
-            else -> AppError.Generic.Unknown(exception)
-        }
-        DataResult.Failure(error)
-    }
-
-    override suspend fun getCurrentUser(): DataResult<com.google.firebase.auth.FirebaseUser?> = runCatching {
-        DataResult.Success(auth.currentUser)
-    }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha ao obter usuário atual: ${exception.message}", exception)
-        val error: AppError = when (exception) {
-            is IOException -> AppError.Generic.Network
-            else -> AppError.Generic.Unknown(exception)
-        }
-        DataResult.Failure(error)
-    }
-
-    override suspend fun isUserLogged(): DataResult<Boolean> = runCatching {
-        DataResult.Success(auth.currentUser != null)
-    }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha ao verificar usuário logado: ${exception.message}", exception)
-        val error: AppError = when (exception) {
-            is IOException -> AppError.Generic.Network
-            else -> AppError.Generic.Unknown(exception)
-        }
-        DataResult.Failure(error)
-    }
-
-    override suspend fun signOut(): DataResult<Unit> = runCatching {
-        auth.signOut()
+    /**
+     * Envia e-mail de redefinição de senha para o endereço fornecido.
+     *
+     * @param email E-mail cadastrado.
+     * @return [DataResult.Success] com [Unit] após o disparo do e-mail.
+     */
+    override suspend fun resetPassword(email: String): DataResult<Unit> = runCatching {
+        auth.sendPasswordResetEmail(email).await()
         DataResult.Success(Unit)
     }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha ao deslogar: ${exception.message}", exception)
-        DataResult.Failure(AppError.Generic.Unknown(exception))
-    }
-
-    override suspend fun updateProfile(
-        name: String?,
-        photoUri: Uri?
-    ): DataResult<Unit> = runCatching {
-        val user = auth.currentUser
-            ?: throw FirebaseAuthInvalidUserException(
-                "ERROR_USER_NOT_FOUND",
-                "Nenhum usuário logado."
-            )
-
-        val request = UserProfileChangeRequest.Builder().apply {
-            name?.let { setDisplayName(it) }
-            photoUri?.let { setPhotoUri(it) }
-        }.build()
-
-        user.updateProfile(request).await()
-        DataResult.Success(Unit)
-    }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha ao atualizar perfil: ${exception.message}", exception)
+        Log.e(TAG, "Falha ao enviar e-mail de redefinição: ${exception.message}", exception)
         val error = when (exception) {
             is FirebaseAuthInvalidUserException -> AppError.Auth.UserNotFound
             is IOException -> AppError.Generic.Network
@@ -148,31 +159,36 @@ internal class AuthRepositoryImpl @Inject constructor(
         DataResult.Failure(error)
     }
 
-    override suspend fun updateEmail(newEmail: String): DataResult<Unit> = runCatching {
+    /**
+     * Dispara e-mail de validação para o usuário logado atualmente.
+     */
+    override suspend fun sendEmailVerification(): DataResult<Unit> = runCatching {
         val user = auth.currentUser
             ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Nenhum usuário logado.")
-        user.verifyBeforeUpdateEmail(newEmail).await()
+        user.sendEmailVerification().await()
         DataResult.Success(Unit)
     }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha ao atualizar e-mail: ${exception.message}", exception)
+        Log.e(TAG, "Falha ao enviar verificação de e-mail: ${exception.message}", exception)
         val error = when (exception) {
             is FirebaseAuthInvalidUserException -> AppError.Auth.UserNotFound
-            is FirebaseAuthRecentLoginRequiredException -> AppError.Auth.RequiresRecentLogin
-            is FirebaseAuthUserCollisionException -> AppError.Auth.EmailAlreadyInUse
-            is FirebaseAuthInvalidCredentialsException -> AppError.Auth.InvalidCredentials
             is IOException -> AppError.Generic.Network
             else -> AppError.Generic.Unknown(exception)
         }
         DataResult.Failure(error)
     }
 
+    /**
+     * Atualiza a senha da conta ativa.
+     *
+     * @param newPassword Nova senha desejada.
+     */
     override suspend fun updatePassword(newPassword: String): DataResult<Unit> = runCatching {
         val user = auth.currentUser
             ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Nenhum usuário logado.")
         user.updatePassword(newPassword).await()
         DataResult.Success(Unit)
     }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha ao atualizar senha: ${exception.message}", exception)
+        Log.e(TAG, "Falha ao atualizar senha: ${exception.message}", exception)
         val error = when (exception) {
             is FirebaseAuthInvalidUserException -> AppError.Auth.UserNotFound
             is FirebaseAuthRecentLoginRequiredException -> AppError.Auth.RequiresRecentLogin
@@ -183,13 +199,28 @@ internal class AuthRepositoryImpl @Inject constructor(
         DataResult.Failure(error)
     }
 
-    override suspend fun sendEmailVerification(): DataResult<Unit> = runCatching {
+    /**
+     * Atualiza o perfil (nome e avatar) do usuário logado.
+     *
+     * @param name Novo nome de exibição.
+     * @param photoUri URI da nova foto.
+     */
+    override suspend fun updateProfile(
+        name: String?,
+        photoUri: Uri?
+    ): DataResult<Unit> = runCatching {
         val user = auth.currentUser
             ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Nenhum usuário logado.")
-        user.sendEmailVerification().await()
+
+        val request = UserProfileChangeRequest.Builder().apply {
+            name?.let { setDisplayName(it) }
+            photoUri?.let { setPhotoUri(it) }
+        }.build()
+
+        user.updateProfile(request).await()
         DataResult.Success(Unit)
     }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha ao enviar verificação de e-mail: ${exception.message}", exception)
+        Log.e(TAG, "Falha ao atualizar perfil: ${exception.message}", exception)
         val error = when (exception) {
             is FirebaseAuthInvalidUserException -> AppError.Auth.UserNotFound
             is IOException -> AppError.Generic.Network
@@ -198,35 +229,34 @@ internal class AuthRepositoryImpl @Inject constructor(
         DataResult.Failure(error)
     }
 
-    override suspend fun sendPasswordResetEmail(email: String): DataResult<Unit> = runCatching {
-        auth.sendPasswordResetEmail(email).await()
-        DataResult.Success(Unit)
-    }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha ao enviar e-mail de redefinição: ${exception.message}", exception)
-        val error = when (exception) {
-            is FirebaseAuthInvalidUserException -> AppError.Auth.UserNotFound
-            is IOException -> AppError.Generic.Network
-            else -> AppError.Generic.Unknown(exception)
-        }
-        DataResult.Failure(error)
-    }
-
-    override suspend fun delete(): DataResult<Unit> = runCatching {
+    /**
+     * Atualiza o e-mail do usuário ativo no Firebase.
+     *
+     * @param newEmail Novo endereço de e-mail.
+     */
+    override suspend fun updateEmail(newEmail: String): DataResult<Unit> = runCatching {
         val user = auth.currentUser
             ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Nenhum usuário logado.")
-        user.delete().await()
+        user.verifyBeforeUpdateEmail(newEmail).await()
         DataResult.Success(Unit)
     }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha ao deletar usuário: ${exception.message}", exception)
+        Log.e(TAG, "Falha ao atualizar e-mail: ${exception.message}", exception)
         val error = when (exception) {
             is FirebaseAuthInvalidUserException -> AppError.Auth.UserNotFound
             is FirebaseAuthRecentLoginRequiredException -> AppError.Auth.RequiresRecentLogin
+            is FirebaseAuthUserCollisionException -> AppError.Auth.EmailAlreadyInUse
+            is FirebaseAuthInvalidCredentialsException -> AppError.Auth.InvalidCredentials
             is IOException -> AppError.Generic.Network
             else -> AppError.Generic.Unknown(exception)
         }
         DataResult.Failure(error)
     }
 
+    /**
+     * Reautentica a sessão ativa com a senha atual para validação de segurança.
+     *
+     * @param password Senha atual.
+     */
     override suspend fun reauthenticate(password: String): DataResult<Unit> = runCatching {
         val user = auth.currentUser
             ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Nenhum usuário logado.")
@@ -236,7 +266,7 @@ internal class AuthRepositoryImpl @Inject constructor(
         user.reauthenticate(credential).await()
         DataResult.Success(Unit)
     }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha na reautenticação: ${exception.message}", exception)
+        Log.e(TAG, "Falha na reautenticação: ${exception.message}", exception)
         val error = when (exception) {
             is FirebaseAuthInvalidCredentialsException -> AppError.Auth.InvalidCredentials
             is FirebaseAuthInvalidUserException -> AppError.Auth.UserNotFound
@@ -246,15 +276,48 @@ internal class AuthRepositoryImpl @Inject constructor(
         DataResult.Failure(error)
     }
 
-    override suspend fun linkWithCredential(email: String, credential: AuthCredential): DataResult<Unit> = runCatching {
+    /**
+     * Autentica uma nova sessão anônima de convidado.
+     */
+    override suspend fun loginAnonymously(): DataResult<String> = runCatching {
+        val authResult = auth.signInAnonymously().await()
+        val uid = authResult.user?.uid
+            ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Usuário anônimo não encontrado.")
+        DataResult.Success(uid)
+    }.getOrElse { exception ->
+        Log.e(TAG, "Falha no login anônimo: ${exception.message}", exception)
+        val error = when (exception) {
+            is IOException -> AppError.Generic.Network
+            else -> AppError.Generic.Unknown(exception)
+        }
+        DataResult.Failure(error)
+    }
+
+    /**
+     * Verifica se existe um usuário autenticado ativo no momento.
+     */
+    override suspend fun isUserLogged(): DataResult<Boolean> = runCatching {
+        DataResult.Success(auth.currentUser != null)
+    }.getOrElse { exception ->
+        Log.e(TAG, "Falha ao checar status de login: ${exception.message}", exception)
+        val error = when (exception) {
+            is IOException -> AppError.Generic.Network
+            else -> AppError.Generic.Unknown(exception)
+        }
+        DataResult.Failure(error)
+    }
+
+    /**
+     * Deleta a conta do usuário autenticado no Firebase.
+     */
+    override suspend fun deleteUser(): DataResult<Unit> = runCatching {
         val user = auth.currentUser
             ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Nenhum usuário logado.")
-        user.linkWithCredential(credential).await()
+        user.delete().await()
         DataResult.Success(Unit)
     }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha ao vincular credencial: ${exception.message}", exception)
+        Log.e(TAG, "Falha ao deletar usuário: ${exception.message}", exception)
         val error = when (exception) {
-            is FirebaseAuthUserCollisionException -> AppError.Auth.EmailAlreadyInUse
             is FirebaseAuthInvalidUserException -> AppError.Auth.UserNotFound
             is FirebaseAuthRecentLoginRequiredException -> AppError.Auth.RequiresRecentLogin
             is IOException -> AppError.Generic.Network
@@ -263,31 +326,21 @@ internal class AuthRepositoryImpl @Inject constructor(
         DataResult.Failure(error)
     }
 
-    override suspend fun unlink(providerId: String): DataResult<Unit> = runCatching {
-        val user = auth.currentUser
-            ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Nenhum usuário logado.")
-        user.unlink(providerId).await()
-        DataResult.Success(Unit)
-    }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha ao desvincular provedor: ${exception.message}", exception)
-        val error = when (exception) {
-            is FirebaseAuthInvalidUserException -> AppError.Auth.UserNotFound
-            is IOException -> AppError.Generic.Network
-            else -> AppError.Generic.Unknown(exception)
-        }
-        DataResult.Failure(error)
-    }
-
-    override suspend fun loginWithCredential(
-        credential: AuthCredential
-    ): DataResult<String> = runCatching {
+    /**
+     * Autentica no Firebase utilizando o Google ID Token fornecido pelo Credential Manager.
+     *
+     * @param idToken Token de identidade JWT retornado pela autenticação do Google.
+     * @return [DataResult.Success] com [OmniUser] ou [DataResult.Failure] com erro mapeado.
+     */
+    override suspend fun signInWithGoogle(idToken: String): DataResult<OmniUser> = runCatching {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
         val authResult = auth.signInWithCredential(credential).await()
-        val uid = authResult.user?.uid
-            ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Usuário não encontrado.")
-        DataResult.Success(uid)
+        val user = authResult.user?.toOmniUser()
+            ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Usuário não encontrado após login Google.")
+        DataResult.Success(user)
     }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha no login com credencial: ${exception.message}", exception)
-        val error = when (exception) {
+        Log.e(TAG, "Falha no signInWithGoogle: ${exception.message}", exception)
+        val error: AppError = when (exception) {
             is FirebaseAuthInvalidCredentialsException -> AppError.Auth.InvalidCredentials
             is FirebaseAuthInvalidUserException -> AppError.Auth.UserNotFound
             is IOException -> AppError.Generic.Network
@@ -296,35 +349,18 @@ internal class AuthRepositoryImpl @Inject constructor(
         DataResult.Failure(error)
     }
 
-    override suspend fun signInWithGoogle(
-        credential: AuthCredential
-    ): DataResult<AuthResult> = runCatching {
-        val authResult = auth.signInWithCredential(credential).await()
-        if (authResult.user != null) {
-            DataResult.Success(authResult)
-        } else {
-            DataResult.Failure(AppError.Auth.UserNotFound)
-        }
+    /**
+     * Encerra a sessão ativa deslogando o usuário do dispositivo.
+     */
+    override suspend fun signOut(): DataResult<Unit> = runCatching {
+        auth.signOut()
+        DataResult.Success(Unit)
     }.getOrElse { exception ->
-        val error = when (exception) {
-            is IOException -> AppError.Generic.Network
-            else -> AppError.Generic.Unknown(exception)
-        }
-        DataResult.Failure(error)
+        Log.e(TAG, "Falha ao deslogar: ${exception.message}", exception)
+        DataResult.Failure(AppError.Generic.Unknown(exception))
     }
 
-    override suspend fun loginAnonymously(): DataResult<String> = runCatching {
-        val authResult = auth.signInAnonymously().await()
-        val uid = authResult.user?.uid
-            ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Usuário não encontrado.")
-        DataResult.Success(uid)
-    }.getOrElse { exception ->
-        Log.e("AuthRepoImpl", "Falha no login anônimo: ${exception.message}", exception)
-        val error = when (exception) {
-            is IOException -> AppError.Generic.Network
-            else -> AppError.Generic.Unknown(exception)
-        }
-        DataResult.Failure(error)
+    companion object {
+        private const val TAG = "AuthRepositoryImpl"
     }
 }
-

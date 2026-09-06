@@ -1,18 +1,30 @@
-﻿package br.wgc.omnibackend.firebase.data.repository
+package br.wgc.omnibackend.firebase.data.repository
 
-import br.wgc.omnibackend.firebase.domain.repository.VertexAIRepository
-import br.wgc.omnibackend.firebase.utils.AppError
-import br.wgc.omnibackend.firebase.utils.DataResult
+import br.wgc.omnibackend.core.repository.VertexAIRepository
+import br.wgc.omnibackend.core.utils.AppError
+import br.wgc.omnibackend.core.utils.DataResult
 import com.google.firebase.vertexai.FirebaseVertexAI
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.IOException
 import javax.inject.Inject
 
+/**
+ * Implementação do contrato [VertexAIRepository] utilizando a biblioteca Firebase Vertex AI (Gemini).
+ *
+ * @property vertexAI Instância do [FirebaseVertexAI] injetada.
+ */
 class VertexAIRepositoryImpl @Inject constructor(
     private val vertexAI: FirebaseVertexAI
 ) : VertexAIRepository {
 
+    /**
+     * Gera uma resposta em texto completo a partir do prompt e modelo especificados.
+     *
+     * @param prompt Texto descritivo com a instrução para a IA.
+     * @param modelName Identificador do modelo generativo (padrão "gemini-1.5-flash").
+     * @return [DataResult.Success] com o texto retornado pela IA.
+     */
     override suspend fun generateText(
         prompt: String,
         modelName: String
@@ -25,6 +37,13 @@ class VertexAIRepositoryImpl @Inject constructor(
         DataResult.Failure(mapExceptionToAppError(exception))
     }
 
+    /**
+     * Gera um fluxo de streaming de texto emitindo partes da resposta incrementalmente.
+     *
+     * @param prompt Instrução para a IA.
+     * @param modelName Nome do modelo generativo.
+     * @return [Flow] que emite blocos textuais à medida que são concluídos.
+     */
     override fun generateTextStream(
         prompt: String,
         modelName: String
@@ -57,4 +76,3 @@ class VertexAIRepositoryImpl @Inject constructor(
         }
     }
 }
-
