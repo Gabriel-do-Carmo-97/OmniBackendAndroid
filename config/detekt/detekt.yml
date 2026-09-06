@@ -9,8 +9,8 @@ build:
 
 config:
   validation: true
-  warningsAsErrors: false
-  checkExhaustiveness: false
+  warningsAsErrors: true
+  checkExhaustiveness: true
 
 comments:
   CommentOverPrivateFunction:
@@ -18,11 +18,11 @@ comments:
   CommentOverPrivateProperty:
     active: false
   UndocumentedPublicClass:
-    active: false
+    active: true
   UndocumentedPublicFunction:
-    active: false
+    active: true
   UndocumentedPublicProperty:
-    active: false
+    active: true
 
 complexity:
   ComplexCondition:
