@@ -16,6 +16,10 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.javax.inject)
 
+    // Appwrite Android SDK & Gson
+    implementation(libs.appwrite.sdk)
+    implementation(libs.google.gson)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)

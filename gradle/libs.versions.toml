@@ -22,6 +22,8 @@ detekt = "1.23.8"
 supabase = "3.1.3"
 ktor = "3.0.3"
 gson = "2.11.0"
+appwrite = "24.1.1"
+parseSdk = "4.4.0"
 
 [libraries]
 # Gradle build plugins para build-logic
@@ -64,6 +66,8 @@ supabase-storage = { module = "io.github.jan-tennert.supabase:storage-kt" }
 supabase-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 google-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+appwrite-sdk = { module = "io.appwrite:sdk-for-android", version.ref = "appwrite" }
+parse-android = { module = "com.github.parse-community.Parse-SDK-Android:parse", version.ref = "parseSdk" }
 
 # Injeção e Concorrência
 javax-inject = { module = "javax.inject:javax.inject", version = "1" }
