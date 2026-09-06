@@ -4,9 +4,9 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Gradle](https://img.shields.io/badge/Gradle-9.5.0-02303A?logo=gradle&logoColor=white)](https://gradle.org/)
 [![AGP](https://img.shields.io/badge/AGP-9.3.2-blue)](https://developer.android.com/build)
-[![Architecture](https://img.shields.io/badge/Architecture-Multi--Provider%20BaaS-blueviolet)](#architecture)
+[![Architecture](https://img.shields.io/badge/Architecture-Clean%20Hexagonal%20%2B%20Multi--Provider-blueviolet)](#architecture)
 
-OmniBackend Android is an enterprise-ready, multi-provider Backend-as-a-Service (BaaS) abstraction architecture for Android applications. It enables applications to consume cloud providers (Firebase, Supabase, etc.) with clean, reactive, and unified interfaces.
+**OmniBackend Android** is an enterprise-grade, multi-provider Backend-as-a-Service (BaaS) abstraction framework for Android applications. It decouples client applications from specific cloud vendors (Firebase, Supabase, Appwrite, etc.) through clean, reactive, and cloud-agnostic domain contracts.
 
 ---
 
@@ -14,49 +14,59 @@ OmniBackend Android is an enterprise-ready, multi-provider Backend-as-a-Service 
 
 ```mermaid
 graph TD
-    App[":app (Client Application / Presentation)"] -->|depends on| BF[":backend-firebase"]
+    BL["build-logic (Composite Build Conventions)"] -.->|configura| App[":app"]
+    BL -.->|configura| Core[":core"]
+    BL -.->|configura| BF[":backend-firebase"]
 
-    subgraph "OmniBackend Architecture"
-        BF --> Facade["OmniFirebase (Unified Facade)"]
-        BF --> Security["AppCheckManager (Play Integrity / Debug)"]
-        BF --> Telemetry["FirebaseTelemetry (Crashlytics + Performance)"]
-        BF --> Repos["Domain & Data Repositories"]
+    App -->|consome contratos| Core
+    App -->|injeta provedor| BF
+    BF -->|implementa contratos| Core
 
-        Repos --> Auth["AuthRepository (Flow<FirebaseUser?>)"]
-        Repos --> Firestore["FirestoreRepository"]
-        Repos --> RTDB["RealtimeDatabaseRepository"]
-        Repos --> Storage["StorageRepository (Streams/Uri)"]
-        Repos --> Config["RemoteConfigRepository (Reactive)"]
-        Repos --> Analytics["AnalyticsRepository"]
-        Repos --> VertexAI["VertexAIRepository (Gemini AI)"]
-        Repos --> Realtime["Geolocation, Messaging, Presence"]
+    subgraph "Módulo Agnóstico (:core)"
+        Core --> Contracts["Contratos: AuthRepository, StorageRepository, AnalyticsRepository..."]
+        Core --> DomainModels["Modelos: OmniUser, DataResult<T>, AppError"]
+        Core --> TelemetryContract["TelemetryProvider"]
     end
 
-    BF --> GoogleFirebase["Google Firebase SDK (BoM 33.9.0)"]
+    subgraph "Driver Firebase (:backend-firebase)"
+        BF --> Facade["OmniFirebase (Unified Facade)"]
+        BF --> Impl["AuthRepositoryImpl, StorageRepositoryImpl, etc."]
+        BF --> Sec["AppCheckManager (Play Integrity / Debug)"]
+        BF --> Tel["FirebaseTelemetry (Crashlytics + Perf)"]
+    end
+
+    BF --> GoogleSDK["Google Firebase Android SDK (BoM 33.9.0)"]
 ```
 
 ---
 
-## 🚀 Providers
+## 📦 Modules
 
-| Provider Module | Status | Features |
+| Module | Type | Description |
 | :--- | :---: | :--- |
-| **`:backend-firebase`** | ✅ **Active** | Auth (reactive), Firestore, Realtime DB, Storage, Config, Analytics, Gemini AI, App Check (Play Integrity), Telemetry |
-| **`:backend-supabase`** | 🔜 *Planned* | GoTrue Auth, PostgREST, Storage, Realtime CDC |
+| **`build-logic`** | Composite Build | Plugins de convenção Gradle (`omni.android.application`, `omni.android.application.compose`, `omni.android.library`) unificando compilação e configurações do AGP 9.3.2. |
+| **`:core`** | Android Library | Camada de domínio agnóstica contendo interfaces (`AuthRepository`, `StorageRepository`, `AnalyticsRepository`), modelos (`OmniUser`), resultados (`DataResult`) e hierarquia de erros (`AppError`). **Zero dependências de terceiros.** |
+| **`:backend-firebase`** | Android Library | Driver do Firebase implementando os contratos do `:core` usando Firebase BoM 33.9.0, App Check (Play Integrity) e Telemetria (Crashlytics/Perf). |
+| **`:app`** | Android Application | Aplicativo de demonstração consumindo `:core` e injetando `:backend-firebase`. |
 
 ---
 
-## ⚡ Quick Start with `:backend-firebase`
+## ⚡ Quick Start
 
-### 1. Add dependency in your `app/build.gradle.kts`:
+### 1. Injetar ou Utilizar no Aplicativo
+
+No seu módulo de apresentação (`:app`), declare:
 
 ```kotlin
 dependencies {
+    implementation(project(":core"))
     implementation(project(":backend-firebase"))
 }
 ```
 
-### 2. Initialize in `Application` or `MainActivity`:
+### 2. Inicialização
+
+No `Application.onCreate()` ou `MainActivity.onCreate()`:
 
 ```kotlin
 class MainApplication : Application() {
@@ -72,38 +82,37 @@ class MainApplication : Application() {
 }
 ```
 
-### 3. Consume via `OmniFirebase` Facade:
+### 3. Consumindo os Contratos do `:core`
 
 ```kotlin
 class UserProfileViewModel : ViewModel() {
 
-    // Reactive user session
-    val currentUser = OmniFirebase.auth.authState
+    // Sessão reativa agnóstica de usuário
+    val currentUserFlow: Flow<OmniUser?> = OmniFirebase.auth.authState
 
-    // Firestore CRUD
-    suspend fun saveProfile(user: UserProfile) {
-        OmniFirebase.firestore.addDocument("users", user, user.id)
-    }
-
-    // Telemetry & Error reporting
-    fun handleError(error: AppError) {
-        OmniFirebase.telemetry.recordError(error)
+    // Salvar documento
+    suspend fun saveProfile(user: OmniUser) {
+        val result: DataResult<String> = OmniFirebase.firestore.addDocument("users", user, user.uid)
+        when (result) {
+            is DataResult.Success -> println("Documento salvo: ${result.data}")
+            is DataResult.Failure -> OmniFirebase.telemetry.recordError(result.error)
+        }
     }
 }
 ```
 
 ---
 
-## 🧪 Testing
+## 🧪 Testes e Compilação
 
-Execute tests across all modules:
+Executar todos os testes unitários em todos os módulos:
 
 ```bash
 ./gradlew testDebugUnitTest
 ```
 
-Execute tests specifically for `:backend-firebase`:
+Compilar os AARs de `:core`, `:backend-firebase` e o APK do `:app`:
 
 ```bash
-./gradlew :backend-firebase:testDebugUnitTest
+./gradlew assembleDebug
 ```

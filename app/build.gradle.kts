@@ -1,42 +1,28 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
+    id("omni.android.application")
+    id("omni.android.application.compose")
 }
 
 android {
     namespace = "br.wgc.omnibackendandroid"
-    compileSdk {
-        version = release(37)
-    }
 
     defaultConfig {
         applicationId = "br.wgc.omnibackendandroid"
-        minSdk = 29
-        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            optimization {
-                enable = false
-            }
+            isMinifyEnabled = false
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    buildFeatures {
-        compose = true
     }
 }
 
 dependencies {
+    implementation(project(":core"))
     implementation(project(":backend-firebase"))
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

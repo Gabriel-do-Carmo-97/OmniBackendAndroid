@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="br.wgc.omnibackend.firebase.data.repository.FirestoreRepositoryTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-06T15:09:38.772Z" hostname="DESKTOP-UADTKH3" time="1.803">
-  <properties/>
-  <testcase name="addDocument delegates to firestore collection and document" classname="br.wgc.omnibackend.firebase.data.repository.FirestoreRepositoryTest" time="1.803"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

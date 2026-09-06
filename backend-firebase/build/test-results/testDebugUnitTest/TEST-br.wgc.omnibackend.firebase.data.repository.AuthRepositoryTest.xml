@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="br.wgc.omnibackend.firebase.data.repository.AuthRepositoryTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-06T15:09:34.517Z" hostname="DESKTOP-UADTKH3" time="4.229">
-  <properties/>
-  <testcase name="authState emits current Firebase user from listener" classname="br.wgc.omnibackend.firebase.data.repository.AuthRepositoryTest" time="4.229"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
