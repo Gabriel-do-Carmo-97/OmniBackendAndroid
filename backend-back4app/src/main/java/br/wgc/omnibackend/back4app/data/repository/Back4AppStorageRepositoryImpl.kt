@@ -44,10 +44,10 @@ internal class Back4AppStorageRepositoryImpl(
         Uri.parse(parseFile.url)
     }
 
-    override suspend fun uploadFileDirect(path: String, fileUri: Uri): DataResult<Uri> = runCatchingStorage {
+    override suspend fun uploadFileDirect(path: String, fileUri: Uri): DataResult<Uri> {
         val bytes = context.contentResolver.openInputStream(fileUri)?.use { it.readBytes() }
-            ?: throw IllegalStateException("Unable to open stream for URI: $fileUri")
-        uploadFileDirect(path, bytes)
+            ?: return DataResult.Failure(br.wgc.omnibackend.core.utils.AppError.Storage.ObjectNotFound)
+        return uploadFileDirect(path, bytes)
     }
 
     override suspend fun getDownloadUrl(path: String): DataResult<Uri> = runCatchingStorage {

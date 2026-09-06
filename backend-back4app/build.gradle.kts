@@ -16,6 +16,10 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.javax.inject)
 
+    // Parse Android SDK (Back4App) & Gson
+    implementation(libs.parse.android)
+    implementation(libs.google.gson)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)

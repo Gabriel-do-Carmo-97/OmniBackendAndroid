@@ -4,10 +4,10 @@ import android.content.Context
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 
 class OmniBack4AppTest {
 
@@ -15,7 +15,12 @@ class OmniBack4AppTest {
 
     @Before
     fun setUp() {
+        val tempDir = File(System.getProperty("java.io.tmpdir"), "parse_test_dir")
+        tempDir.mkdirs()
         every { mockContext.applicationContext } returns mockContext
+        every { mockContext.getDir(any(), any()) } returns tempDir
+        every { mockContext.cacheDir } returns tempDir
+        every { mockContext.filesDir } returns tempDir
         OmniBack4App.resetForTesting()
     }
 
