@@ -19,6 +19,9 @@ mockk = "1.13.13"
 kotlinxCoroutines = "1.10.1"
 dokka = "2.0.0"
 detekt = "1.23.8"
+supabase = "3.1.3"
+ktor = "3.0.3"
+gson = "2.11.0"
 
 [libraries]
 # Gradle build plugins para build-logic
@@ -52,6 +55,15 @@ firebase-vertexai = { group = "com.google.firebase", name = "firebase-vertexai",
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-appcheck-playintegrity = { module = "com.google.firebase:firebase-appcheck-playintegrity" }
 firebase-appcheck-debug = { module = "com.google.firebase:firebase-appcheck-debug" }
+
+# Supabase
+supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabase" }
+supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
+supabase-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
+supabase-storage = { module = "io.github.jan-tennert.supabase:storage-kt" }
+supabase-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt" }
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+google-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 # Injeção e Concorrência
 javax-inject = { module = "javax.inject:javax.inject", version = "1" }
