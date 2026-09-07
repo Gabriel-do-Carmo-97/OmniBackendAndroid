@@ -33,7 +33,14 @@ class OmniAndroidLibraryConventionPlugin : Plugin<Project> {
                             from(components["release"])
                             groupId = "br.wgc.omnibackend"
                             artifactId = target.name
-                            version = target.findProperty("version")?.toString()?.takeIf { it != "unspecified" }
+                            val envRunNumber = providers.environmentVariable("GITHUB_RUN_NUMBER").orNull
+                            val envVersionName = providers.environmentVariable("VERSION_NAME").orNull
+                            val propVersion = target.findProperty("VERSION_NAME")?.toString()
+                                ?: target.findProperty("version")?.toString()?.takeIf { it != "unspecified" }
+
+                            version = propVersion
+                                ?: envVersionName
+                                ?: envRunNumber?.let { "0.0.$it" }
                                 ?: target.version.toString().takeIf { it != "unspecified" }
                                 ?: "1.0.0"
 
