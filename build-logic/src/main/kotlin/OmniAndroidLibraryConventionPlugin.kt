@@ -32,7 +32,11 @@ class OmniAndroidLibraryConventionPlugin : Plugin<Project> {
                         register<MavenPublication>("release") {
                             from(components["release"])
                             groupId = "br.wgc.omnibackend"
-                            artifactId = target.name
+                            artifactId = when {
+                                target.parent?.name == "backend" -> "backend-${target.name}"
+                                target.parent?.name == "bundle" -> "bundle-${target.name}"
+                                else -> target.name
+                            }
                             val envRunNumber = providers.environmentVariable("GITHUB_RUN_NUMBER").orNull
                             val envVersionName = providers.environmentVariable("VERSION_NAME").orNull
                             val propVersion = target.findProperty("VERSION_NAME")?.toString()

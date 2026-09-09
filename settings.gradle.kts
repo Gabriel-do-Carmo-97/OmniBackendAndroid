@@ -27,14 +27,27 @@ dependencyResolutionManagement {
 rootProject.name = "OmniBackendAndroid"
 include(":app")
 include(":core")
-include(":backend-firebase")
-include(":backend-supabase")
-include(":backend-appwrite")
-include(":backend-back4app")
-include(":backend-amplify")
-include(":backend-pocketbase")
-include(":backend-rest")
-include(":backend-cloudflare")
 
+// 🚀 Registra drivers especializados da pasta backend/
+fun registerBackend(name: String) {
+    include(":backend:$name")
+    project(":backend:$name").projectDir = file("backend/$name")
+}
 
- 
+registerBackend("firebase")
+registerBackend("supabase")
+registerBackend("appwrite")
+registerBackend("pocketbase")
+registerBackend("back4app")
+registerBackend("amplify")
+registerBackend("rest")
+registerBackend("cloudflare")
+
+// 📦 Registra bundles agregadores da pasta bundle/
+fun registerBundle(name: String) {
+    include(":bundle:$name")
+    project(":bundle:$name").projectDir = file("bundle/$name")
+}
+
+registerBundle("hybrid")
+registerBundle("all")

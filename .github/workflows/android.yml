@@ -28,14 +28,8 @@ jobs:
         with:
           files: |
             core/**
-            backend-firebase/**
-            backend-supabase/**
-            backend-appwrite/**
-            backend-back4app/**
-            backend-amplify/**
-            backend-pocketbase/**
-            backend-rest/**
-            backend-cloudflare/**
+            backend/**
+            bundle/**
             build-logic/**
             gradle/**
 
@@ -82,12 +76,26 @@ jobs:
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
         run: |
           echo "Publishing modules for run number: ${{ github.run_number }}"
-          for module in core backend-firebase backend-supabase backend-appwrite backend-back4app backend-amplify backend-pocketbase backend-rest backend-cloudflare; do
-            if [ -d "$module" ]; then
-              if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "$module/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
-                echo "Publishing :$module to GitHub Packages..."
-                ./gradlew ":$module:publish" --no-daemon
-              fi
+          
+          # Publicar Core se alterado
+          if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "core/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
+            echo "Publishing :core to GitHub Packages..."
+            ./gradlew ":core:publish" --no-daemon
+          fi
+
+          # Publicar Drivers da pasta backend/
+          for b in firebase supabase appwrite back4app amplify pocketbase rest cloudflare; do
+            if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "backend/$b/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
+              echo "Publishing :backend:$b to GitHub Packages..."
+              ./gradlew ":backend:$b:publish" --no-daemon
+            fi
+          done
+
+          # Publicar Bundles da pasta bundle/
+          for bun in hybrid all; do
+            if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "bundle/$bun/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
+              echo "Publishing :bundle:$bun to GitHub Packages..."
+              ./gradlew ":bundle:$bun:publish" --no-daemon
             fi
           done
 

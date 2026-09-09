@@ -21,7 +21,7 @@ android {
 
 dependencies {
     implementation(project(":core"))
-    implementation(project(":backend-firebase"))
+    implementation(project(":backend:firebase"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
