@@ -1,54 +1,56 @@
-# Diretrizes de Contribuição para o OmniBackendAndroid
+# Guia de Contribuição — OmniBackendAndroid 🚀
 
-Agradecemos o seu interesse em contribuir com o **OmniBackendAndroid**! Este documento orienta o desenvolvimento colaborativo mantendo o padrão corporativo de arquitetura, qualidade e documentação.
-
----
-
-## 🏛️ Princípios de Arquitetura
-
-O ecossistema é projetado com base em **Clean Architecture** e **Arquitetura Hexagonal (Portas e Adaptadores)**:
-
-1. **Módulo `:core` (Puro e Agnóstico)**:
-   - Contém apenas contratos (interfaces de repositórios, provedores de telemetria), entidades de domínio imutáveis (`OmniUser`) e o tipo funcional `DataResult<T>` com a hierarquia selada `AppError`.
-   - **Regra de Ouro**: O módulo `:core` **nunca** deve conter dependências de fornecedores em nuvem (sem Firebase, sem Supabase, sem Appwrite).
-2. **Módulos Adaptadores (`:backend-firebase`, `:backend-supabase`, etc.)**:
-   - Devem implementar **exclusivamente** os contratos definidos no `:core`.
-   - Todas as exceções do provedor devem ser capturadas e mapeadas para subclasses de `AppError`.
-   - Tipos nativos dos SDKs (como `FirebaseUser`) **jamais** devem vazar para a assinatura pública de repositórios ou casos de uso; converta sempre para os modelos do `:core`.
-3. **Módulo `build-logic` (Plugins de Convenção)**:
-   - Gerencia de forma centralizada as configurações do Android Gradle Plugin, Kotlin DSL, compilação (JVM 11, compileSdk 37), Dokka e publicação Maven.
+Obrigado pelo seu interesse em contribuir com o **OmniBackendAndroid**!
+Este repositório segue rigorosos padrões de engenharia de software móvel, Clean Architecture e convenções multi-módulo corporativas.
 
 ---
 
-## 📝 Padrões de Código e Documentação (KDoc)
+## 🏛️ Princípios Arquiteturais Obrigatórios
 
-- **KDoc 100% Obrigatório**: Toda classe pública, interface, função, parâmetro (`@param`), retorno (`@return`) e possível erro (`@throws`) deve possuir documentação detalhada em português ou inglês com formatação KDoc oficial.
-- **Análise Estática (Detekt)**: Todo código deve passar sem alertas pelas regras de qualidade configuradas em `config/detekt/detekt.yml`. Execute `./gradlew detekt` localmente antes de submeter um PR.
-- **Testes Unitários**: Toda nova funcionalidade ou correção de bug deve ser acompanhada por testes unitários com MockK (`./gradlew testDebugUnitTest`).
-
----
-
-## 🌿 Fluxo de Git e Commits
-
-- **Conventional Commits**: Siga o padrão padronizado:
-  - `feat(modulo): nova funcionalidade`
-  - `fix(modulo): correção de comportamento`
-  - `refactor(modulo): melhoria interna sem alteração de comportamento externo`
-  - `docs: documentação ou KDoc`
-  - `test: criação ou ajuste de testes`
-  - `build: mudanças de build-logic, gradle ou dependabot`
-  - `ci: fluxos do GitHub Actions`
-- **Branches**: Crie branches a partir da `master` com prefixos semânticos (ex: `feature/suporte-appwrite`, `fix/auth-reauthentication`).
+1. **Zero SDK Leakage (Isolamento Estrito):** Nenhuma classe ou modelo específico de SDKs de terceiros (Firebase, Supabase, Appwrite, PocketBase, etc.) deve vazar além de seu respectivo módulo `:backend:<nome>`. Camadas superiores de aplicação enxergam única e exclusivamente as entidades do `:core` (`OmniUser`, `DataResult`, `AppError`).
+2. **Abstração por Interfaces:** Toda funcionalidade deve ser declarada como contrato de interface no `:core` (`AuthRepository`, `FirestoreRepository`, `StorageRepository`, etc.) antes de receber implementações concretas.
+3. **KDoc Exaustivo (100%):** Qualquer classe, interface, propriedade ou método público DEVE conter documentação KDoc em português, detalhando propósito, `@param`, `@return` e `@throws` quando aplicável.
+4. **Resiliência e Failover:** Recursos corporativos devem ser compatíveis com a orquestração híbrida de `:bundle:hybrid`.
 
 ---
 
-## 🚀 Como Submeter um Pull Request (PR)
+## 🛠️ Padrão de Commits (Conventional Commits)
 
-1. Crie uma branch para a sua modificação.
-2. Certifique-se de que a suite de validação passa com 100% de sucesso:
+Todas as mensagens de commit e títulos de Pull Requests **DEVEM** seguir a especificação de [Conventional Commits](https://www.conventionalcommits.org/):
+
+* `feat(<modulo>):` Nova funcionalidade (ex: `feat(hybrid): add active-active quorum sync`)
+* `fix(<modulo>):` Correção de bug (ex: `fix(appwrite): prevent token refresh crash`)
+* `refactor(<modulo>):` Refatoração sem alteração de comportamento externo
+* `test(<modulo>):` Adição ou alteração de testes unitários com MockK
+* `docs(<modulo>):` Alterações exclusivas na documentação ou KDocs
+* `chore(<modulo>):` Atualização de dependências ou automação de build
+
+---
+
+## 🧪 Validação Local Antes de Abrir PR
+
+Antes de enviar seus commits para o repositório remoto, certifique-se de que todas as validações passam localmente:
+
+```bash
+# 1. Análise estática com Detekt
+./gradlew detekt
+
+# 2. Executar suíte completa de testes unitários
+./gradlew testDebugUnitTest
+
+# 3. Compilar AARs de release
+./gradlew assembleRelease
+```
+
+---
+
+## 🔀 Fluxo de Branches e Pull Requests
+
+1. Crie uma branch a partir de `master`:
    ```bash
-   ./gradlew detekt
-   ./gradlew testDebugUnitTest
-   ./gradlew assembleRelease
+   git checkout -b feat/<nome-da-feature>
+   # ou
+   git checkout -b fix/<nome-do-bug>
    ```
-3. Abra o Pull Request descrevendo claramente o objetivo da alteração e os testes realizados.
+2. Realize commits atômicos com mensagens padronizadas.
+3. Envie a branch para o remoto e abra um Pull Request preenchendo o template.

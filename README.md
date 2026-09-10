@@ -1,135 +1,152 @@
-# OmniBackendAndroid
+# OmniBackendAndroid 🚀
 
-[![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
-[![Gradle](https://img.shields.io/badge/Gradle-9.5.0-02303A?logo=gradle&logoColor=white)](https://gradle.org/)
+[![Android CI/CD](https://github.com/Gabriel-do-Carmo-97/OmniBackendAndroid/actions/workflows/android.yml/badge.svg)](https://github.com/Gabriel-do-Carmo-97/OmniBackendAndroid/actions)
+[![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Gradle](https://img.shields.io/badge/Gradle-9.7.1-02303A?logo=gradle&logoColor=white)](https://gradle.org/)
 [![AGP](https://img.shields.io/badge/AGP-9.3.2-blue)](https://developer.android.com/build)
-[![Architecture](https://img.shields.io/badge/Architecture-Clean%20Hexagonal%20%2B%20Multi--Provider-blueviolet)](#architecture)
+[![Quality](https://img.shields.io/badge/Detekt-0%20issues-success.svg)](#qualidade-e-governança)
 
-**OmniBackend Android** é uma solução empresarial multi-provedor de abstração Backend-as-a-Service (BaaS) para aplicativos Android. Desacopla o aplicativo de provedores específicos (Firebase, Supabase, Appwrite, Back4App, PocketBase, Cloudflare, AWS Amplify, Custom REST) por meio de contratos de domínio limpos, reativos e totalmente agnósticos.
+**OmniBackend Android** é um framework empresarial e agnóstico de abstração Backend-as-a-Service (BaaS) e orquestração de nuvem para Android. 
+
+Permite que aplicativos corporativos operem com múltiplos provedores de backend (Firebase, Supabase, Appwrite, Back4App, PocketBase, Cloudflare, AWS Amplify e REST proprietário) com **Zero SDK Leakage** e suporte nativo a **Failover Automático / Redundância Ativo-Passivo**.
 
 ---
 
-## 🏛️ Arquitetura do Projeto
+## 🏛️ Arquitetura Multi-Módulo Corporativa
 
 ```mermaid
 graph TD
-    BL["build-logic (Composite Build Conventions)"] -.->|configura| App[":app"]
-    BL -.->|configura| Core[":core"]
-    BL -.->|configura| BF[":backend-firebase"]
-    BL -.->|configura| BS[":backend-supabase"]
-    BL -.->|configura| BA[":backend-appwrite"]
-    BL -.->|configura| BB[":backend-back4app"]
-    BL -.->|configura| BP[":backend-pocketbase"]
-    BL -.->|configura| BC[":backend-cloudflare"]
-    BL -.->|configura| BAM[":backend-amplify"]
-    BL -.->|configura| BR[":backend-rest"]
+    classDef core fill:#FBBC04,stroke:#F29900,stroke-width:2px,color:#000;
+    classDef backend fill:#4285F4,stroke:#1A73E8,stroke-width:2px,color:#fff;
+    classDef bundle fill:#9C27B0,stroke:#7B1FA2,stroke-width:2px,color:#fff;
 
-    App -->|consome contratos| Core
-    App -->|injeta provedor| BF
-    App -->|injeta provedor| BS
-    App -->|injeta provedor| BA
-    App -->|injeta provedor| BB
-    App -->|injeta provedor| BP
-    App -->|injeta provedor| BC
-    App -->|injeta provedor| BAM
-    App -->|injeta provedor| BR
+    Core[":core<br/>(Contratos Agnósticos, Modelos, Tracing, FailoverRouter)"]:::core
 
-    BF -->|implementa contratos| Core
-    BS -->|implementa contratos| Core
-    BA -->|implementa contratos| Core
-    BB -->|implementa contratos| Core
-    BP -->|implementa contratos| Core
-    BC -->|implementa contratos| Core
-    BAM -->|implementa contratos| Core
-    BR -->|implementa contratos| Core
-
-    subgraph "Módulo Agnóstico (:core)"
-        Core --> Contracts["AuthRepository, FirestoreRepository, StorageRepository..."]
-        Core --> DomainModels["OmniUser, DataResult<T>, AppError"]
+    subgraph Drivers [Diretório: backend/]
+        BF[":backend:firebase"]:::backend
+        BS[":backend:supabase"]:::backend
+        BA[":backend:appwrite"]:::backend
+        BP[":backend:pocketbase"]:::backend
+        BB[":backend:back4app"]:::backend
+        BAM[":backend:amplify"]:::backend
+        BR[":backend:rest"]:::backend
+        BC[":backend:cloudflare"]:::backend
     end
+
+    BF -->|implementa| Core
+    BS -->|implementa| Core
+    BA -->|implementa| Core
+    BP -->|implementa| Core
+    BB -->|implementa| Core
+    BAM -->|implementa| Core
+    BR -->|implementa| Core
+    BC -->|implementa| Core
+
+    subgraph Bundles [Diretório: bundle/]
+        BHybrid[":bundle:hybrid<br/>(Failover Dinâmico entre quaisquer 2 backends)"]:::bundle
+        BSelf[":bundle:self-hosted<br/>(PocketBase + Appwrite + Hybrid)"]:::bundle
+        BCloud[":bundle:cloud-native<br/>(Firebase + Supabase + Amplify + Hybrid)"]:::bundle
+        BAll[":bundle:all<br/>(Guarda-chuva completo com todos os backends)"]:::bundle
+    end
+
+    BHybrid -->|orquestra| Core
+    BSelf -->|api| BP
+    BSelf -->|api| BA
+    BSelf -->|api| BHybrid
+
+    BCloud -->|api| BF
+    BCloud -->|api| BS
+    BCloud -->|api| BAM
+    BCloud -->|api| BHybrid
+
+    BAll -->|api| BF
+    BAll -->|api| BS
+    BAll -->|api| BA
+    BAll -->|api| BP
+    BAll -->|api| BB
+    BAll -->|api| BAM
+    BAll -->|api| BR
+    BAll -->|api| BC
+    BAll -->|api| BHybrid
 ```
 
 ---
 
-## 📦 Módulos do Framework
+## 📦 Matriz de Módulos e Artefatos
 
-| Módulo | Tipo | Documentação | Descrição |
-| :--- | :---: | :---: | :--- |
-| **`build-logic`** | Composite Build | [README.md](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/build-logic/README.md) | Convention Plugins Gradle unificando AGP 9.3.2 e Kotlin. |
-| **`:core`** | Android Library | [README.md](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/core/README.md) | Núcleo agnóstico contendo contratos, modelos `OmniUser`, `DataResult` e `AppError`. **Zero dependências externas.** |
-| **`:backend-firebase`** | Android Library | [README.md](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/backend-firebase/README.md) | Driver do Google Firebase (Auth, Firestore, RTDB, Storage, Telemetria, AppCheck, Vertex AI). |
-| **`:backend-supabase`** | Android Library | [README.md](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/backend-supabase/README.md) | Driver do Supabase (GoTrue Auth, PostgREST, Storage, Realtime). |
-| **`:backend-appwrite`** | Android Library | [README.md](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/backend-appwrite/README.md) | Driver do Appwrite (Account, Databases & Realtime WebSockets, Storage). |
-| **`:backend-back4app`** | Android Library | [README.md](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/backend-back4app/README.md) | Driver do Back4App / Parse Platform (`ParseUser`, `ParseObject`, `ParseFile`). |
-| **`:backend-pocketbase`** | Android Library | [README.md](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/backend-pocketbase/README.md) | Driver do PocketBase (RecordAuth, Collections, Files). |
-| **`:backend-cloudflare`** | Android Library | [README.md](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/backend-cloudflare/README.md) | Driver da Cloudflare (Workers Auth/API, D1 Database, R2 Storage). |
-| **`:backend-amplify`** | Android Library | [README.md](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/backend-amplify/README.md) | Driver da AWS Amplify (Cognito, DynamoDB/AppSync, S3 Storage). |
-| **`:backend-rest`** | Android Library | [README.md](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/backend-rest/README.md) | Driver REST customizado/proprietário com suporte a JWT e RFC 7807. |
-| **`:app`** | Android Application | [README.md](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/app/README.md) | Aplicativo de demonstração consumindo os contratos do `:core` e trocando de provedor. |
+### 1. Núcleo Agnóstico (`core/`)
+| Módulo | Artefato Maven | Descrição |
+| :--- | :--- | :--- |
+| **`:core`** | `br.wgc.omnibackend:core` | Contratos puros (`AuthRepository`, `FirestoreRepository`, `StorageRepository`), modelos `OmniUser`, `DataResult`, `AppError`, tracing distribuído e enfileiramento offline. |
+
+### 2. Drivers Especializados (`backend/`)
+| Módulo | Artefato Maven | Provedor / Nuvem | Capacidades Principais |
+| :--- | :--- | :--- | :--- |
+| **`:backend:firebase`** | `br.wgc.omnibackend:backend-firebase` | Google Cloud | Auth, Firestore, RTDB, Storage, Telemetria, AppCheck, Vertex AI. |
+| **`:backend:supabase`** | `br.wgc.omnibackend:backend-supabase` | PostgreSQL / Supabase | GoTrue Auth, PostgREST CRUD, Realtime WebSocket, Storage. |
+| **`:backend:appwrite`** | `br.wgc.omnibackend:backend-appwrite` | Appwrite Cloud / Docker | Account, Databases, Realtime Subscriptions, Storage. |
+| **`:backend:pocketbase`** | `br.wgc.omnibackend:backend-pocketbase` | PocketBase (Go / SQLite) | RecordAuth, Collections CRUD, File Storage. |
+| **`:backend:back4app`** | `br.wgc.omnibackend:backend-back4app` | Back4App / Parse | ParseUser, ParseObject Queries, ParseFile Storage. |
+| **`:backend:amplify`** | `br.wgc.omnibackend:backend-amplify` | Amazon Web Services | AWS Cognito, DynamoDB API, S3 Storage. |
+| **`:backend:rest`** | `br.wgc.omnibackend:backend-rest` | API Proprietária | JWT Auth, RFC 7807 ProblemDetails, Endpoints REST. |
+| **`:backend:cloudflare`** | `br.wgc.omnibackend:backend-cloudflare` | Cloudflare Edge | Workers Auth, D1 SQL Database, R2 Object Storage. |
+
+### 3. Bundles Agregadores (`bundle/`)
+| Módulo | Artefato Maven | Propósito |
+| :--- | :--- | :--- |
+| **`:bundle:hybrid`** | `br.wgc.omnibackend:bundle-hybrid` | Motor de failover e roteamento agnóstico (`OmniHybrid`). Permite combinar **quaisquer dois provedores**. |
+| **`:bundle:self-hosted`** | `br.wgc.omnibackend:bundle-self-hosted` | Solução para empresas que usam servidores próprios (PocketBase + Appwrite + Hybrid). |
+| **`:bundle:cloud-native`** | `br.wgc.omnibackend:bundle-cloud-native` | Multi-cloud em hiperescala (Google Cloud + AWS + Supabase + Hybrid). |
+| **`:bundle:all`** | `br.wgc.omnibackend:bundle-all` | Pacote completo com todos os 8 drivers integrados. |
 
 ---
 
-## ⚡ Guia Rápido de Inicialização
+## ⚡ Instalação & Consumo via GitHub Packages
 
-### 1. Selecionar o Provedor Desejado
-
-No `build.gradle.kts` do seu aplicativo (`:app`):
+Adicione o repositório no seu `settings.gradle.kts`:
 
 ```kotlin
-dependencies {
-    implementation(project(":core"))
-    implementation(project(":backend-firebase")) // ou :backend-supabase, :backend-appwrite, etc.
-}
-```
-
-### 2. Inicializar a Facade no `Application.onCreate()`
-
-```kotlin
-class MainApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-
-        // Exemplo: Inicializando o Firebase
-        OmniFirebase.initialize(context = this)
-
-        // Ou Supabase: OmniSupabase.initialize(this, url = "...", anonKey = "...")
-        // Ou Appwrite: OmniAppwrite.initialize(this, endpoint = "...", projectId = "...", databaseId = "...")
-    }
-}
-```
-
-### 3. Consumir a Camada Agnóstica de Domínio
-
-```kotlin
-class UserViewModel(
-    private val authRepository: AuthRepository // Injetado via Hilt, Koin ou Facade
-) : ViewModel() {
-
-    val userFlow: Flow<OmniUser?> = authRepository.authState
-
-    suspend fun login(email: String, pass: String) {
-        val result: DataResult<OmniUser> = authRepository.login(email, pass)
-        when (result) {
-            is DataResult.Success -> println("Usuário autenticado: ${result.data.displayName}")
-            is DataResult.Failure -> println("Erro: ${result.error}")
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Gabriel-do-Carmo-97/OmniBackendAndroid")
+            credentials {
+                username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
+                password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
+            }
         }
     }
 }
 ```
 
+### Exemplo 1: Uso com Failover Ativo-Passivo (Redundância)
+```kotlin
+// build.gradle.kts do seu app:
+dependencies {
+    implementation("br.wgc.omnibackend:bundle-hybrid:0.0.x")
+    implementation("br.wgc.omnibackend:backend-firebase:0.0.x")
+    implementation("br.wgc.omnibackend:backend-supabase:0.0.x")
+}
+
+// No seu Application ou Módulo DI:
+val database = OmniHybrid.createDatabase(
+    primary = OmniFirebase.firestore,
+    secondary = OmniSupabase.database
+)
+
+// Se o Firebase falhar ou der timeout de rede, o Supabase assume transparentemente!
+```
+
 ---
 
-## 🧪 Testes e Compilação
+## 🛡️ Qualidade e Governança
+* **Detekt Static Analysis**: Regras estritas sem supressões não justificadas.
+* **100% KDoc**: Toda classe, método e contrato público documentado.
+* **Zero SDK Leakage**: Interfaces do `:core` isolam completamente os SDKs de terceiros.
+* **Conventional Commits**: Padronização estrita de PRs e tags automáticas (`v0.0.<run_number>`).
 
-Executar a suíte completa de testes unitários em todos os módulos:
-
-```bash
-./gradlew testDebugUnitTest
-```
-
-Gerar documentação em HTML das APIs com o Dokka:
-
-```bash
-./gradlew dokkaGenerate
-```
+Consulte [CONTRIBUTING.md](CONTRIBUTING.md) para diretrizes de desenvolvimento e [SECURITY.md](SECURITY.md) para nossa política de divulgação responsável de vulnerabilidades.

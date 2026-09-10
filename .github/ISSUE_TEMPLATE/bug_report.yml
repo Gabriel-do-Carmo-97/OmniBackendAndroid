@@ -1,0 +1,53 @@
+name: Bug Report
+description: Crie um relatório para nos ajudar a identificar e corrigir um problema no OmniBackend.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por dedicar seu tempo para nos reportar um problema! Por favor, forneça o máximo de detalhes possível.
+  - type: dropdown
+    id: module
+    attributes:
+      label: Módulo Afetado
+      description: Qual módulo apresentou o comportamento incorreto?
+      options:
+        - ":core"
+        - ":backend:firebase"
+        - ":backend:supabase"
+        - ":backend:appwrite"
+        - ":backend:pocketbase"
+        - ":backend:back4app"
+        - ":backend:amplify"
+        - ":backend:rest"
+        - ":backend:cloudflare"
+        - ":bundle:hybrid"
+        - ":bundle:self-hosted"
+        - ":bundle:cloud-native"
+        - ":bundle:all"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição do Bug
+      description: Uma descrição clara e concisa do que aconteceu de forma incorreta.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Como Reproduzir
+      description: Passos ou trecho de código para reproduzir o comportamento.
+      placeholder: |
+        1. Inicializar o backend '...'
+        2. Chamar o método '...'
+        3. Observar o erro '...'
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs ou Stacktrace
+      description: Cole aqui logs de erro relevantes, se houver.
+      render: shell

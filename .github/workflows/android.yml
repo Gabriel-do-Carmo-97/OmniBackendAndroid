@@ -1,4 +1,4 @@
-name: Android CI, Test, Quality & Release
+name: Android CI/CD Pipeline (Pro Enterprise)
 
 on:
   push:
@@ -6,9 +6,42 @@ on:
   pull_request:
     branches: [ master, main ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/main' }}
+
 jobs:
+  # =============================================================================
+  # PR VALIDATION: CONVENTIONAL COMMITS
+  # =============================================================================
+  semantic-pull-request:
+    name: "PR: Validate Conventional Title"
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            refactor
+            docs
+            test
+            chore
+            ci
+            perf
+            build
+          requireScope: false
+
+  # =============================================================================
+  # BUILD, TEST, QUALITY & PUBLISH
+  # =============================================================================
   build_Test_and_Publish:
-    name: Build, Test and Publish
+    name: Build, Test, Quality & Publish
     runs-on: ubuntu-latest
 
     permissions:
@@ -17,7 +50,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -33,18 +66,8 @@ jobs:
             build-logic/**
             gradle/**
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v6
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
-
-      - name: 🤖 Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
 
       - name: 🔍 Run Detekt Static Analysis
         run: ./gradlew detekt
@@ -92,7 +115,7 @@ jobs:
           done
 
           # Publicar Bundles da pasta bundle/
-          for bun in hybrid all; do
+          for bun in hybrid self-hosted cloud-native all; do
             if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "bundle/$bun/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
               echo "Publishing :bundle:$bun to GitHub Packages..."
               ./gradlew ":bundle:$bun:publish" --no-daemon

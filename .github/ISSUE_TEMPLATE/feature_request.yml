@@ -1,0 +1,27 @@
+name: Solicitação de Funcionalidade
+description: Sugira uma ideia, novo backend ou melhoria para o OmniBackend.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Adoramos ouvir ideias da comunidade e de novos casos de uso corporativos!
+  - type: textarea
+    id: problem
+    attributes:
+      label: O seu pedido está relacionado a um problema ou limitação existente?
+      description: Uma descrição clara de qual é o gargalo ou dificuldade atual.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Descreva a Solução que Você Gostaria de Ver
+      description: Uma explicação do comportamento ideal ou da nova API que você gostaria que existisse.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas Consideradas
+      description: Descreva soluções de contorno ou alternativas que você já considerou.

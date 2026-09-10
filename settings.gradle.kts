@@ -50,4 +50,6 @@ fun registerBundle(name: String) {
 }
 
 registerBundle("hybrid")
+registerBundle("self-hosted")
+registerBundle("cloud-native")
 registerBundle("all")
