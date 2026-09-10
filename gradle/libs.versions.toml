@@ -24,6 +24,8 @@ ktor = "3.0.3"
 gson = "2.11.0"
 appwrite = "27.1.0"
 parseSdk = "4.4.0"
+amplify = "2.24.1"
+hilt = "2.51.1"
 
 [libraries]
 # Gradle build plugins para build-logic
@@ -72,7 +74,16 @@ parse-android = { module = "com.github.parse-community.Parse-SDK-Android:parse",
 
 # Injeção e Concorrência
 javax-inject = { module = "javax.inject:javax.inject", version = "1" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
+
+# AWS Amplify
+amplify-core = { module = "com.amplifyframework:core", version.ref = "amplify" }
+amplify-core-kotlin = { module = "com.amplifyframework:core-kotlin", version.ref = "amplify" }
+amplify-auth-cognito = { module = "com.amplifyframework:aws-auth-cognito", version.ref = "amplify" }
+amplify-storage-s3 = { module = "com.amplifyframework:aws-storage-s3", version.ref = "amplify" }
+amplify-api = { module = "com.amplifyframework:aws-api", version.ref = "amplify" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

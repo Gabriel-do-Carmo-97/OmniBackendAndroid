@@ -159,6 +159,46 @@ val database = OmniHybrid.createDatabase(
 // Se o Firebase falhar ou der timeout de rede, o Supabase assume transparentemente!
 ```
 
+### Exemplo 2: Injeção de Dependências Plug-and-Play com Dagger / Hilt
+Todos os módulos backend e bundles incluem módulos `@InstallIn(SingletonComponent::class)` prontos para injeção direta sem boilerplate:
+
+```kotlin
+@AndroidEntryPoint
+class UserProfileActivity : AppCompatActivity() {
+
+    // 1. Injeção direta por qualificador de provedor:
+    @Inject
+    @FirebaseBackend
+    lateinit var firebaseAuth: AuthRepository
+
+    @Inject
+    @SupabaseBackend
+    lateinit var supabaseDb: FirestoreRepository
+
+    @Inject
+    @AmplifyBackend
+    lateinit var awsStorage: StorageRepository
+
+    // 2. Injeção do backend ativo/híbrido dinâmico:
+    @Inject
+    @ActiveBackend
+    lateinit var activeAuth: AuthRepository
+}
+
+// Para alternar o backend ativo em tempo de execução:
+OmniBackendSelector.setActiveAuthRepository(OmniSupabase.auth)
+```
+
+### Exemplo 3: AWS Amplify Oficial (Cognito + S3)
+```kotlin
+// No Application.onCreate():
+OmniAmplify.initialize(this)
+
+// Consumo direto de contratos agnósticos:
+val auth: AuthRepository = OmniAmplify.auth
+val storage: StorageRepository = OmniAmplify.storage
+```
+
 ---
 
 ## 🛡️ Qualidade e Governança

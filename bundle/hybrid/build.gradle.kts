@@ -9,6 +9,8 @@ android {
 
 dependencies {
     api(project(":core"))
+    api(project(":backend:firebase"))
+    api(project(":backend:supabase"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.play.services)

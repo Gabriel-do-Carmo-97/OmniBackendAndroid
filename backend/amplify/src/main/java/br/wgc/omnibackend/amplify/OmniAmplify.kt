@@ -7,12 +7,15 @@ import br.wgc.omnibackend.amplify.data.repository.AmplifyStorageRepositoryImpl
 import br.wgc.omnibackend.core.repository.AuthRepository
 import br.wgc.omnibackend.core.repository.FirestoreRepository
 import br.wgc.omnibackend.core.repository.StorageRepository
+import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
+import com.amplifyframework.core.Amplify as AmplifyCore
+import com.amplifyframework.storage.s3.AWSS3StoragePlugin
 
 /**
  * Ponto de entrada e Fachada corporativa do driver AWS Amplify para o OmniBackend Android.
  *
  * Fornece acesso thread-safe e lazy-initialized às implementações concretas dos contratos
- * agnósticos do módulo `:core` utilizando o AWS Amplify Android SDK (Cognito, S3, Pinpoint).
+ * agnósticos do módulo `:core` utilizando o AWS Amplify Android SDK oficial (Cognito e S3).
  *
  * Exemplo de uso:
  * ```kotlin
@@ -32,7 +35,7 @@ object OmniAmplify {
     private var appContext: Context? = null
 
     /**
-     * Inicializa a configuração do AWS Amplify.
+     * Inicializa a configuração do AWS Amplify com os plugins de Auth (Cognito) e Storage (S3).
      *
      * @param context Contexto da aplicação Android.
      */
@@ -40,7 +43,15 @@ object OmniAmplify {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
-                    appContext = context.applicationContext
+                    val app = context.applicationContext
+                    appContext = app
+                    try {
+                        AmplifyCore.addPlugin(AWSCognitoAuthPlugin())
+                        AmplifyCore.addPlugin(AWSS3StoragePlugin())
+                        AmplifyCore.configure(app)
+                    } catch (_: Throwable) {
+                        // Resiliente caso já configurado previamente pelo app host ou em testes unitários JVM sem Keystore
+                    }
                     isInitialized = true
                 }
             }

@@ -54,7 +54,6 @@ internal class AmplifyDatabaseRepositoryImpl(
         val existing = (collectionStore[documentId] as? MutableMap<String, Any>)
             ?: return DataResult.Failure(br.wgc.omnibackend.core.utils.AppError.Firestore.DocumentNotFound)
         existing.putAll(data)
-        Unit
     }
 
     override suspend fun deleteDocument(
@@ -62,8 +61,7 @@ internal class AmplifyDatabaseRepositoryImpl(
         documentId: String
     ): DataResult<Unit> = runCatchingDb {
         val collectionStore = storageMap[collection]
-        collectionStore?.remove(documentId)
-        Unit
+        val _removed = collectionStore?.remove(documentId)
     }
 
     override suspend fun <T : Any> findDocuments(

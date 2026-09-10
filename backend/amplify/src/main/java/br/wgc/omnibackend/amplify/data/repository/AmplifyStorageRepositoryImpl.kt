@@ -6,16 +6,19 @@ import br.wgc.omnibackend.amplify.utils.AmplifyErrorMapper
 import br.wgc.omnibackend.core.repository.StorageRepository
 import br.wgc.omnibackend.core.utils.AppError
 import br.wgc.omnibackend.core.utils.DataResult
+import com.amplifyframework.kotlin.core.Amplify
+import com.amplifyframework.storage.StoragePath
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 /**
- * Implementação de [StorageRepository] para AWS S3 via AWS Amplify.
+ * Implementação corporativa de [StorageRepository] para AWS S3 via AWS Amplify.
  */
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class, kotlinx.coroutines.FlowPreview::class)
 internal class AmplifyStorageRepositoryImpl(
-    private val context: Context,
-    private val s3BucketUrl: String = "https://amplify-storage.s3.amazonaws.com"
+    private val context: Context
 ) : StorageRepository {
 
     override fun uploadFile(path: String, fileData: ByteArray): Flow<DataResult<Uri>> = flow {
@@ -27,34 +30,49 @@ internal class AmplifyStorageRepositoryImpl(
     }
 
     override fun uploadFile(path: String, inputStream: InputStream): Flow<DataResult<Uri>> = flow {
-        val bytes = inputStream.use { it.readBytes() }
-        emit(uploadFileDirect(path, bytes))
+        val result = runCatchingStorage {
+            val storagePath = StoragePath.fromString(path)
+            Amplify.Storage.uploadInputStream(storagePath, inputStream)
+            val downloadUrlResult = Amplify.Storage.getUrl(storagePath)
+            Uri.parse(downloadUrlResult.url.toString())
+        }
+        emit(result)
     }
 
     override suspend fun uploadFileDirect(path: String, fileData: ByteArray): DataResult<Uri> = runCatchingStorage {
-        val fileUrl = "$s3BucketUrl/$path"
-        Uri.parse(fileUrl)
+        val stream = ByteArrayInputStream(fileData)
+        val storagePath = StoragePath.fromString(path)
+        Amplify.Storage.uploadInputStream(storagePath, stream)
+        val downloadUrlResult = Amplify.Storage.getUrl(storagePath)
+        Uri.parse(downloadUrlResult.url.toString())
     }
 
     override suspend fun uploadFileDirect(path: String, fileUri: Uri): DataResult<Uri> {
         return try {
-            val bytes = context.contentResolver.openInputStream(fileUri)?.use { it.readBytes() }
+            val inputStream = context.contentResolver.openInputStream(fileUri)
                 ?: return DataResult.Failure(AppError.Storage.ObjectNotFound)
-            uploadFileDirect(path, bytes)
+            val stream = inputStream.use { ByteArrayInputStream(it.readBytes()) }
+            val storagePath = StoragePath.fromString(path)
+            Amplify.Storage.uploadInputStream(storagePath, stream)
+            val downloadUrlResult = Amplify.Storage.getUrl(storagePath)
+            DataResult.Success(Uri.parse(downloadUrlResult.url.toString()))
         } catch (e: Exception) {
             DataResult.Failure(AmplifyErrorMapper.mapThrowable(e, "storage"))
         }
     }
 
     override suspend fun getDownloadUrl(path: String): DataResult<Uri> = runCatchingStorage {
-        Uri.parse("$s3BucketUrl/$path")
+        val storagePath = StoragePath.fromString(path)
+        val downloadUrlResult = Amplify.Storage.getUrl(storagePath)
+        Uri.parse(downloadUrlResult.url.toString())
     }
 
     override suspend fun delete(path: String): DataResult<Unit> = runCatchingStorage {
-        Unit
+        val storagePath = StoragePath.fromString(path)
+        Amplify.Storage.remove(storagePath)
     }
 
-    private inline fun <T> runCatchingStorage(block: () -> T): DataResult<T> {
+    private suspend inline fun <T> runCatchingStorage(crossinline block: suspend () -> T): DataResult<T> {
         return try {
             DataResult.Success(block())
         } catch (e: Exception) {
