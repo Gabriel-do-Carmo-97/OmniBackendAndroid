@@ -115,7 +115,7 @@ jobs:
           done
 
           # Publicar Bundles da pasta bundle/
-          for bun in hybrid self-hosted cloud-native all; do
+          for bun in hybrid self-hosted cloud-native enterprise-hybrid edge-serverless baas-classic all; do
             if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "bundle/$bun/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
               echo "Publishing :bundle:$bun to GitHub Packages..."
               ./gradlew ":bundle:$bun:publish" --no-daemon

@@ -47,7 +47,10 @@ graph TD
         BHybrid[":bundle:hybrid<br/>(Failover Dinâmico entre quaisquer 2 backends)"]:::bundle
         BSelf[":bundle:self-hosted<br/>(PocketBase + Appwrite + Hybrid)"]:::bundle
         BCloud[":bundle:cloud-native<br/>(Firebase + Supabase + Amplify + Hybrid)"]:::bundle
-        BAll[":bundle:all<br/>(Guarda-chuva completo com todos os backends)"]:::bundle
+        BEnterprise[":bundle:enterprise-hybrid<br/>(REST Proprietário + Firebase + Hybrid)"]:::bundle
+        BEdge[":bundle:edge-serverless<br/>(Cloudflare + Supabase + Hybrid)"]:::bundle
+        BClassic[":bundle:baas-classic<br/>(Back4App + Firebase + Hybrid)"]:::bundle
+        BAll[":bundle:all<br/>(Guarda-chuva completo com todos os 8 backends)"]:::bundle
     end
 
     BHybrid -->|orquestra| Core
@@ -59,6 +62,18 @@ graph TD
     BCloud -->|api| BS
     BCloud -->|api| BAM
     BCloud -->|api| BHybrid
+
+    BEnterprise -->|api| BR
+    BEnterprise -->|api| BF
+    BEnterprise -->|api| BHybrid
+
+    BEdge -->|api| BC
+    BEdge -->|api| BS
+    BEdge -->|api| BHybrid
+
+    BClassic -->|api| BB
+    BClassic -->|api| BF
+    BClassic -->|api| BHybrid
 
     BAll -->|api| BF
     BAll -->|api| BS
@@ -93,12 +108,15 @@ graph TD
 | **`:backend:cloudflare`** | `br.wgc.omnibackend:backend-cloudflare` | Cloudflare Edge | Workers Auth, D1 SQL Database, R2 Object Storage. |
 
 ### 3. Bundles Agregadores (`bundle/`)
-| Módulo | Artefato Maven | Propósito |
-| :--- | :--- | :--- |
-| **`:bundle:hybrid`** | `br.wgc.omnibackend:bundle-hybrid` | Motor de failover e roteamento agnóstico (`OmniHybrid`). Permite combinar **quaisquer dois provedores**. |
-| **`:bundle:self-hosted`** | `br.wgc.omnibackend:bundle-self-hosted` | Solução para empresas que usam servidores próprios (PocketBase + Appwrite + Hybrid). |
-| **`:bundle:cloud-native`** | `br.wgc.omnibackend:bundle-cloud-native` | Multi-cloud em hiperescala (Google Cloud + AWS + Supabase + Hybrid). |
-| **`:bundle:all`** | `br.wgc.omnibackend:bundle-all` | Pacote completo com todos os 8 drivers integrados. |
+| Módulo | Artefato Maven | Composição | Propósito / Caso de Uso |
+| :--- | :--- | :--- | :--- |
+| **`:bundle:hybrid`** | `br.wgc.omnibackend:bundle-hybrid` | Contratos Core + FailoverRouter | Motor de failover e roteamento agnóstico (`OmniHybrid`). Permite combinar **quaisquer dois provedores**. |
+| **`:bundle:self-hosted`** | `br.wgc.omnibackend:bundle-self-hosted` | PocketBase + Appwrite + Hybrid | Solução para empresas que usam servidores próprios / VPS (Zero dependência de Big Techs). |
+| **`:bundle:cloud-native`** | `br.wgc.omnibackend:bundle-cloud-native` | Firebase + Supabase + AWS Amplify + Hybrid | Multi-cloud em escala (Google Cloud + AWS + Supabase com redundância). |
+| **`:bundle:enterprise-hybrid`** | `br.wgc.omnibackend:bundle-enterprise-hybrid` | REST Proprietário + Firebase + Hybrid | Corporativo tradicional: API REST própria como primário e nuvem como contingência. |
+| **`:bundle:edge-serverless`** | `br.wgc.omnibackend:bundle-edge-serverless` | Cloudflare + Supabase + Hybrid | Ultra-baixa latência (Edge Workers/D1/R2) com robustez relacional Postgres. |
+| **`:bundle:baas-classic`** | `br.wgc.omnibackend:bundle-baas-classic` | Back4App (Parse) + Firebase + Hybrid | BaaS clássico NoSQL/Relacional para apps existentes ou migrações suaves. |
+| **`:bundle:all`** | `br.wgc.omnibackend:bundle-all` | Todos os 8 Drivers + Hybrid | Pacote completo com todos os 8 provedores integrados. |
 
 ---
 
