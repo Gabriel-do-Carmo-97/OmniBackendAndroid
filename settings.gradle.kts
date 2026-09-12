@@ -56,3 +56,9 @@ registerBundle("enterprise-hybrid")
 registerBundle("edge-serverless")
 registerBundle("baas-classic")
 registerBundle("all")
+
+// 🔗 Bundles de Pares Diretos Pré-configurados
+registerBundle("firebase-supabase")
+registerBundle("firebase-amplify")
+registerBundle("firebase-back4app")
+registerBundle("supabase-cloudflare")

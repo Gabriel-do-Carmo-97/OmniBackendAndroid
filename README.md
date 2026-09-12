@@ -27,7 +27,7 @@ graph TD
         Core --> Resilient["OfflineFirstRepository, HybridAuthRepository, KeystoreCryptoManager"]
     end
 
-    subgraph "Agregadores Inteligentes (bundle/*)"
+        subgraph "Agregadores Inteligentes (bundle/*)"
         Bundles --> BAll[":bundle:all"]
         Bundles --> BHyb[":bundle:hybrid"]
         Bundles --> BSelf[":bundle:self-hosted"]
@@ -35,6 +35,10 @@ graph TD
         Bundles --> BEnt[":bundle:enterprise-hybrid"]
         Bundles --> BEdge[":bundle:edge-serverless"]
         Bundles --> BClassic[":bundle:baas-classic"]
+        Bundles --> BFS[":bundle:firebase-supabase"]
+        Bundles --> BFA[":bundle:firebase-amplify"]
+        Bundles --> BFB[":bundle:firebase-back4app"]
+        Bundles --> BSC[":bundle:supabase-cloudflare"]
     end
 
     subgraph "Drivers Especializados (backend/*)"
@@ -64,6 +68,10 @@ graph TD
 | **`enterprise-hybrid`** | `implementation("br.wgc.omnibackend:bundle-enterprise-hybrid:1.0.0")` | **Nuvem Híbrida & Legado:** AWS Amplify, Cloudflare, Custom REST, Firebase. | Empresas com APIs REST/SOAP legadas internas em transição para nuvem. |
 | **`edge-serverless`** | `implementation("br.wgc.omnibackend:bundle-edge-serverless:1.0.0")` | **Borda de Ultra-Baixa Latência:** Cloudflare, PocketBase, Custom REST. | Apps IoT, respostas em milissegundos e serverless em borda. |
 | **`baas-classic`** | `implementation("br.wgc.omnibackend:bundle-baas-classic:1.0.0")` | **BaaS Tradicionais:** Firebase, Appwrite, Back4App. | Foco em máxima velocidade de entrega (Time-to-Market) e MVPs. |
+| **`firebase-supabase`** | `implementation("br.wgc.omnibackend:bundle-firebase-supabase:1.0.0")` | **Par Pré-Configurado:** Google Firebase + Supabase (PostgreSQL). | Failover ativo-passivo direto entre GCP Firebase e Supabase. |
+| **`firebase-amplify`** | `implementation("br.wgc.omnibackend:bundle-firebase-amplify:1.0.0")` | **Par Multi-Cloud:** Google Firebase + AWS Amplify (GCP + AWS). | Redundância corporativa direta entre os dois maiores gigantes da nuvem. |
+| **`firebase-back4app`** | `implementation("br.wgc.omnibackend:bundle-firebase-back4app:1.0.0")` | **Par Híbrido:** Google Firebase + Back4App (Parse Platform). | Contingência robusta entre ecossistema Google e infraestrutura Parse. |
+| **`supabase-cloudflare`** | `implementation("br.wgc.omnibackend:bundle-supabase-cloudflare:1.0.0")` | **Par Edge & Dados:** Supabase (PostgreSQL) + Cloudflare Edge (Workers/D1/R2). | Apps com dados relacionais robustos e computação de borda de baixa latência. |
 
 ---
 
