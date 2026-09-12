@@ -1,19 +1,20 @@
-name: Android CI/CD Pipeline (Pro Enterprise)
+name: Android Publish Lib OmniBackendAndroid
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ master, main ]
+    branches: [ "master" ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/main' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
-  # =============================================================================
+  # ═════════════════════════════════════════════════════════════════════════════
   # PR VALIDATION: CONVENTIONAL COMMITS
-  # =============================================================================
+  # ═════════════════════════════════════════════════════════════════════════════
+
   semantic-pull-request:
     name: "PR: Validate Conventional Title"
     if: github.event_name == 'pull_request'
@@ -21,7 +22,8 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -37,122 +39,371 @@ jobs:
             build
           requireScope: false
 
-  # =============================================================================
-  # BUILD, TEST, QUALITY & PUBLISH
-  # =============================================================================
-  build_Test_and_Publish:
-    name: Build, Test, Quality & Publish
+  # ═════════════════════════════════════════════════════════════════════════════
+  # NÍVEL 1: FUNDAÇÃO AGNOSTICA (:core)
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  core:
+    name: "foundation: core"
     runs-on: ubuntu-latest
-
     permissions:
-      contents: write
-      packages: write
-
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          lfs: true
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build do Core
+        run: ./gradlew :core:detekt :core:testDebugUnitTest :core:assembleRelease :core:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-core
+          path: |
+            core/build/reports/tests/
+            core/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-core
+          path: core/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-core
+          path: core/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # NÍVEL 2: DRIVERS BACKEND ESPECIALIZADOS (Em Paralelo)
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  backend-drivers:
+    name: "driver: ${{ matrix.driver }}"
+    needs: [core]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        driver:
+          - firebase
+          - supabase
+          - appwrite
+          - pocketbase
+          - back4app
+          - amplify
+          - rest
+          - cloudflare
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build do Driver
+        run: ./gradlew :backend:${{ matrix.driver }}:detekt :backend:${{ matrix.driver }}:testDebugUnitTest :backend:${{ matrix.driver }}:assembleRelease :backend:${{ matrix.driver }}:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-backend-${{ matrix.driver }}
+          path: |
+            backend/${{ matrix.driver }}/build/reports/tests/
+            backend/${{ matrix.driver }}/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-backend-${{ matrix.driver }}
+          path: backend/${{ matrix.driver }}/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-backend-${{ matrix.driver }}
+          path: backend/${{ matrix.driver }}/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # NÍVEL 3: BUNDLES AGREGADORES (Em Paralelo)
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  bundles:
+    name: "bundle: ${{ matrix.bundle }}"
+    needs: [core, backend-drivers]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        bundle:
+          - hybrid
+          - self-hosted
+          - cloud-native
+          - enterprise-hybrid
+          - edge-serverless
+          - baas-classic
+          - all
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build do Bundle
+        run: ./gradlew :bundle:${{ matrix.bundle }}:detekt :bundle:${{ matrix.bundle }}:testDebugUnitTest :bundle:${{ matrix.bundle }}:assembleRelease :bundle:${{ matrix.bundle }}:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-${{ matrix.bundle }}
+          path: |
+            bundle/${{ matrix.bundle }}/build/reports/tests/
+            bundle/${{ matrix.bundle }}/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-${{ matrix.bundle }}
+          path: bundle/${{ matrix.bundle }}/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-${{ matrix.bundle }}
+          path: bundle/${{ matrix.bundle }}/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # NÍVEL 4: VALIDAÇÃO DO APLICATIVO CONSUMIDOR DE EXEMPLO
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  sample-app:
+    name: "app: Sample Application"
+    needs: [core, backend-drivers, bundles]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 📱 Build e Teste do App Sample
+        run: ./gradlew :app:assembleDebug :app:testDebugUnitTest
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # NÍVEL 5: PUBLICAÇÃO DOS DRIVERS E DO CORE NO GITHUB PACKAGES
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  publish-drivers:
+    name: "🚀 Deploy Core & Backend Drivers"
+    needs: [core, backend-drivers, sample-app]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment:
+      name: production-infra
+      url: https://github.com/${{ github.repository }}/releases/tag/v0.0.${{ github.run_number }}
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Detect changed modules
+      - name: Detect changed library modules
         id: changed_modules
         uses: tj-actions/changed-files@v47
         with:
           files: |
             core/**
             backend/**
-            bundle/**
             build-logic/**
             gradle/**
 
       - name: Setup Android & Java Environment
+        if: steps.changed_modules.outputs.any_changed == 'true'
         uses: ./.github/actions/setup-android-env
 
-      - name: 🔍 Run Detekt Static Analysis
-        run: ./gradlew detekt
-
-      - name: 🧪 Run Unit Tests Across All Modules
-        run: ./gradlew testDebugUnitTest
-
-      - name: 📚 Generate Dokka API Documentation
-        run: ./gradlew dokkaGeneratePublicationHtml
-
-      - name: 📦 Build Release AARs
-        run: ./gradlew assembleRelease
-
-      - name: ⬆️ Upload Release AARs as Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-aars
-          path: ./**/build/outputs/aar/*-release.aar
-          if-no-files-found: ignore
-
-      # ─── Publicação dos Módulos para GitHub Packages ──────────────────────
-
-      - name: 📦 Publish Changed Modules to GitHub Packages
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && steps.changed_modules.outputs.any_changed == 'true'
+      - name: 📦 Publish Core to GitHub Packages
+        if: steps.changed_modules.outputs.any_changed == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_RUN_NUMBER: ${{ github.run_number }}
         run: |
-          echo "Publishing modules for run number: ${{ github.run_number }}"
-          
-          # Publicar Core se alterado
           if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "core/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
-            echo "Publishing :core to GitHub Packages..."
-            ./gradlew ":core:publish" --no-daemon
+            ./gradlew :core:publish --no-daemon
           fi
 
-          # Publicar Drivers da pasta backend/
-          for b in firebase supabase appwrite back4app amplify pocketbase rest cloudflare; do
-            if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "backend/$b/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
-              echo "Publishing :backend:$b to GitHub Packages..."
-              ./gradlew ":backend:$b:publish" --no-daemon
-            fi
-          done
-
-          # Publicar Bundles da pasta bundle/
-          for bun in hybrid self-hosted cloud-native enterprise-hybrid edge-serverless baas-classic all; do
-            if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "bundle/$bun/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
-              echo "Publishing :bundle:$bun to GitHub Packages..."
-              ./gradlew ":bundle:$bun:publish" --no-daemon
-            fi
-          done
-
-      # ─── Criar Tag e Release no GitHub ─────────────────────────────────────
-
-      - name: Configure GitHub Access
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && steps.changed_modules.outputs.any_changed == 'true'
+      - name: 📦 Publish Backend Drivers to GitHub Packages
+        if: steps.changed_modules.outputs.any_changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
+          for driver in firebase supabase appwrite pocketbase back4app amplify rest cloudflare; do
+            if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "backend/$driver/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
+              echo "Publishing :backend:$driver to GitHub Packages..."
+              ./gradlew ":backend:$driver:publish" --no-daemon
+            fi
+          done
 
-      - name: Create Git Tag and Push
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && steps.changed_modules.outputs.any_changed == 'true'
+      - name: ⬇️ Download Core and Backend Release AARs
+        if: steps.changed_modules.outputs.any_changed == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-aar-*
+          merge-multiple: true
+          path: ./release-aars
+
+      - name: 🏷️ Create GitHub Release and Upload Artifacts
+        if: steps.changed_modules.outputs.any_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG_NAME="v0.0.${{ github.run_number }}"
-          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
-          git push origin "$TAG_NAME"
+          mapfile -t AAR_FILES < <(find ./release-aars -type f -name "*-release.aar")
+          if [ ${#AAR_FILES[@]} -gt 0 ]; then
+            gh release create "$TAG_NAME" \
+              --title "Release $TAG_NAME" \
+              --notes "Release automático corporativo OmniBackendAndroid.
+              
+              **Versão Publicada**: \`0.0.${{ github.run_number }}\`
+              **Mudanças detectadas em**:
+              ${{ steps.changed_modules.outputs.all_changed_files }}" \
+              "${AAR_FILES[@]}"
+          else
+            gh release create "$TAG_NAME" \
+              --title "Release $TAG_NAME" \
+              --notes "Release automático corporativo OmniBackendAndroid. Versão 0.0.${{ github.run_number }}."
+          fi
 
-      - name: Create GitHub Release
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && steps.changed_modules.outputs.any_changed == 'true'
+  # ═════════════════════════════════════════════════════════════════════════════
+  # NÍVEL 6: PUBLICAÇÃO DOS BUNDLES NO GITHUB PACKAGES
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  publish-bundles:
+    name: "🚀 Deploy Bundles"
+    needs: [publish-drivers, bundles]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment:
+      name: production-bundles
+      url: https://github.com/${{ github.repository }}/releases/tag/v0.0.${{ github.run_number }}
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Detect changed bundle modules
+        id: changed_modules
+        uses: tj-actions/changed-files@v47
+        with:
+          files: |
+            bundle/**
+            core/**
+            backend/**
+            build-logic/**
+            gradle/**
+
+      - name: Setup Android & Java Environment
+        if: steps.changed_modules.outputs.any_changed == 'true'
+        uses: ./.github/actions/setup-android-env
+
+      - name: 📦 Publish Bundles to GitHub Packages
+        if: steps.changed_modules.outputs.any_changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for bundle in hybrid self-hosted cloud-native enterprise-hybrid edge-serverless baas-classic all; do
+            if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "bundle/$bundle/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "core/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
+              echo "Publishing :bundle:$bundle to GitHub Packages..."
+              ./gradlew ":bundle:$bundle:publish" --no-daemon
+            fi
+          done
+
+      - name: ⬇️ Download Bundle Release AARs
+        if: steps.changed_modules.outputs.any_changed == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-aar-bundle-*
+          merge-multiple: true
+          path: ./bundle-release-aars
+
+      - name: 📎 Attach Bundle AARs to Release
+        if: steps.changed_modules.outputs.any_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG_NAME="v0.0.${{ github.run_number }}"
-          AAR_FILES=$(find . -path '*/build/outputs/aar/*-release.aar' 2>/dev/null | tr '\n' ' ')
-          gh release create "$TAG_NAME" \
-            --title "Release $TAG_NAME" \
-            --notes "Release automático gerado pela esteira de CI/CD.
-            
-          **Versão Publicada**: \`0.0.${{ github.run_number }}\`
-          **Mudanças detectadas em**:
-          ${{ steps.changed_modules.outputs.all_changed_files }}" \
-            $AAR_FILES
+          mapfile -t AAR_FILES < <(find ./bundle-release-aars -type f -name "*-release.aar")
+          if [ ${#AAR_FILES[@]} -gt 0 ]; then
+            gh release upload "$TAG_NAME" "${AAR_FILES[@]}" --clobber
+          fi
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # NÍVEL 7: DEPLOY DE DOCUMENTAÇÃO DOKKA NO GITHUB PAGES
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  deploy-docs:
+    name: "🌐 Deploy Dokka Docs to GitHub Pages"
+    needs: [publish-bundles]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 📚 Generate Dokka HTML Documentation
+        run: ./gradlew dokkaGenerateHtml
+      - name: 📁 Consolidate Documentation Pages
+        run: |
+          mkdir -p ./site-docs
+          cp -r core/build/dokka/html/* ./site-docs/ || true
+          for mod in backend/* bundle/*; do
+            if [ -d "$mod/build/dokka/html" ]; then
+              mod_name=$(basename "$mod")
+              mkdir -p "./site-docs/$mod_name"
+              cp -r "$mod/build/dokka/html/"* "./site-docs/$mod_name/" || true
+            fi
+          done
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './site-docs'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
