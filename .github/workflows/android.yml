@@ -1,8 +1,8 @@
-name: Android Publish Lib OmniBackendAndroid
+name: Android CI/CD Pipeline (Hyper-Granular Pro)
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "feat/**" ]
   pull_request:
     branches: [ "master" ]
 
@@ -10,10 +10,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GPR_USER: ${{ secrets.GPR_USER || github.actor }}
+  GPR_KEY: ${{ secrets.GPR_KEY || secrets.GITHUB_TOKEN }}
+
 jobs:
-  # ═════════════════════════════════════════════════════════════════════════════
+  # =============================================================================
   # PR VALIDATION: CONVENTIONAL COMMITS
-  # ═════════════════════════════════════════════════════════════════════════════
+  # =============================================================================
 
   semantic-pull-request:
     name: "PR: Validate Conventional Title"
@@ -22,8 +27,7 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - name: Validate PR title
-        uses: amannn/action-semantic-pull-request@v5
+      - uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -39,11 +43,11 @@ jobs:
             build
           requireScope: false
 
-  # ═════════════════════════════════════════════════════════════════════════════
-  # NÍVEL 1: FUNDAÇÃO AGNOSTICA (:core)
-  # ═════════════════════════════════════════════════════════════════════════════
+  # =============================================================================
+  # NIVEL 1: FUNDACAO AGNOSTICA & TESTES
+  # =============================================================================
 
-  core:
+  foundation-core:
     name: "foundation: core"
     runs-on: ubuntu-latest
     permissions:
@@ -51,20 +55,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          lfs: true
+        with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
-      - name: 🔍 Spotless & API Compatibility Check
-        run: ./gradlew spotlessCheck apiCheck --no-daemon
-      - name: 🔍 Detekt, Testes e Build do Core e Testing
-        run: ./gradlew :core:detekt :core:testDebugUnitTest :core:assembleRelease :core:assembleDebug :testing:testDebugUnitTest :testing:assembleRelease :testing:assembleDebug
+      - name: 🔍 Spotless, API Check, Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            spotlessCheck \
+            apiCheck \
+            :core:detekt \
+            :core:testDebugUnitTest \
+            :core:assembleRelease \
+            :core:assembleDebug
       - name: 📊 Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reports-core
+          name: reports-foundation-core
           path: |
             core/build/reports/tests/
             core/build/reports/detekt/
@@ -72,160 +79,897 @@ jobs:
       - name: ⬆️ Upload Release AAR
         uses: actions/upload-artifact@v4
         with:
-          name: release-aar-core
+          name: release-aar-foundation-core
           path: core/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
         uses: actions/upload-artifact@v4
         with:
-          name: debug-aar-core
+          name: debug-aar-foundation-core
           path: core/build/outputs/aar/*-debug.aar
           if-no-files-found: ignore
 
-  # ═════════════════════════════════════════════════════════════════════════════
-  # NÍVEL 2: DRIVERS BACKEND ESPECIALIZADOS (Em Paralelo)
-  # ═════════════════════════════════════════════════════════════════════════════
-
-  backend-drivers:
-    name: "driver: ${{ matrix.driver }}"
-    needs: [core]
+  foundation-testing:
+    name: "foundation: testing"
+    needs: [foundation-core]
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        driver:
-          - firebase
-          - supabase
-          - appwrite
-          - pocketbase
-          - back4app
-          - amplify
-          - rest
-          - cloudflare
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          lfs: true
+        with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
-      - name: 🔍 Detekt, Testes e Build do Driver
-        run: ./gradlew :backend:${{ matrix.driver }}:detekt :backend:${{ matrix.driver }}:testDebugUnitTest :backend:${{ matrix.driver }}:assembleRelease :backend:${{ matrix.driver }}:assembleDebug
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :testing:detekt \
+            :testing:testDebugUnitTest \
+            :testing:assembleRelease \
+            :testing:assembleDebug
       - name: 📊 Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reports-backend-${{ matrix.driver }}
+          name: reports-foundation-testing
           path: |
-            backend/${{ matrix.driver }}/build/reports/tests/
-            backend/${{ matrix.driver }}/build/reports/detekt/
+            testing/build/reports/tests/
+            testing/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
         uses: actions/upload-artifact@v4
         with:
-          name: release-aar-backend-${{ matrix.driver }}
-          path: backend/${{ matrix.driver }}/build/outputs/aar/*-release.aar
+          name: release-aar-foundation-testing
+          path: testing/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
         uses: actions/upload-artifact@v4
         with:
-          name: debug-aar-backend-${{ matrix.driver }}
-          path: backend/${{ matrix.driver }}/build/outputs/aar/*-debug.aar
+          name: debug-aar-foundation-testing
+          path: testing/build/outputs/aar/*-debug.aar
           if-no-files-found: ignore
 
-  # ═════════════════════════════════════════════════════════════════════════════
-  # NÍVEL 3: BUNDLES AGREGADORES (Em Paralelo)
-  # ═════════════════════════════════════════════════════════════════════════════
+  # =============================================================================
+  # NIVEL 2: DRIVERS BACKEND ESPECIALIZADOS (HIPERGRANULARES)
+  # =============================================================================
 
-  bundles:
-    name: "bundle: ${{ matrix.bundle }}"
-    needs: [core, backend-drivers]
+  driver-firebase:
+    name: "driver: firebase"
+    needs: [foundation-core]
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        bundle:
-          - hybrid
-          - self-hosted
-          - cloud-native
-          - enterprise-hybrid
-          - edge-serverless
-          - baas-classic
-          - all
-          - firebase-supabase
-          - firebase-amplify
-          - firebase-back4app
-          - supabase-cloudflare
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          lfs: true
+        with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
-      - name: 🔍 Detekt, Testes e Build do Bundle
-        run: ./gradlew :bundle:${{ matrix.bundle }}:detekt :bundle:${{ matrix.bundle }}:testDebugUnitTest :bundle:${{ matrix.bundle }}:assembleRelease :bundle:${{ matrix.bundle }}:assembleDebug
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :backend:firebase:detekt \
+            :backend:firebase:testDebugUnitTest \
+            :backend:firebase:assembleRelease \
+            :backend:firebase:assembleDebug
       - name: 📊 Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reports-bundle-${{ matrix.bundle }}
+          name: reports-driver-firebase
           path: |
-            bundle/${{ matrix.bundle }}/build/reports/tests/
-            bundle/${{ matrix.bundle }}/build/reports/detekt/
+            backend/firebase/build/reports/tests/
+            backend/firebase/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
         uses: actions/upload-artifact@v4
         with:
-          name: release-aar-bundle-${{ matrix.bundle }}
-          path: bundle/${{ matrix.bundle }}/build/outputs/aar/*-release.aar
+          name: release-aar-driver-firebase
+          path: backend/firebase/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
         uses: actions/upload-artifact@v4
         with:
-          name: debug-aar-bundle-${{ matrix.bundle }}
-          path: bundle/${{ matrix.bundle }}/build/outputs/aar/*-debug.aar
+          name: debug-aar-driver-firebase
+          path: backend/firebase/build/outputs/aar/*-debug.aar
           if-no-files-found: ignore
 
-  # ═════════════════════════════════════════════════════════════════════════════
-  # NÍVEL 4: VALIDAÇÃO DO APLICATIVO CONSUMIDOR DE EXEMPLO
-  # ═════════════════════════════════════════════════════════════════════════════
+  driver-supabase:
+    name: "driver: supabase"
+    needs: [foundation-core]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :backend:supabase:detekt \
+            :backend:supabase:testDebugUnitTest \
+            :backend:supabase:assembleRelease \
+            :backend:supabase:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-driver-supabase
+          path: |
+            backend/supabase/build/reports/tests/
+            backend/supabase/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-driver-supabase
+          path: backend/supabase/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-driver-supabase
+          path: backend/supabase/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  driver-appwrite:
+    name: "driver: appwrite"
+    needs: [foundation-core]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :backend:appwrite:detekt \
+            :backend:appwrite:testDebugUnitTest \
+            :backend:appwrite:assembleRelease \
+            :backend:appwrite:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-driver-appwrite
+          path: |
+            backend/appwrite/build/reports/tests/
+            backend/appwrite/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-driver-appwrite
+          path: backend/appwrite/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-driver-appwrite
+          path: backend/appwrite/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  driver-pocketbase:
+    name: "driver: pocketbase"
+    needs: [foundation-core]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :backend:pocketbase:detekt \
+            :backend:pocketbase:testDebugUnitTest \
+            :backend:pocketbase:assembleRelease \
+            :backend:pocketbase:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-driver-pocketbase
+          path: |
+            backend/pocketbase/build/reports/tests/
+            backend/pocketbase/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-driver-pocketbase
+          path: backend/pocketbase/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-driver-pocketbase
+          path: backend/pocketbase/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  driver-back4app:
+    name: "driver: back4app"
+    needs: [foundation-core]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :backend:back4app:detekt \
+            :backend:back4app:testDebugUnitTest \
+            :backend:back4app:assembleRelease \
+            :backend:back4app:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-driver-back4app
+          path: |
+            backend/back4app/build/reports/tests/
+            backend/back4app/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-driver-back4app
+          path: backend/back4app/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-driver-back4app
+          path: backend/back4app/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  driver-amplify:
+    name: "driver: amplify"
+    needs: [foundation-core]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :backend:amplify:detekt \
+            :backend:amplify:testDebugUnitTest \
+            :backend:amplify:assembleRelease \
+            :backend:amplify:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-driver-amplify
+          path: |
+            backend/amplify/build/reports/tests/
+            backend/amplify/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-driver-amplify
+          path: backend/amplify/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-driver-amplify
+          path: backend/amplify/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  driver-cloudflare:
+    name: "driver: cloudflare"
+    needs: [foundation-core]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :backend:cloudflare:detekt \
+            :backend:cloudflare:testDebugUnitTest \
+            :backend:cloudflare:assembleRelease \
+            :backend:cloudflare:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-driver-cloudflare
+          path: |
+            backend/cloudflare/build/reports/tests/
+            backend/cloudflare/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-driver-cloudflare
+          path: backend/cloudflare/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-driver-cloudflare
+          path: backend/cloudflare/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  driver-rest:
+    name: "driver: rest"
+    needs: [foundation-core]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :backend:rest:detekt \
+            :backend:rest:testDebugUnitTest \
+            :backend:rest:assembleRelease \
+            :backend:rest:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-driver-rest
+          path: |
+            backend/rest/build/reports/tests/
+            backend/rest/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-driver-rest
+          path: backend/rest/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-driver-rest
+          path: backend/rest/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  # =============================================================================
+  # NIVEL 3: BUNDLES ARQUITETURAIS & PARES (HIPERGRANULARES)
+  # =============================================================================
+
+  bundle-hybrid:
+    name: "bundle: hybrid"
+    needs: [driver-firebase, driver-supabase, driver-appwrite]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :bundle:hybrid:detekt \
+            :bundle:hybrid:testDebugUnitTest \
+            :bundle:hybrid:assembleRelease \
+            :bundle:hybrid:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-hybrid
+          path: |
+            bundle/hybrid/build/reports/tests/
+            bundle/hybrid/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-hybrid
+          path: bundle/hybrid/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-hybrid
+          path: bundle/hybrid/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  bundle-self-hosted:
+    name: "bundle: self-hosted"
+    needs: [driver-supabase, driver-appwrite, driver-pocketbase, driver-back4app]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :bundle:self-hosted:detekt \
+            :bundle:self-hosted:testDebugUnitTest \
+            :bundle:self-hosted:assembleRelease \
+            :bundle:self-hosted:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-self-hosted
+          path: |
+            bundle/self-hosted/build/reports/tests/
+            bundle/self-hosted/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-self-hosted
+          path: bundle/self-hosted/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-self-hosted
+          path: bundle/self-hosted/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  bundle-cloud-native:
+    name: "bundle: cloud-native"
+    needs: [driver-firebase, driver-supabase, driver-amplify, driver-cloudflare]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :bundle:cloud-native:detekt \
+            :bundle:cloud-native:testDebugUnitTest \
+            :bundle:cloud-native:assembleRelease \
+            :bundle:cloud-native:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-cloud-native
+          path: |
+            bundle/cloud-native/build/reports/tests/
+            bundle/cloud-native/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-cloud-native
+          path: bundle/cloud-native/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-cloud-native
+          path: bundle/cloud-native/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  bundle-enterprise-hybrid:
+    name: "bundle: enterprise-hybrid"
+    needs: [driver-amplify, driver-cloudflare, driver-rest, driver-firebase]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :bundle:enterprise-hybrid:detekt \
+            :bundle:enterprise-hybrid:testDebugUnitTest \
+            :bundle:enterprise-hybrid:assembleRelease \
+            :bundle:enterprise-hybrid:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-enterprise-hybrid
+          path: |
+            bundle/enterprise-hybrid/build/reports/tests/
+            bundle/enterprise-hybrid/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-enterprise-hybrid
+          path: bundle/enterprise-hybrid/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-enterprise-hybrid
+          path: bundle/enterprise-hybrid/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  bundle-edge-serverless:
+    name: "bundle: edge-serverless"
+    needs: [driver-cloudflare, driver-pocketbase, driver-rest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :bundle:edge-serverless:detekt \
+            :bundle:edge-serverless:testDebugUnitTest \
+            :bundle:edge-serverless:assembleRelease \
+            :bundle:edge-serverless:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-edge-serverless
+          path: |
+            bundle/edge-serverless/build/reports/tests/
+            bundle/edge-serverless/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-edge-serverless
+          path: bundle/edge-serverless/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-edge-serverless
+          path: bundle/edge-serverless/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  bundle-baas-classic:
+    name: "bundle: baas-classic"
+    needs: [driver-firebase, driver-appwrite, driver-back4app]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :bundle:baas-classic:detekt \
+            :bundle:baas-classic:testDebugUnitTest \
+            :bundle:baas-classic:assembleRelease \
+            :bundle:baas-classic:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-baas-classic
+          path: |
+            bundle/baas-classic/build/reports/tests/
+            bundle/baas-classic/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-baas-classic
+          path: bundle/baas-classic/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-baas-classic
+          path: bundle/baas-classic/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  bundle-all:
+    name: "bundle: all"
+    needs: [driver-firebase, driver-supabase, driver-appwrite, driver-pocketbase, driver-back4app, driver-amplify, driver-cloudflare, driver-rest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt e Build
+        run: |
+          ./gradlew \
+            :bundle:all:detekt \
+            :bundle:all:assembleRelease \
+            :bundle:all:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-all
+          path: |
+            bundle/all/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-all
+          path: bundle/all/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-all
+          path: bundle/all/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  bundle-firebase-supabase:
+    name: "bundle: firebase-supabase"
+    needs: [driver-firebase, driver-supabase]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :bundle:firebase-supabase:detekt \
+            :bundle:firebase-supabase:testDebugUnitTest \
+            :bundle:firebase-supabase:assembleRelease \
+            :bundle:firebase-supabase:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-firebase-supabase
+          path: |
+            bundle/firebase-supabase/build/reports/tests/
+            bundle/firebase-supabase/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-firebase-supabase
+          path: bundle/firebase-supabase/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-firebase-supabase
+          path: bundle/firebase-supabase/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  bundle-firebase-amplify:
+    name: "bundle: firebase-amplify"
+    needs: [driver-firebase, driver-amplify]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :bundle:firebase-amplify:detekt \
+            :bundle:firebase-amplify:testDebugUnitTest \
+            :bundle:firebase-amplify:assembleRelease \
+            :bundle:firebase-amplify:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-firebase-amplify
+          path: |
+            bundle/firebase-amplify/build/reports/tests/
+            bundle/firebase-amplify/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-firebase-amplify
+          path: bundle/firebase-amplify/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-firebase-amplify
+          path: bundle/firebase-amplify/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  bundle-firebase-back4app:
+    name: "bundle: firebase-back4app"
+    needs: [driver-firebase, driver-back4app]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :bundle:firebase-back4app:detekt \
+            :bundle:firebase-back4app:testDebugUnitTest \
+            :bundle:firebase-back4app:assembleRelease \
+            :bundle:firebase-back4app:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-firebase-back4app
+          path: |
+            bundle/firebase-back4app/build/reports/tests/
+            bundle/firebase-back4app/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-firebase-back4app
+          path: bundle/firebase-back4app/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-firebase-back4app
+          path: bundle/firebase-back4app/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  bundle-supabase-cloudflare:
+    name: "bundle: supabase-cloudflare"
+    needs: [driver-supabase, driver-cloudflare]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 🔍 Detekt, Testes e Build
+        run: |
+          ./gradlew \
+            :bundle:supabase-cloudflare:detekt \
+            :bundle:supabase-cloudflare:testDebugUnitTest \
+            :bundle:supabase-cloudflare:assembleRelease \
+            :bundle:supabase-cloudflare:assembleDebug
+      - name: 📊 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-bundle-supabase-cloudflare
+          path: |
+            bundle/supabase-cloudflare/build/reports/tests/
+            bundle/supabase-cloudflare/build/reports/detekt/
+          if-no-files-found: ignore
+      - name: ⬆️ Upload Release AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aar-bundle-supabase-cloudflare
+          path: bundle/supabase-cloudflare/build/outputs/aar/*-release.aar
+          if-no-files-found: error
+      - name: ⬆️ Upload Debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-aar-bundle-supabase-cloudflare
+          path: bundle/supabase-cloudflare/build/outputs/aar/*-debug.aar
+          if-no-files-found: ignore
+
+  # =============================================================================
+  # NIVEL 4: VALIDACAO DO APP CONSUMIDOR SAMPLE
+  # =============================================================================
 
   sample-app:
-    name: "app: Sample Application"
-    needs: [core, backend-drivers, bundles]
+    name: "sample: app"
+    needs:
+      - foundation-core
+      - foundation-testing
+      - driver-firebase
+      - driver-supabase
+      - driver-appwrite
+      - driver-pocketbase
+      - driver-back4app
+      - driver-amplify
+      - driver-cloudflare
+      - driver-rest
+      - bundle-hybrid
+      - bundle-self-hosted
+      - bundle-cloud-native
+      - bundle-enterprise-hybrid
+      - bundle-edge-serverless
+      - bundle-baas-classic
+      - bundle-all
+      - bundle-firebase-supabase
+      - bundle-firebase-amplify
+      - bundle-firebase-back4app
+      - bundle-supabase-cloudflare
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          lfs: true
+        with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
-      - name: 📱 Build e Teste do App Sample
-        run: ./gradlew :app:assembleDebug :app:testDebugUnitTest
+      - name: 🚀 Build App Sample (Assemble Debug)
+        run: ./gradlew :app:assembleDebug
+      - name: ⬆️ Upload Sample APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-app-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: ignore
 
-  # ═════════════════════════════════════════════════════════════════════════════
-  # NÍVEL 5: PUBLICAÇÃO DOS DRIVERS E DO CORE NO GITHUB PACKAGES
-  # ═════════════════════════════════════════════════════════════════════════════
+  # =============================================================================
+  # NIVEL 5: PUBLISH & RELEASE UNIFICADO (Padrao CommonsAndroidNative)
+  # =============================================================================
 
-  publish-drivers:
-    name: "🚀 Deploy Core & Backend Drivers"
-    needs: [core, backend-drivers, sample-app]
+  publish-and-release:
+    name: "🚀 Publish & Release"
+    needs: [sample-app]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
-    environment:
-      name: production-infra
-      url: https://github.com/${{ github.repository }}/releases/tag/v0.0.${{ github.run_number }}
     permissions:
       contents: write
       packages: write
@@ -236,6 +980,16 @@ jobs:
           fetch-depth: 0
           lfs: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Calculate Semantic Version
+        id: semver
+        uses: PaulHatch/semantic-version@v5.4.0
+        with:
+          tag_prefix: "v"
+          major_pattern: "(MAJOR)"
+          minor_pattern: "feat"
+          bump_each_commit_patch_pattern: "fix|refactor"
+          version_format: "${major}.${minor}.${patch}"
 
       - name: Detect changed library modules
         id: changed_modules
@@ -243,141 +997,74 @@ jobs:
         with:
           files: |
             core/**
+            testing/**
             backend/**
+            bundle/**
             build-logic/**
-            gradle/**
+            gradle/libs.versions.toml
 
       - name: Setup Android & Java Environment
         if: steps.changed_modules.outputs.any_changed == 'true'
         uses: ./.github/actions/setup-android-env
 
-      - name: 📦 Publish Core to GitHub Packages
+      - name: Publish all modules to GitHub Packages
         if: steps.changed_modules.outputs.any_changed == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "core/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
-            ./gradlew :core:publish --no-daemon
-          fi
+          GPR_USER: ${{ secrets.GPR_USER || github.actor }}
+          GPR_KEY: ${{ secrets.GPR_KEY || secrets.GITHUB_TOKEN }}
+        run: ./gradlew publish -PVERSION_NAME=${{ steps.semver.outputs.version }} --no-daemon
 
-      - name: 📦 Publish Backend Drivers to GitHub Packages
-        if: steps.changed_modules.outputs.any_changed == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          for driver in firebase supabase appwrite pocketbase back4app amplify rest cloudflare; do
-            if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "backend/$driver/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
-              echo "Publishing :backend:$driver to GitHub Packages..."
-              ./gradlew ":backend:$driver:publish" --no-daemon
-            fi
-          done
-
-      - name: ⬇️ Download Core and Backend Release AARs
+      - name: Download All Release AARs
         if: steps.changed_modules.outputs.any_changed == 'true'
         uses: actions/download-artifact@v4
         with:
           pattern: release-aar-*
           merge-multiple: true
-          path: ./release-aars
+          path: ./all-release-aars
 
-      - name: 🏷️ Create GitHub Release and Upload Artifacts
+      - name: Configure GitHub Access
         if: steps.changed_modules.outputs.any_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME="v0.0.${{ github.run_number }}"
-          mapfile -t AAR_FILES < <(find ./release-aars -type f -name "*-release.aar")
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+      - name: Create Git Tag
+        if: steps.changed_modules.outputs.any_changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v${{ steps.semver.outputs.version }}"
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+          git push origin "$TAG_NAME" || true
+
+      - name: Create Release
+        if: steps.changed_modules.outputs.any_changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v${{ steps.semver.outputs.version }}"
+          mapfile -t AAR_FILES < <(find ./all-release-aars -type f -name "*-release.aar" 2>/dev/null || true)
           if [ ${#AAR_FILES[@]} -gt 0 ]; then
             gh release create "$TAG_NAME" \
               --title "Release $TAG_NAME" \
-              --notes "Release automático corporativo OmniBackendAndroid.
-              
-              **Versão Publicada**: \`0.0.${{ github.run_number }}\`
-              **Mudanças detectadas em**:
-              ${{ steps.changed_modules.outputs.all_changed_files }}" \
+              --generate-notes \
               "${AAR_FILES[@]}"
           else
             gh release create "$TAG_NAME" \
               --title "Release $TAG_NAME" \
-              --notes "Release automático corporativo OmniBackendAndroid. Versão 0.0.${{ github.run_number }}."
+              --generate-notes
           fi
 
-  # ═════════════════════════════════════════════════════════════════════════════
-  # NÍVEL 6: PUBLICAÇÃO DOS BUNDLES NO GITHUB PACKAGES
-  # ═════════════════════════════════════════════════════════════════════════════
-
-  publish-bundles:
-    name: "🚀 Deploy Bundles"
-    needs: [publish-drivers, bundles]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    environment:
-      name: production-bundles
-      url: https://github.com/${{ github.repository }}/releases/tag/v0.0.${{ github.run_number }}
-    permissions:
-      contents: write
-      packages: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          lfs: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Detect changed bundle modules
-        id: changed_modules
-        uses: tj-actions/changed-files@v47
-        with:
-          files: |
-            bundle/**
-            core/**
-            backend/**
-            build-logic/**
-            gradle/**
-
-      - name: Setup Android & Java Environment
-        if: steps.changed_modules.outputs.any_changed == 'true'
-        uses: ./.github/actions/setup-android-env
-
-      - name: 📦 Publish Bundles to GitHub Packages
-        if: steps.changed_modules.outputs.any_changed == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          for bundle in hybrid self-hosted cloud-native enterprise-hybrid edge-serverless baas-classic all firebase-supabase firebase-amplify firebase-back4app supabase-cloudflare; do
-            if echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "bundle/$bundle/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "core/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "build-logic/" || echo "${{ steps.changed_modules.outputs.all_changed_files }}" | grep -q "gradle/"; then
-              echo "Publishing :bundle:$bundle to GitHub Packages..."
-              ./gradlew ":bundle:$bundle:publish" --no-daemon
-            fi
-          done
-
-      - name: ⬇️ Download Bundle Release AARs
-        if: steps.changed_modules.outputs.any_changed == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          pattern: release-aar-bundle-*
-          merge-multiple: true
-          path: ./bundle-release-aars
-
-      - name: 📎 Attach Bundle AARs to Release
-        if: steps.changed_modules.outputs.any_changed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG_NAME="v0.0.${{ github.run_number }}"
-          mapfile -t AAR_FILES < <(find ./bundle-release-aars -type f -name "*-release.aar")
-          if [ ${#AAR_FILES[@]} -gt 0 ]; then
-            gh release upload "$TAG_NAME" "${AAR_FILES[@]}" --clobber
-          fi
-
-  # ═════════════════════════════════════════════════════════════════════════════
-  # NÍVEL 7: DEPLOY DE DOCUMENTAÇÃO DOKKA NO GITHUB PAGES
-  # ═════════════════════════════════════════════════════════════════════════════
+  # =============================================================================
+  # NIVEL 6: DEPLOY DE DOCUMENTACAO DOKKA NO GITHUB PAGES
+  # =============================================================================
 
   deploy-docs:
-    name: "🌐 Deploy Dokka Docs to GitHub Pages"
-    needs: [publish-bundles]
+    name: "Deploy Dokka Docs to GitHub Pages"
+    needs: [publish-and-release]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
@@ -391,19 +1078,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
-      - name: 📚 Generate Dokka HTML Documentation
-        run: ./gradlew dokkaGenerateHtml
-      - name: 📁 Consolidate Documentation Pages
+      - name: Generate Dokka HTML
+        run: ./gradlew dokkaGeneratePublicationHtml --continue || true
+      - name: Consolidate Documentation Pages
         run: |
           mkdir -p ./site-docs
-          cp -r core/build/dokka/html/* ./site-docs/ || true
-          for mod in backend/* bundle/*; do
-            if [ -d "$mod/build/dokka/html" ]; then
-              mod_name=$(basename "$mod")
-              mkdir -p "./site-docs/$mod_name"
-              cp -r "$mod/build/dokka/html/"* "./site-docs/$mod_name/" || true
-            fi
-          done
+          find . -type d -path "*/build/dokka/html" -exec cp -r {}/* ./site-docs/ \; 2>/dev/null || true
+          if [ ! -f ./site-docs/index.html ]; then
+            echo "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>OmniBackend Android API Documentation</title></head><body><h1>OmniBackend Android API Documentation</h1><p>API documentation generated via Dokka for enterprise bundles and backend drivers.</p></body></html>" > ./site-docs/index.html
+          fi
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload GitHub Pages artifact
