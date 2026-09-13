@@ -27,7 +27,7 @@ class OmniCloudflareTest {
         OmniCloudflare.initialize(
             context = mockContext,
             accountId = accountId,
-            workerBaseUrl = workerUrl
+            workerBaseUrl = workerUrl,
         )
 
         assertTrue(OmniCloudflare.initialized)

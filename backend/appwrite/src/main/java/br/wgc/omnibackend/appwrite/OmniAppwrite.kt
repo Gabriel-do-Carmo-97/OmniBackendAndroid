@@ -46,7 +46,7 @@ object OmniAppwrite {
     private var _projectId: String = ""
     private var _databaseId: String = ""
     private var _defaultBucketId: String = ""
-    private var _context: Context? = null
+    private var appContext: Context? = null
 
     // SDK Client is created once during initialize()
     private var _client: Client? = null
@@ -72,17 +72,11 @@ object OmniAppwrite {
      * @param databaseId Identificador do banco de dados Appwrite a ser utilizado nas operações de [database].
      * @param defaultBucketId Bucket padrão para operações de [storage] quando o path não inclui `bucketId/`.
      */
-    fun initialize(
-        context: Context,
-        endpoint: String,
-        projectId: String,
-        databaseId: String,
-        defaultBucketId: String = "default"
-    ) {
+    fun initialize(context: Context, endpoint: String, projectId: String, databaseId: String, defaultBucketId: String = "default") {
         if (!_initialized) {
             synchronized(this) {
                 if (!_initialized) {
-                    _context = context.applicationContext
+                    appContext = context.applicationContext
                     _endpoint = endpoint
                     _projectId = projectId
                     _databaseId = databaseId
@@ -133,6 +127,17 @@ object OmniAppwrite {
         }
 
     /**
+     * Bucket padrão configurado do Appwrite Storage.
+     *
+     * @throws IllegalStateException se [initialize] ainda não foi invocado.
+     */
+    val defaultBucketId: String
+        get() {
+            check(_initialized) { "OmniAppwrite deve ser inicializado antes do uso. Chame OmniAppwrite.initialize(...)" }
+            return _defaultBucketId
+        }
+
+    /**
      * Implementação de [AuthRepository] para autenticação de usuários via Appwrite Account API.
      *
      * @throws IllegalStateException se [initialize] ainda não foi invocado.
@@ -161,10 +166,10 @@ object OmniAppwrite {
         check(_initialized) { "OmniAppwrite deve ser inicializado antes do uso." }
         AppwriteStorageRepositoryImpl(
             storage = storageService,
-            context = _context ?: error("OmniAppwrite deve ser inicializado antes do uso."),
+            context = appContext ?: error("OmniAppwrite deve ser inicializado antes do uso."),
             endpoint = _endpoint,
             projectId = _projectId,
-            defaultBucketId = _defaultBucketId
+            defaultBucketId = _defaultBucketId,
         )
     }
 
@@ -178,7 +183,7 @@ object OmniAppwrite {
         synchronized(this) {
             _initialized = false
             _client = null
-            _context = null
+            appContext = null
             _endpoint = ""
             _projectId = ""
             _databaseId = ""

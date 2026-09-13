@@ -19,10 +19,7 @@ import java.util.UUID
 /**
  * Implementação de [AuthRepository] delegando autenticação para Cloudflare Worker endpoints.
  */
-internal class CloudflareAuthRepositoryImpl(
-    private val workerBaseUrl: String,
-    private val gson: Gson = Gson()
-) : AuthRepository {
+internal class CloudflareAuthRepositoryImpl(private val workerBaseUrl: String, private val gson: Gson = Gson()) : AuthRepository {
 
     @Volatile
     private var activeUser: OmniUser? = null
@@ -52,10 +49,7 @@ internal class CloudflareAuthRepositoryImpl(
         user
     }
 
-    override suspend fun registerEmailWithPassword(
-        email: String,
-        pass: String
-    ): DataResult<RegisterUserResponse> = runCatchingAuth {
+    override suspend fun registerEmailWithPassword(email: String, pass: String): DataResult<RegisterUserResponse> = runCatchingAuth {
         val url = "$workerBaseUrl/auth/register"
         val response = postJson(url, mapOf("email" to email, "password" to pass))
         val uid = response["uid"]?.toString() ?: response["id"]?.toString().orEmpty()
@@ -69,7 +63,7 @@ internal class CloudflareAuthRepositoryImpl(
             provider = "cloudflare",
             isAnonymous = false,
             isEmailVerified = response["isEmailVerified"] as? Boolean ?: false,
-            isNewUser = true
+            isNewUser = true,
         )
     }
 
@@ -162,17 +156,17 @@ internal class CloudflareAuthRepositoryImpl(
             val responseText = conn.inputStream.use { it.bufferedReader().readText() }
             return if (responseText.isNotBlank()) {
                 gson.fromJson(responseText, Map::class.java) as Map<String, Any?>
-            } else emptyMap()
+            } else {
+                emptyMap()
+            }
         } else {
             throw IllegalStateException("Cloudflare Worker HTTP $code: ${conn.responseMessage}")
         }
     }
 
-    private inline fun <T> runCatchingAuth(block: () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: Exception) {
-            DataResult.Failure(CloudflareErrorMapper.mapThrowable(e, "auth"))
-        }
+    private inline fun <T> runCatchingAuth(block: () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: Exception) {
+        DataResult.Failure(CloudflareErrorMapper.mapThrowable(e, "auth"))
     }
 }

@@ -31,7 +31,7 @@ class UserRegisterUseCase @Inject constructor(
     private val auth: AuthRepository,
     private val firestore: FirestoreRepository,
     private val database: RealtimeDatabaseRepository,
-    private val storage: StorageRepository
+    private val storage: StorageRepository,
 ) {
 
     /**
@@ -45,12 +45,13 @@ class UserRegisterUseCase @Inject constructor(
     operator fun invoke(
         newUser: NewUser,
         customBasePath: String? = null,
-        updatePresence: Boolean = false
+        updatePresence: Boolean = false,
     ): Flow<UseCaseResult<RegisteredUser>> = flow {
         emit(UseCaseResult.Loading)
 
         val authResult = auth.registerEmailWithPassword(
-            newUser.email, newUser.password
+            newUser.email,
+            newUser.password,
         )
 
         val authResponse: RegisterUserResponse = when (authResult) {
@@ -79,7 +80,7 @@ class UserRegisterUseCase @Inject constructor(
 
         val registeredUser = authResponse.toRegisteredUser(
             photo = photoUri,
-            isClient = newUser.isClient
+            isClient = newUser.isClient,
         )
         val firestoreResult = firestore.addDocument(userPath, registeredUser, registeredUser.id)
         if (firestoreResult is DataResult.Failure) {
@@ -103,4 +104,3 @@ class UserRegisterUseCase @Inject constructor(
         emit(UseCaseResult.Success(registeredUser))
     }
 }
-

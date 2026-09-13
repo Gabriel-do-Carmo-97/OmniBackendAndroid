@@ -42,7 +42,7 @@ class SupabaseUserMapperTest {
             phoneChangeSentAt = null,
             newPhone = null,
             factors = emptyList(),
-            identities = emptyList()
+            identities = emptyList(),
         )
 
         val omniUser = SupabaseUserMapper.toOmniUser(userInfo)
@@ -80,7 +80,7 @@ class SupabaseUserMapperTest {
             phoneChangeSentAt = null,
             newPhone = null,
             factors = emptyList(),
-            identities = null
+            identities = null,
         )
 
         val omniUser = SupabaseUserMapper.toOmniUser(userInfo)

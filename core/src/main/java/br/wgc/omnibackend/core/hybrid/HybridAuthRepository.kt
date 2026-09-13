@@ -17,10 +17,8 @@ import kotlinx.coroutines.flow.Flow
  * @param primaryRepository Provedor primário de autenticação (ex: Firebase).
  * @param fallbackRepository Provedor secundário de autenticação (ex: Supabase, Appwrite, PocketBase).
  */
-class HybridAuthRepository(
-    private val primaryRepository: AuthRepository,
-    private val fallbackRepository: AuthRepository
-) : AuthRepository {
+class HybridAuthRepository(private val primaryRepository: AuthRepository, private val fallbackRepository: AuthRepository) :
+    AuthRepository {
 
     override val authState: Flow<OmniUser?>
         get() = primaryRepository.authState
@@ -38,10 +36,7 @@ class HybridAuthRepository(
         return if (result is DataResult.Success) result else fallbackRepository.createUser(email, pass)
     }
 
-    override suspend fun registerEmailWithPassword(
-        email: String,
-        pass: String
-    ): DataResult<RegisterUserResponse> {
+    override suspend fun registerEmailWithPassword(email: String, pass: String): DataResult<RegisterUserResponse> {
         val result = primaryRepository.registerEmailWithPassword(email, pass)
         return if (result is DataResult.Success) result else fallbackRepository.registerEmailWithPassword(email, pass)
     }

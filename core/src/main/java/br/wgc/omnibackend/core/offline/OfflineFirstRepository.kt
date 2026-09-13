@@ -29,7 +29,7 @@ class OfflineFirstRepository(
     private val mutationQueue: MutationQueueRepository,
     private val networkMonitor: NetworkMonitor,
     private val scope: CoroutineScope,
-    private val gson: Gson = Gson()
+    private val gson: Gson = Gson(),
 ) : FirestoreRepository {
 
     private val localCache = ConcurrentHashMap<String, MutableMap<String, Any>>()
@@ -44,11 +44,7 @@ class OfflineFirstRepository(
         }
     }
 
-    override suspend fun <T : Any> addDocument(
-        collection: String,
-        data: T,
-        customId: String?
-    ): DataResult<String> {
+    override suspend fun <T : Any> addDocument(collection: String, data: T, customId: String?): DataResult<String> {
         val docId = customId ?: UUID.randomUUID().toString()
         val json = gson.toJson(data)
 
@@ -64,25 +60,16 @@ class OfflineFirstRepository(
             collection = collection,
             documentId = docId,
             type = MutationType.ADD,
-            payloadJson = json
+            payloadJson = json,
         )
         mutationQueue.enqueue(mutation)
         return DataResult.Success(docId)
     }
 
-    override suspend fun <T : Any> getDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): DataResult<T?> {
-        return remoteRepository.getDocument(collection, documentId, clazz)
-    }
+    override suspend fun <T : Any> getDocument(collection: String, documentId: String, clazz: Class<T>): DataResult<T?> =
+        remoteRepository.getDocument(collection, documentId, clazz)
 
-    override suspend fun updateDocument(
-        collection: String,
-        documentId: String,
-        data: Map<String, Any>
-    ): DataResult<Unit> {
+    override suspend fun updateDocument(collection: String, documentId: String, data: Map<String, Any>): DataResult<Unit> {
         val json = gson.toJson(data)
         val result = remoteRepository.updateDocument(collection, documentId, data)
         if (result is DataResult.Success) {
@@ -94,16 +81,13 @@ class OfflineFirstRepository(
             collection = collection,
             documentId = documentId,
             type = MutationType.UPDATE,
-            payloadJson = json
+            payloadJson = json,
         )
         mutationQueue.enqueue(mutation)
         return DataResult.Success(Unit)
     }
 
-    override suspend fun deleteDocument(
-        collection: String,
-        documentId: String
-    ): DataResult<Unit> {
+    override suspend fun deleteDocument(collection: String, documentId: String): DataResult<Unit> {
         val result = remoteRepository.deleteDocument(collection, documentId)
         if (result is DataResult.Success) {
             return result
@@ -114,35 +98,23 @@ class OfflineFirstRepository(
             collection = collection,
             documentId = documentId,
             type = MutationType.DELETE,
-            payloadJson = ""
+            payloadJson = "",
         )
         mutationQueue.enqueue(mutation)
         return DataResult.Success(Unit)
     }
 
-    override suspend fun <T : Any> findDocuments(
-        collection: String,
-        filters: List<FilterRequest>,
-        clazz: Class<T>
-    ): DataResult<List<T>> {
-        return remoteRepository.findDocuments(collection, filters, clazz)
-    }
+    override suspend fun <T : Any> findDocuments(collection: String, filters: List<FilterRequest>, clazz: Class<T>): DataResult<List<T>> =
+        remoteRepository.findDocuments(collection, filters, clazz)
 
-    override fun <T : Any> listenToDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): Flow<DataResult<T?>> {
-        return remoteRepository.listenToDocument(collection, documentId, clazz)
-    }
+    override fun <T : Any> listenToDocument(collection: String, documentId: String, clazz: Class<T>): Flow<DataResult<T?>> =
+        remoteRepository.listenToDocument(collection, documentId, clazz)
 
     override fun <T : Any> listenToCollection(
         collection: String,
         filters: List<FilterRequest>,
-        clazz: Class<T>
-    ): Flow<DataResult<List<T>>> {
-        return remoteRepository.listenToCollection(collection, filters, clazz)
-    }
+        clazz: Class<T>,
+    ): Flow<DataResult<List<T>>> = remoteRepository.listenToCollection(collection, filters, clazz)
 
     /**
      * Sincroniza todas as mutações pendentes enfileiradas com o repositório remoto.
@@ -155,7 +127,9 @@ class OfflineFirstRepository(
                     val map = gson.fromJson(mutation.payloadJson, Map::class.java)
                     if (map != null) {
                         remoteRepository.addDocument(mutation.collection, map as Any, mutation.documentId) is DataResult.Success
-                    } else false
+                    } else {
+                        false
+                    }
                 }
                 MutationType.UPDATE -> {
                     @Suppress("UNCHECKED_CAST")

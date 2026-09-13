@@ -27,7 +27,7 @@ internal object CloudflareUserMapper {
             displayName = displayName,
             photoUrl = photoUrl,
             isEmailVerified = isVerified,
-            isAnonymous = isAnonymous
+            isAnonymous = isAnonymous,
         )
     }
 }

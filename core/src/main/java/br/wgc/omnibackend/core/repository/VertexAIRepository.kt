@@ -15,10 +15,7 @@ interface VertexAIRepository {
      * @param modelName Nome do modelo generativo (padrão "gemini-1.5-flash").
      * @return [DataResult.Success] contendo o texto gerado pela IA.
      */
-    suspend fun generateText(
-        prompt: String,
-        modelName: String = "gemini-1.5-flash"
-    ): DataResult<String>
+    suspend fun generateText(prompt: String, modelName: String = "gemini-1.5-flash"): DataResult<String>
 
     /**
      * Gera uma resposta textual contínua em formato de streaming (token por token).
@@ -27,8 +24,5 @@ interface VertexAIRepository {
      * @param modelName Nome do modelo generativo.
      * @return [Flow] que emite blocos textuais à medida que são gerados pelo modelo.
      */
-    fun generateTextStream(
-        prompt: String,
-        modelName: String = "gemini-1.5-flash"
-    ): Flow<DataResult<String>>
+    fun generateTextStream(prompt: String, modelName: String = "gemini-1.5-flash"): Flow<DataResult<String>>
 }

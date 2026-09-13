@@ -24,7 +24,12 @@ internal object SupabaseErrorMapper {
         throwable is RestException -> {
             val message = throwable.message?.lowercase() ?: ""
             when {
-                throwable.statusCode == 400 && (message.contains("user already registered") || message.contains("email already in use") || message.contains("already exists")) ->
+                throwable.statusCode == 400 &&
+                    (
+                        message.contains("user already registered") ||
+                            message.contains("email already in use") ||
+                            message.contains("already exists")
+                        ) ->
                     AppError.Auth.EmailAlreadyInUse
                 throwable.statusCode == 400 && (message.contains("password") || message.contains("weak")) ->
                     AppError.Auth.WeakPassword
@@ -78,8 +83,7 @@ internal object SupabaseErrorMapper {
         else -> AppError.Storage.Generic(Exception(throwable.message, throwable))
     }
 
-    private fun isNetworkError(throwable: Throwable): Boolean =
-        throwable is IOException ||
+    private fun isNetworkError(throwable: Throwable): Boolean = throwable is IOException ||
         throwable is UnknownHostException ||
         throwable is ConnectException ||
         throwable is HttpRequestTimeoutException

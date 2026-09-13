@@ -23,9 +23,7 @@ import javax.inject.Inject
  *
  * @property remoteConfig Instância do [FirebaseRemoteConfig] injetada.
  */
-class RemoteConfigRepositoryImpl @Inject constructor(
-    private val remoteConfig: FirebaseRemoteConfig
-) : RemoteConfigRepository {
+class RemoteConfigRepositoryImpl @Inject constructor(private val remoteConfig: FirebaseRemoteConfig) : RemoteConfigRepository {
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
@@ -38,13 +36,11 @@ class RemoteConfigRepositoryImpl @Inject constructor(
     /**
      * Baixa os parâmetros mais recentes do servidor remoto e os ativa para consumo imediato.
      */
-    override suspend fun fetchAndActivate(): DataResult<Boolean> {
-        return runCatching {
-            val success = remoteConfig.fetchAndActivate().await()
-            DataResult.Success(success)
-        }.getOrElse { exception ->
-            DataResult.Failure(error = getRemoteConfigError(exception))
-        }
+    override suspend fun fetchAndActivate(): DataResult<Boolean> = runCatching {
+        val success = remoteConfig.fetchAndActivate().await()
+        DataResult.Success(success)
+    }.getOrElse { exception ->
+        DataResult.Failure(error = getRemoteConfigError(exception))
     }
 
     /**
@@ -76,18 +72,17 @@ class RemoteConfigRepositoryImpl @Inject constructor(
     /**
      * Registra callbacks para captura de atualizações em tempo real de uma chave.
      */
-    override fun detectedUpdateFlagInLive(
-        key: String,
-        updateFlagResult: suspend () -> Unit,
-        errorResult: suspend (AppError) -> Unit
-    ) {
+    override fun detectedUpdateFlagInLive(key: String, updateFlagResult: suspend () -> Unit, errorResult: suspend (AppError) -> Unit) {
         val configUpdateListener = object : ConfigUpdateListener {
             override fun onUpdate(configUpdate: ConfigUpdate) {
                 if (configUpdate.updatedKeys.contains(key)) {
                     repositoryScope.launch {
                         val activated = remoteConfig.activate().await()
-                        if (activated) updateFlagResult()
-                        else errorResult(AppError.RemoteConfig.Unknown)
+                        if (activated) {
+                            updateFlagResult()
+                        } else {
+                            errorResult(AppError.RemoteConfig.Unknown)
+                        }
                     }
                 }
             }
@@ -102,48 +97,38 @@ class RemoteConfigRepositoryImpl @Inject constructor(
     }
 
     /** Recupera valor [String] para a chave informada. */
-    override fun getString(key: String): DataResult<String> {
-        return runCatching {
-            val value = remoteConfig.getString(key)
-            DataResult.Success(value)
-        }.getOrElse { exception ->
-            DataResult.Failure(AppError.Generic.Unknown(exception))
-        }
+    override fun getString(key: String): DataResult<String> = runCatching {
+        val value = remoteConfig.getString(key)
+        DataResult.Success(value)
+    }.getOrElse { exception ->
+        DataResult.Failure(AppError.Generic.Unknown(exception))
     }
 
     /** Recupera valor [Boolean] para a chave informada. */
-    override fun getBoolean(key: String): DataResult<Boolean> {
-        return runCatching {
-            val value = remoteConfig.getBoolean(key)
-            DataResult.Success(value)
-        }.getOrElse { exception ->
-            DataResult.Failure(AppError.Generic.Unknown(exception))
-        }
+    override fun getBoolean(key: String): DataResult<Boolean> = runCatching {
+        val value = remoteConfig.getBoolean(key)
+        DataResult.Success(value)
+    }.getOrElse { exception ->
+        DataResult.Failure(AppError.Generic.Unknown(exception))
     }
 
     /** Recupera valor [Long] para a chave informada. */
-    override fun getLong(key: String): DataResult<Long> {
-        return runCatching {
-            val value = remoteConfig.getLong(key)
-            DataResult.Success(value)
-        }.getOrElse { exception ->
-            DataResult.Failure(AppError.Generic.Unknown(exception))
-        }
+    override fun getLong(key: String): DataResult<Long> = runCatching {
+        val value = remoteConfig.getLong(key)
+        DataResult.Success(value)
+    }.getOrElse { exception ->
+        DataResult.Failure(AppError.Generic.Unknown(exception))
     }
 
     /** Recupera valor [Double] para a chave informada. */
-    override fun getDouble(key: String): DataResult<Double> {
-        return runCatching {
-            val value = remoteConfig.getDouble(key)
-            DataResult.Success(value)
-        }.getOrElse { exception ->
-            DataResult.Failure(AppError.Generic.Unknown(exception))
-        }
+    override fun getDouble(key: String): DataResult<Double> = runCatching {
+        val value = remoteConfig.getDouble(key)
+        DataResult.Success(value)
+    }.getOrElse { exception ->
+        DataResult.Failure(AppError.Generic.Unknown(exception))
     }
 
-    private fun getRemoteConfigError(
-        exception: Throwable
-    ): AppError = if (exception is FirebaseRemoteConfigException) {
+    private fun getRemoteConfigError(exception: Throwable): AppError = if (exception is FirebaseRemoteConfigException) {
         when (exception.code) {
             FirebaseRemoteConfigException.Code.CONFIG_UPDATE_STREAM_ERROR -> AppError.RemoteConfig.StreamError
             FirebaseRemoteConfigException.Code.CONFIG_UPDATE_MESSAGE_INVALID -> AppError.RemoteConfig.MessageInvalid

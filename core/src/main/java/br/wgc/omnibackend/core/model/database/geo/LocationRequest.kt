@@ -10,8 +10,4 @@ import androidx.annotation.Keep
  * @property timestamp Carimbo de data/hora em milissegundos UTC no momento da captura da posição.
  */
 @Keep
-data class LocationRequest(
-    val latitude: Double = 0.0,
-    val longitude: Double = 0.0,
-    val timestamp: Long = System.currentTimeMillis()
-)
+data class LocationRequest(val latitude: Double = 0.0, val longitude: Double = 0.0, val timestamp: Long = System.currentTimeMillis())

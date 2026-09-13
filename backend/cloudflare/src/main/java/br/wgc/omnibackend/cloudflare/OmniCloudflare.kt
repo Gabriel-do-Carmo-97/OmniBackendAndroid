@@ -44,11 +44,7 @@ object OmniCloudflare {
      * @param accountId Identificador da conta na Cloudflare.
      * @param workerBaseUrl URL base do Cloudflare Worker (ex: "https://meu-worker.workers.dev").
      */
-    fun initialize(
-        context: Context,
-        accountId: String,
-        workerBaseUrl: String
-    ) {
+    fun initialize(context: Context, accountId: String, workerBaseUrl: String) {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
@@ -103,7 +99,7 @@ object OmniCloudflare {
         check(isInitialized) { "OmniCloudflare deve ser inicializado antes do uso." }
         CloudflareStorageRepositoryImpl(
             context = appContext ?: error("OmniCloudflare deve ser inicializado antes do uso."),
-            workerBaseUrl = cloudflareWorkerUrl
+            workerBaseUrl = cloudflareWorkerUrl,
         )
     }
 

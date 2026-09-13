@@ -62,14 +62,14 @@ class DataResultTest {
         val success: DataResult<String> = DataResult.Success("Omni")
         val successFold = success.fold(
             onSuccess = { "Hello $it" },
-            onFailure = { "Error" }
+            onFailure = { "Error" },
         )
         assertEquals("Hello Omni", successFold)
 
         val failure: DataResult<String> = DataResult.Failure(AppError.Auth.InvalidCredentials)
         val failureFold = failure.fold(
             onSuccess = { "Success" },
-            onFailure = { "Failed: ${it::class.java.simpleName}" }
+            onFailure = { "Failed: ${it::class.java.simpleName}" },
         )
         assertEquals("Failed: InvalidCredentials", failureFold)
     }

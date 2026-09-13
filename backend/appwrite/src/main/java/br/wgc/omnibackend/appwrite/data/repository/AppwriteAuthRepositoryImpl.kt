@@ -26,9 +26,7 @@ import kotlinx.coroutines.flow.callbackFlow
  *
  * @param account Serviço de conta do Appwrite SDK.
  */
-internal class AppwriteAuthRepositoryImpl(
-    private val account: Account
-) : AuthRepository {
+internal class AppwriteAuthRepositoryImpl(private val account: Account) : AuthRepository {
 
     @Volatile
     private var cachedUser: OmniUser? = null
@@ -94,10 +92,7 @@ internal class AppwriteAuthRepositoryImpl(
      * @param email E-mail para a nova conta.
      * @param pass Senha da nova conta.
      */
-    override suspend fun registerEmailWithPassword(
-        email: String,
-        pass: String
-    ): DataResult<RegisterUserResponse> = runCatchingAuth {
+    override suspend fun registerEmailWithPassword(email: String, pass: String): DataResult<RegisterUserResponse> = runCatchingAuth {
         val created = account.create(ID.unique(), email, pass)
         RegisterUserResponse(
             id = created.id,
@@ -107,7 +102,7 @@ internal class AppwriteAuthRepositoryImpl(
             provider = "appwrite",
             isAnonymous = false,
             isEmailVerified = created.emailVerification,
-            isNewUser = true
+            isNewUser = true,
         )
     }
 
@@ -227,16 +222,14 @@ internal class AppwriteAuthRepositoryImpl(
      *
      * @param idToken Token de identidade Google (não suportado diretamente pelo SDK Appwrite Android).
      */
-    override suspend fun signInWithGoogle(idToken: String): DataResult<OmniUser> {
-        return DataResult.Failure(
-            AppError.Auth.Generic(
-                IllegalStateException(
-                    "Appwrite Google Sign-In requer fluxo OAuth2 via Activity. " +
-                        "Use Account.createOAuth2Session(activity, OAuthProvider.GOOGLE) diretamente."
-                )
-            )
-        )
-    }
+    override suspend fun signInWithGoogle(idToken: String): DataResult<OmniUser> = DataResult.Failure(
+        AppError.Auth.Generic(
+            IllegalStateException(
+                "Appwrite Google Sign-In requer fluxo OAuth2 via Activity. " +
+                    "Use Account.createOAuth2Session(activity, OAuthProvider.GOOGLE) diretamente.",
+            ),
+        ),
+    )
 
     // ─── Sign Out ─────────────────────────────────────────────────────────────
 
@@ -251,13 +244,11 @@ internal class AppwriteAuthRepositoryImpl(
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    private suspend inline fun <T> runCatchingAuth(crossinline block: suspend () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: AppwriteException) {
-            DataResult.Failure(AppwriteErrorMapper.mapException(e, "auth"))
-        } catch (e: Exception) {
-            DataResult.Failure(AppwriteErrorMapper.mapThrowable(e, "auth"))
-        }
+    private suspend inline fun <T> runCatchingAuth(crossinline block: suspend () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: AppwriteException) {
+        DataResult.Failure(AppwriteErrorMapper.mapException(e, "auth"))
+    } catch (e: Exception) {
+        DataResult.Failure(AppwriteErrorMapper.mapThrowable(e, "auth"))
     }
 }

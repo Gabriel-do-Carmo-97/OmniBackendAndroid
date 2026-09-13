@@ -1,0 +1,977 @@
+public abstract interface annotation class br/wgc/omnibackend/core/di/ActiveBackend : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class br/wgc/omnibackend/core/di/AmplifyBackend : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class br/wgc/omnibackend/core/di/AppwriteBackend : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class br/wgc/omnibackend/core/di/Back4AppBackend : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class br/wgc/omnibackend/core/di/CloudflareBackend : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class br/wgc/omnibackend/core/di/FirebaseBackend : java/lang/annotation/Annotation {
+}
+
+public final class br/wgc/omnibackend/core/di/OmniBackendSelector {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/di/OmniBackendSelector;
+	public final fun getActiveAuthRepository ()Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun getActiveFirestoreRepository ()Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun getActiveStorageRepository ()Lbr/wgc/omnibackend/core/repository/StorageRepository;
+	public final fun reset ()V
+	public final fun setActiveAuthRepository (Lbr/wgc/omnibackend/core/repository/AuthRepository;)V
+	public final fun setActiveFirestoreRepository (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;)V
+	public final fun setActiveStorageRepository (Lbr/wgc/omnibackend/core/repository/StorageRepository;)V
+}
+
+public abstract interface annotation class br/wgc/omnibackend/core/di/PocketBaseBackend : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class br/wgc/omnibackend/core/di/RestBackend : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class br/wgc/omnibackend/core/di/SupabaseBackend : java/lang/annotation/Annotation {
+}
+
+public final class br/wgc/omnibackend/core/featureflag/HybridFeatureFlagRepository : br/wgc/omnibackend/core/repository/FeatureFlagRepository {
+	public fun <init> ()V
+	public fun <init> (Lbr/wgc/omnibackend/core/repository/FeatureFlagRepository;)V
+	public synthetic fun <init> (Lbr/wgc/omnibackend/core/repository/FeatureFlagRepository;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clearAllOverrides ()V
+	public final fun clearOverride (Ljava/lang/String;)V
+	public fun fetchAndActivate (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getBoolean (Ljava/lang/String;Z)Z
+	public fun getLong (Ljava/lang/String;J)J
+	public fun getString (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public final fun setOverride (Ljava/lang/String;Ljava/lang/Object;)V
+}
+
+public final class br/wgc/omnibackend/core/hybrid/HybridAuthRepository : br/wgc/omnibackend/core/repository/AuthRepository {
+	public fun <init> (Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/AuthRepository;)V
+	public fun createUser (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun deleteUser (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getAuthState ()Lkotlinx/coroutines/flow/Flow;
+	public fun getCurrentUser ()Lbr/wgc/omnibackend/core/model/OmniUser;
+	public fun isUserLogged (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun login (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun loginAnonymously (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun reauthenticate (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun registerEmailWithPassword (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun resetPassword (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun sendEmailVerification (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun signInWithCredential (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun signInWithGoogle (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun signOut (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateEmail (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updatePassword (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateProfile (Ljava/lang/String;Landroid/net/Uri;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/core/model/OmniUser {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Z
+	public final fun component6 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)Lbr/wgc/omnibackend/core/model/OmniUser;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/model/OmniUser;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZILjava/lang/Object;)Lbr/wgc/omnibackend/core/model/OmniUser;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDisplayName ()Ljava/lang/String;
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getPhotoUrl ()Ljava/lang/String;
+	public final fun getUid ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isAnonymous ()Z
+	public final fun isEmailVerified ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/model/auth/NewUser {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lbr/wgc/omnibackend/core/model/auth/NewUser;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/model/auth/NewUser;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lbr/wgc/omnibackend/core/model/auth/NewUser;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getLastName ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPassword ()Ljava/lang/String;
+	public final fun getPhoto ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isClient ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/model/auth/RegisterUserResponse {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/Boolean;
+	public final fun component7 ()Ljava/lang/Boolean;
+	public final fun component8 ()Ljava/lang/Boolean;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)Lbr/wgc/omnibackend/core/model/auth/RegisterUserResponse;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/model/auth/RegisterUserResponse;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/model/auth/RegisterUserResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMethod ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getProvider ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isAnonymous ()Ljava/lang/Boolean;
+	public final fun isEmailVerified ()Ljava/lang/Boolean;
+	public final fun isNewUser ()Ljava/lang/Boolean;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/model/auth/RegisteredUser {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;ZZZZ)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;ZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Landroid/net/Uri;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Z
+	public final fun component8 ()Z
+	public final fun component9 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;ZZZZ)Lbr/wgc/omnibackend/core/model/auth/RegisteredUser;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/model/auth/RegisteredUser;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;ZZZZILjava/lang/Object;)Lbr/wgc/omnibackend/core/model/auth/RegisteredUser;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCompletedName ()Ljava/lang/String;
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMethod ()Ljava/lang/String;
+	public final fun getPhoto ()Landroid/net/Uri;
+	public final fun getProvider ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isAnonymous ()Z
+	public final fun isClient ()Z
+	public final fun isEmailVerified ()Z
+	public final fun isNewUser ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/model/database/geo/LocationRequest {
+	public fun <init> ()V
+	public fun <init> (DDJ)V
+	public synthetic fun <init> (DDJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()J
+	public final fun copy (DDJ)Lbr/wgc/omnibackend/core/model/database/geo/LocationRequest;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/model/database/geo/LocationRequest;DDJILjava/lang/Object;)Lbr/wgc/omnibackend/core/model/database/geo/LocationRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLatitude ()D
+	public final fun getLongitude ()D
+	public final fun getTimestamp ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/model/database/message/ConversationRequest {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lbr/wgc/omnibackend/core/model/database/message/ConversationType;Ljava/util/List;Lbr/wgc/omnibackend/core/model/database/message/MessageRequest;I)V
+	public synthetic fun <init> (Ljava/lang/String;Lbr/wgc/omnibackend/core/model/database/message/ConversationType;Ljava/util/List;Lbr/wgc/omnibackend/core/model/database/message/MessageRequest;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lbr/wgc/omnibackend/core/model/database/message/ConversationType;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Lbr/wgc/omnibackend/core/model/database/message/MessageRequest;
+	public final fun component5 ()I
+	public final fun copy (Ljava/lang/String;Lbr/wgc/omnibackend/core/model/database/message/ConversationType;Ljava/util/List;Lbr/wgc/omnibackend/core/model/database/message/MessageRequest;I)Lbr/wgc/omnibackend/core/model/database/message/ConversationRequest;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/model/database/message/ConversationRequest;Ljava/lang/String;Lbr/wgc/omnibackend/core/model/database/message/ConversationType;Ljava/util/List;Lbr/wgc/omnibackend/core/model/database/message/MessageRequest;IILjava/lang/Object;)Lbr/wgc/omnibackend/core/model/database/message/ConversationRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConversationId ()Ljava/lang/String;
+	public final fun getLastMessage ()Lbr/wgc/omnibackend/core/model/database/message/MessageRequest;
+	public final fun getParticipants ()Ljava/util/List;
+	public final fun getType ()Lbr/wgc/omnibackend/core/model/database/message/ConversationType;
+	public final fun getUnreadCount ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/model/database/message/ConversationType : java/lang/Enum {
+	public static final field GROUP Lbr/wgc/omnibackend/core/model/database/message/ConversationType;
+	public static final field ONE_TO_ONE Lbr/wgc/omnibackend/core/model/database/message/ConversationType;
+	public static final field SUPPORT Lbr/wgc/omnibackend/core/model/database/message/ConversationType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lbr/wgc/omnibackend/core/model/database/message/ConversationType;
+	public static fun values ()[Lbr/wgc/omnibackend/core/model/database/message/ConversationType;
+}
+
+public final class br/wgc/omnibackend/core/model/database/message/MessageRequest {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLbr/wgc/omnibackend/core/model/database/message/MessageStatus;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLbr/wgc/omnibackend/core/model/database/message/MessageStatus;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()J
+	public final fun component5 ()Lbr/wgc/omnibackend/core/model/database/message/MessageStatus;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLbr/wgc/omnibackend/core/model/database/message/MessageStatus;)Lbr/wgc/omnibackend/core/model/database/message/MessageRequest;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/model/database/message/MessageRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLbr/wgc/omnibackend/core/model/database/message/MessageStatus;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/model/database/message/MessageRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Ljava/lang/String;
+	public final fun getMessageId ()Ljava/lang/String;
+	public final fun getSenderId ()Ljava/lang/String;
+	public final fun getStatus ()Lbr/wgc/omnibackend/core/model/database/message/MessageStatus;
+	public final fun getTimestamp ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/model/database/message/MessageStatus : java/lang/Enum {
+	public static final field DELIVERED Lbr/wgc/omnibackend/core/model/database/message/MessageStatus;
+	public static final field FAILED Lbr/wgc/omnibackend/core/model/database/message/MessageStatus;
+	public static final field READ Lbr/wgc/omnibackend/core/model/database/message/MessageStatus;
+	public static final field SENDING Lbr/wgc/omnibackend/core/model/database/message/MessageStatus;
+	public static final field SENT Lbr/wgc/omnibackend/core/model/database/message/MessageStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lbr/wgc/omnibackend/core/model/database/message/MessageStatus;
+	public static fun values ()[Lbr/wgc/omnibackend/core/model/database/message/MessageStatus;
+}
+
+public final class br/wgc/omnibackend/core/model/database/presence/PresenceStateRequest {
+	public fun <init> ()V
+	public fun <init> (ZJ)V
+	public synthetic fun <init> (ZJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()J
+	public final fun copy (ZJ)Lbr/wgc/omnibackend/core/model/database/presence/PresenceStateRequest;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/model/database/presence/PresenceStateRequest;ZJILjava/lang/Object;)Lbr/wgc/omnibackend/core/model/database/presence/PresenceStateRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLastSeen ()J
+	public fun hashCode ()I
+	public final fun isOnline ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/model/firestore/FilterRequest {
+	public fun <init> (Ljava/lang/String;Lbr/wgc/omnibackend/core/model/firestore/OperatorType;Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public final fun component3 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/String;Lbr/wgc/omnibackend/core/model/firestore/OperatorType;Ljava/lang/Object;)Lbr/wgc/omnibackend/core/model/firestore/FilterRequest;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/model/firestore/FilterRequest;Ljava/lang/String;Lbr/wgc/omnibackend/core/model/firestore/OperatorType;Ljava/lang/Object;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/model/firestore/FilterRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getField ()Ljava/lang/String;
+	public final fun getOperatorType ()Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/model/firestore/OperatorType : java/lang/Enum {
+	public static final field ARRAY_CONTAINS Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public static final field ARRAY_CONTAINS_ANY Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public static final field EQUAL_TO Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public static final field GREATER_THAN Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public static final field GREATER_THAN_OR_EQUAL_TO Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public static final field IN Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public static final field LESS_THAN Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public static final field LESS_THAN_OR_EQUAL_TO Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public static final field NOT_EQUAL_TO Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public static final field NOT_IN Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+	public static fun values ()[Lbr/wgc/omnibackend/core/model/firestore/OperatorType;
+}
+
+public final class br/wgc/omnibackend/core/model/messaging/OmniPushMessage {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;J)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/util/Map;
+	public final fun component6 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;J)Lbr/wgc/omnibackend/core/model/messaging/OmniPushMessage;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/model/messaging/OmniPushMessage;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;JILjava/lang/Object;)Lbr/wgc/omnibackend/core/model/messaging/OmniPushMessage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBody ()Ljava/lang/String;
+	public final fun getDataPayload ()Ljava/util/Map;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getImageUrl ()Ljava/lang/String;
+	public final fun getTimestamp ()J
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class br/wgc/omnibackend/core/network/NetworkMonitor {
+	public abstract fun isOnline ()Lkotlinx/coroutines/flow/Flow;
+}
+
+public abstract interface class br/wgc/omnibackend/core/offline/MutationQueueRepository {
+	public abstract fun clearAll (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun enqueue (Lbr/wgc/omnibackend/core/offline/PendingMutation;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getPendingMutations (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun remove (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/core/offline/MutationType : java/lang/Enum {
+	public static final field ADD Lbr/wgc/omnibackend/core/offline/MutationType;
+	public static final field DELETE Lbr/wgc/omnibackend/core/offline/MutationType;
+	public static final field UPDATE Lbr/wgc/omnibackend/core/offline/MutationType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lbr/wgc/omnibackend/core/offline/MutationType;
+	public static fun values ()[Lbr/wgc/omnibackend/core/offline/MutationType;
+}
+
+public final class br/wgc/omnibackend/core/offline/OfflineFirstRepository : br/wgc/omnibackend/core/repository/FirestoreRepository {
+	public fun <init> (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/offline/MutationQueueRepository;Lbr/wgc/omnibackend/core/network/NetworkMonitor;Lkotlinx/coroutines/CoroutineScope;Lcom/google/gson/Gson;)V
+	public synthetic fun <init> (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/offline/MutationQueueRepository;Lbr/wgc/omnibackend/core/network/NetworkMonitor;Lkotlinx/coroutines/CoroutineScope;Lcom/google/gson/Gson;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun addDocument (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun deleteDocument (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun findDocuments (Ljava/lang/String;Ljava/util/List;Ljava/lang/Class;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getDocument (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun listenToCollection (Ljava/lang/String;Ljava/util/List;Ljava/lang/Class;)Lkotlinx/coroutines/flow/Flow;
+	public fun listenToDocument (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)Lkotlinx/coroutines/flow/Flow;
+	public final fun syncPendingMutations (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateDocument (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/core/offline/PendingMutation {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lbr/wgc/omnibackend/core/offline/MutationType;Ljava/lang/String;J)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lbr/wgc/omnibackend/core/offline/MutationType;Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lbr/wgc/omnibackend/core/offline/MutationType;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lbr/wgc/omnibackend/core/offline/MutationType;Ljava/lang/String;J)Lbr/wgc/omnibackend/core/offline/PendingMutation;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/offline/PendingMutation;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lbr/wgc/omnibackend/core/offline/MutationType;Ljava/lang/String;JILjava/lang/Object;)Lbr/wgc/omnibackend/core/offline/PendingMutation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCollection ()Ljava/lang/String;
+	public final fun getDocumentId ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getPayloadJson ()Ljava/lang/String;
+	public final fun getTimestamp ()J
+	public final fun getType ()Lbr/wgc/omnibackend/core/offline/MutationType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/AnalyticsRepository {
+	public abstract fun logEvent (Ljava/lang/String;Ljava/util/Map;)V
+	public abstract fun setUserId (Ljava/lang/String;)V
+	public abstract fun setUserProperty (Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun trackAppOpen ()V
+	public abstract fun trackScreenView (Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun trackScreenView$default (Lbr/wgc/omnibackend/core/repository/AnalyticsRepository;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
+public final class br/wgc/omnibackend/core/repository/AnalyticsRepository$DefaultImpls {
+	public static synthetic fun trackScreenView$default (Lbr/wgc/omnibackend/core/repository/AnalyticsRepository;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/AuthRepository {
+	public abstract fun createUser (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun deleteUser (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getAuthState ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getCurrentUser ()Lbr/wgc/omnibackend/core/model/OmniUser;
+	public abstract fun isUserLogged (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun login (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun loginAnonymously (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun reauthenticate (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun registerEmailWithPassword (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun resetPassword (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendEmailVerification (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun signInWithCredential (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun signInWithGoogle (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun signOut (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateEmail (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updatePassword (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateProfile (Ljava/lang/String;Landroid/net/Uri;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/core/repository/AuthRepository$DefaultImpls {
+	public static fun signInWithCredential (Lbr/wgc/omnibackend/core/repository/AuthRepository;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/FeatureFlagRepository {
+	public abstract fun fetchAndActivate (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getBoolean (Ljava/lang/String;Z)Z
+	public static synthetic fun getBoolean$default (Lbr/wgc/omnibackend/core/repository/FeatureFlagRepository;Ljava/lang/String;ZILjava/lang/Object;)Z
+	public abstract fun getLong (Ljava/lang/String;J)J
+	public static synthetic fun getLong$default (Lbr/wgc/omnibackend/core/repository/FeatureFlagRepository;Ljava/lang/String;JILjava/lang/Object;)J
+	public abstract fun getString (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun getString$default (Lbr/wgc/omnibackend/core/repository/FeatureFlagRepository;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/repository/FeatureFlagRepository$DefaultImpls {
+	public static synthetic fun getBoolean$default (Lbr/wgc/omnibackend/core/repository/FeatureFlagRepository;Ljava/lang/String;ZILjava/lang/Object;)Z
+	public static synthetic fun getLong$default (Lbr/wgc/omnibackend/core/repository/FeatureFlagRepository;Ljava/lang/String;JILjava/lang/Object;)J
+	public static synthetic fun getString$default (Lbr/wgc/omnibackend/core/repository/FeatureFlagRepository;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/FirestoreRepository {
+	public abstract fun addDocument (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun addDocument$default (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun deleteDocument (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun findDocuments (Ljava/lang/String;Ljava/util/List;Ljava/lang/Class;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getDocument (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun listenToCollection (Ljava/lang/String;Ljava/util/List;Ljava/lang/Class;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun listenToDocument (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun updateDocument (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/core/repository/FirestoreRepository$DefaultImpls {
+	public static synthetic fun addDocument$default (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/PushNotificationRepository {
+	public abstract fun getNotificationEvents ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getPushToken (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun subscribeToTopic (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun unsubscribeFromTopic (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/RealtimeDatabaseRepository {
+	public abstract fun geo ()Lbr/wgc/omnibackend/core/repository/realtime/GeolocationRepository;
+	public abstract fun messages ()Lbr/wgc/omnibackend/core/repository/realtime/MessageRepository;
+	public abstract fun presence ()Lbr/wgc/omnibackend/core/repository/realtime/PresenceRepository;
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/RemoteConfigRepository {
+	public abstract fun detectedUpdateFlagInLive (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;)V
+	public abstract fun fetchAndActivate (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getBoolean (Ljava/lang/String;)Lbr/wgc/omnibackend/core/utils/DataResult;
+	public abstract fun getDouble (Ljava/lang/String;)Lbr/wgc/omnibackend/core/utils/DataResult;
+	public abstract fun getLong (Ljava/lang/String;)Lbr/wgc/omnibackend/core/utils/DataResult;
+	public abstract fun getString (Ljava/lang/String;)Lbr/wgc/omnibackend/core/utils/DataResult;
+	public abstract fun observeKeyUpdates (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/StorageRepository {
+	public abstract fun delete (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getDownloadUrl (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun uploadFile (Ljava/lang/String;Landroid/net/Uri;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun uploadFile (Ljava/lang/String;Ljava/io/InputStream;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun uploadFile (Ljava/lang/String;[B)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun uploadFileDirect (Ljava/lang/String;Landroid/net/Uri;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun uploadFileDirect (Ljava/lang/String;[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/VertexAIRepository {
+	public abstract fun generateText (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun generateText$default (Lbr/wgc/omnibackend/core/repository/VertexAIRepository;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun generateTextStream (Ljava/lang/String;Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun generateTextStream$default (Lbr/wgc/omnibackend/core/repository/VertexAIRepository;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class br/wgc/omnibackend/core/repository/VertexAIRepository$DefaultImpls {
+	public static synthetic fun generateText$default (Lbr/wgc/omnibackend/core/repository/VertexAIRepository;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun generateTextStream$default (Lbr/wgc/omnibackend/core/repository/VertexAIRepository;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/realtime/GeolocationRepository {
+	public abstract fun trackLocation (Ljava/lang/String;Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun updateLocation (Ljava/lang/String;Ljava/lang/String;Lbr/wgc/omnibackend/core/model/database/geo/LocationRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/realtime/MessageRepository {
+	public abstract fun createConversation (Lbr/wgc/omnibackend/core/model/database/message/ConversationRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getConversations (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getMessageHistory (Ljava/lang/String;Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun getMessageHistory$default (Lbr/wgc/omnibackend/core/repository/realtime/MessageRepository;Ljava/lang/String;Ljava/lang/String;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun getMessages (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun searchUsers (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendMessage (Ljava/lang/String;Lbr/wgc/omnibackend/core/model/database/message/MessageRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateMessageStatus (Ljava/lang/String;Ljava/lang/String;Lbr/wgc/omnibackend/core/model/database/message/MessageStatus;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/core/repository/realtime/MessageRepository$DefaultImpls {
+	public static synthetic fun getMessageHistory$default (Lbr/wgc/omnibackend/core/repository/realtime/MessageRepository;Ljava/lang/String;Ljava/lang/String;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class br/wgc/omnibackend/core/repository/realtime/PresenceRepository {
+	public abstract fun goOffline (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun goOnline (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun trackPresence (Ljava/lang/String;Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class br/wgc/omnibackend/core/security/KeystoreCryptoManager {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun decrypt (Ljava/lang/String;)Ljava/lang/String;
+	public final fun encrypt (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/security/SslPinningHelper {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/security/SslPinningHelper;
+	public final fun computeSha256Pin (Ljava/security/cert/X509Certificate;)Ljava/lang/String;
+	public final fun createPinningTrustManager (Ljava/util/Set;Ljavax/net/ssl/X509TrustManager;)Ljavax/net/ssl/X509TrustManager;
+}
+
+public final class br/wgc/omnibackend/core/storage/ClientSideEncryptedStorageRepository : br/wgc/omnibackend/core/repository/StorageRepository {
+	public fun <init> (Lbr/wgc/omnibackend/core/repository/StorageRepository;Lbr/wgc/omnibackend/core/security/KeystoreCryptoManager;Landroid/content/Context;)V
+	public final fun decryptDownloadedData ([B)Ljava/lang/String;
+	public fun delete (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getDownloadUrl (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun uploadFile (Ljava/lang/String;Landroid/net/Uri;)Lkotlinx/coroutines/flow/Flow;
+	public fun uploadFile (Ljava/lang/String;Ljava/io/InputStream;)Lkotlinx/coroutines/flow/Flow;
+	public fun uploadFile (Ljava/lang/String;[B)Lkotlinx/coroutines/flow/Flow;
+	public fun uploadFileDirect (Ljava/lang/String;Landroid/net/Uri;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun uploadFileDirect (Ljava/lang/String;[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class br/wgc/omnibackend/core/telemetry/TelemetryProvider {
+	public abstract fun log (Ljava/lang/String;)V
+	public abstract fun recordError (Lbr/wgc/omnibackend/core/utils/AppError;Ljava/util/Map;)V
+	public static synthetic fun recordError$default (Lbr/wgc/omnibackend/core/telemetry/TelemetryProvider;Lbr/wgc/omnibackend/core/utils/AppError;Ljava/util/Map;ILjava/lang/Object;)V
+	public abstract fun recordException (Ljava/lang/Throwable;Ljava/util/Map;)V
+	public static synthetic fun recordException$default (Lbr/wgc/omnibackend/core/telemetry/TelemetryProvider;Ljava/lang/Throwable;Ljava/util/Map;ILjava/lang/Object;)V
+	public abstract fun setAttribute (Ljava/lang/String;Ljava/lang/Object;)V
+	public abstract fun setUserId (Ljava/lang/String;)V
+}
+
+public final class br/wgc/omnibackend/core/telemetry/TelemetryProvider$DefaultImpls {
+	public static synthetic fun recordError$default (Lbr/wgc/omnibackend/core/telemetry/TelemetryProvider;Lbr/wgc/omnibackend/core/utils/AppError;Ljava/util/Map;ILjava/lang/Object;)V
+	public static synthetic fun recordException$default (Lbr/wgc/omnibackend/core/telemetry/TelemetryProvider;Ljava/lang/Throwable;Ljava/util/Map;ILjava/lang/Object;)V
+}
+
+public final class br/wgc/omnibackend/core/telemetry/TraceContext {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/telemetry/TraceContext;
+	public final fun createTraceParent ()Ljava/lang/String;
+	public final fun extractTraceId (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/AppError {
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/AppError$Auth : br/wgc/omnibackend/core/utils/AppError {
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Auth$EmailAlreadyInUse : br/wgc/omnibackend/core/utils/AppError$Auth {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Auth$EmailAlreadyInUse;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Auth$EmailSendFailed : br/wgc/omnibackend/core/utils/AppError$Auth {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Auth$EmailSendFailed;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Auth$Generic : br/wgc/omnibackend/core/utils/AppError$Auth {
+	public fun <init> (Ljava/lang/Exception;)V
+	public final fun component1 ()Ljava/lang/Exception;
+	public final fun copy (Ljava/lang/Exception;)Lbr/wgc/omnibackend/core/utils/AppError$Auth$Generic;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/AppError$Auth$Generic;Ljava/lang/Exception;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/AppError$Auth$Generic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getException ()Ljava/lang/Exception;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Auth$InvalidActionCode : br/wgc/omnibackend/core/utils/AppError$Auth {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Auth$InvalidActionCode;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Auth$InvalidCredentials : br/wgc/omnibackend/core/utils/AppError$Auth {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Auth$InvalidCredentials;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Auth$MultiFactorRequired : br/wgc/omnibackend/core/utils/AppError$Auth {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Exception;)V
+	public synthetic fun <init> (Ljava/lang/Exception;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Exception;
+	public final fun copy (Ljava/lang/Exception;)Lbr/wgc/omnibackend/core/utils/AppError$Auth$MultiFactorRequired;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/AppError$Auth$MultiFactorRequired;Ljava/lang/Exception;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/AppError$Auth$MultiFactorRequired;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCause ()Ljava/lang/Exception;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Auth$RecaptchaActivityMissing : br/wgc/omnibackend/core/utils/AppError$Auth {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Auth$RecaptchaActivityMissing;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Auth$RequiresRecentLogin : br/wgc/omnibackend/core/utils/AppError$Auth {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Auth$RequiresRecentLogin;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Auth$UserNotFound : br/wgc/omnibackend/core/utils/AppError$Auth {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Auth$UserNotFound;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Auth$WeakPassword : br/wgc/omnibackend/core/utils/AppError$Auth {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Auth$WeakPassword;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Auth$WebOperationFailed : br/wgc/omnibackend/core/utils/AppError$Auth {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Auth$WebOperationFailed;
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/AppError$Firestore : br/wgc/omnibackend/core/utils/AppError {
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Firestore$Aborted : br/wgc/omnibackend/core/utils/AppError$Firestore {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Firestore$Aborted;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Firestore$DocumentNotFound : br/wgc/omnibackend/core/utils/AppError$Firestore {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Firestore$DocumentNotFound;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Firestore$Generic : br/wgc/omnibackend/core/utils/AppError$Firestore {
+	public fun <init> (Ljava/lang/Exception;)V
+	public final fun component1 ()Ljava/lang/Exception;
+	public final fun copy (Ljava/lang/Exception;)Lbr/wgc/omnibackend/core/utils/AppError$Firestore$Generic;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/AppError$Firestore$Generic;Ljava/lang/Exception;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/AppError$Firestore$Generic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getException ()Ljava/lang/Exception;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Firestore$PermissionDenied : br/wgc/omnibackend/core/utils/AppError$Firestore {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Firestore$PermissionDenied;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Firestore$TransactionFailed : br/wgc/omnibackend/core/utils/AppError$Firestore {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Firestore$TransactionFailed;
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/AppError$Functions : br/wgc/omnibackend/core/utils/AppError {
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Functions$FunctionNotFound : br/wgc/omnibackend/core/utils/AppError$Functions {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Functions$FunctionNotFound;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Functions$Generic : br/wgc/omnibackend/core/utils/AppError$Functions {
+	public fun <init> (Ljava/lang/Exception;)V
+	public final fun component1 ()Ljava/lang/Exception;
+	public final fun copy (Ljava/lang/Exception;)Lbr/wgc/omnibackend/core/utils/AppError$Functions$Generic;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/AppError$Functions$Generic;Ljava/lang/Exception;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/AppError$Functions$Generic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getException ()Ljava/lang/Exception;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Functions$Internal : br/wgc/omnibackend/core/utils/AppError$Functions {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Functions$Internal;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Functions$Timeout : br/wgc/omnibackend/core/utils/AppError$Functions {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Functions$Timeout;
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/AppError$Generic : br/wgc/omnibackend/core/utils/AppError {
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Generic$GenericException : br/wgc/omnibackend/core/utils/AppError$Generic {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lbr/wgc/omnibackend/core/utils/AppError$Generic$GenericException;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/AppError$Generic$GenericException;Ljava/lang/String;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/AppError$Generic$GenericException;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMsg ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Generic$Network : br/wgc/omnibackend/core/utils/AppError$Generic {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Generic$Network;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Generic$Unknown : br/wgc/omnibackend/core/utils/AppError$Generic {
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lbr/wgc/omnibackend/core/utils/AppError$Generic$Unknown;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/AppError$Generic$Unknown;Ljava/lang/Throwable;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/AppError$Generic$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getThrowable ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/AppError$InAppMessaging : br/wgc/omnibackend/core/utils/AppError {
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$InAppMessaging$Generic : br/wgc/omnibackend/core/utils/AppError$InAppMessaging {
+	public fun <init> (Ljava/lang/Exception;)V
+	public final fun component1 ()Ljava/lang/Exception;
+	public final fun copy (Ljava/lang/Exception;)Lbr/wgc/omnibackend/core/utils/AppError$InAppMessaging$Generic;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/AppError$InAppMessaging$Generic;Ljava/lang/Exception;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/AppError$InAppMessaging$Generic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getException ()Ljava/lang/Exception;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$InAppMessaging$ImageFetchFailed : br/wgc/omnibackend/core/utils/AppError$InAppMessaging {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$InAppMessaging$ImageFetchFailed;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$InAppMessaging$MessageDisplayError : br/wgc/omnibackend/core/utils/AppError$InAppMessaging {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$InAppMessaging$MessageDisplayError;
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/AppError$Messaging : br/wgc/omnibackend/core/utils/AppError {
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Messaging$Generic : br/wgc/omnibackend/core/utils/AppError$Messaging {
+	public fun <init> (Ljava/lang/Exception;)V
+	public final fun component1 ()Ljava/lang/Exception;
+	public final fun copy (Ljava/lang/Exception;)Lbr/wgc/omnibackend/core/utils/AppError$Messaging$Generic;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/AppError$Messaging$Generic;Ljava/lang/Exception;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/AppError$Messaging$Generic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getException ()Ljava/lang/Exception;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Messaging$SendMessageFailed : br/wgc/omnibackend/core/utils/AppError$Messaging {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Messaging$SendMessageFailed;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Messaging$TokenFetchFailed : br/wgc/omnibackend/core/utils/AppError$Messaging {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Messaging$TokenFetchFailed;
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase : br/wgc/omnibackend/core/utils/AppError {
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$DataStale : br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$DataStale;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$Disconnected : br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$Disconnected;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$ExpiredToken : br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$ExpiredToken;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$Generic : br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase {
+	public fun <init> (Ljava/lang/Exception;)V
+	public final fun component1 ()Ljava/lang/Exception;
+	public final fun copy (Ljava/lang/Exception;)Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$Generic;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$Generic;Ljava/lang/Exception;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$Generic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getException ()Ljava/lang/Exception;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$InvalidToken : br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$InvalidToken;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$MaxRetries : br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$MaxRetries;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$OperationFailed : br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$OperationFailed;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$OverriddenBySet : br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$OverriddenBySet;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$PermissionDenied : br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$PermissionDenied;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$Unavailable : br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$Unavailable;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$WriteCanceled : br/wgc/omnibackend/core/utils/AppError$RealtimeDatabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RealtimeDatabase$WriteCanceled;
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/AppError$RemoteConfig : br/wgc/omnibackend/core/utils/AppError {
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RemoteConfig$FetchFailure : br/wgc/omnibackend/core/utils/AppError$RemoteConfig {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RemoteConfig$FetchFailure;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RemoteConfig$MessageInvalid : br/wgc/omnibackend/core/utils/AppError$RemoteConfig {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RemoteConfig$MessageInvalid;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RemoteConfig$StreamError : br/wgc/omnibackend/core/utils/AppError$RemoteConfig {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RemoteConfig$StreamError;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RemoteConfig$Unknown : br/wgc/omnibackend/core/utils/AppError$RemoteConfig {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RemoteConfig$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$RemoteConfig$UpdateUnavailable : br/wgc/omnibackend/core/utils/AppError$RemoteConfig {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$RemoteConfig$UpdateUnavailable;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/AppError$Storage : br/wgc/omnibackend/core/utils/AppError {
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Storage$BucketNotFound : br/wgc/omnibackend/core/utils/AppError$Storage {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Storage$BucketNotFound;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Storage$DownloadFailed : br/wgc/omnibackend/core/utils/AppError$Storage {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Storage$DownloadFailed;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Storage$Generic : br/wgc/omnibackend/core/utils/AppError$Storage {
+	public fun <init> (Ljava/lang/Exception;)V
+	public final fun component1 ()Ljava/lang/Exception;
+	public final fun copy (Ljava/lang/Exception;)Lbr/wgc/omnibackend/core/utils/AppError$Storage$Generic;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/AppError$Storage$Generic;Ljava/lang/Exception;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/AppError$Storage$Generic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getException ()Ljava/lang/Exception;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Storage$ObjectNotFound : br/wgc/omnibackend/core/utils/AppError$Storage {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Storage$ObjectNotFound;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Storage$PermissionDenied : br/wgc/omnibackend/core/utils/AppError$Storage {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Storage$PermissionDenied;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Storage$ProjectNotFound : br/wgc/omnibackend/core/utils/AppError$Storage {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Storage$ProjectNotFound;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Storage$QuotaExceeded : br/wgc/omnibackend/core/utils/AppError$Storage {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Storage$QuotaExceeded;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$Storage$UploadCancelled : br/wgc/omnibackend/core/utils/AppError$Storage {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$Storage$UploadCancelled;
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/AppError$VertexAI : br/wgc/omnibackend/core/utils/AppError {
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$VertexAI$Generic : br/wgc/omnibackend/core/utils/AppError$VertexAI {
+	public fun <init> (Ljava/lang/Exception;)V
+	public final fun component1 ()Ljava/lang/Exception;
+	public final fun copy (Ljava/lang/Exception;)Lbr/wgc/omnibackend/core/utils/AppError$VertexAI$Generic;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/AppError$VertexAI$Generic;Ljava/lang/Exception;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/AppError$VertexAI$Generic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getException ()Ljava/lang/Exception;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$VertexAI$InvalidApiKey : br/wgc/omnibackend/core/utils/AppError$VertexAI {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$VertexAI$InvalidApiKey;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$VertexAI$ModelUnavailable : br/wgc/omnibackend/core/utils/AppError$VertexAI {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$VertexAI$ModelUnavailable;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$VertexAI$QuotaExceeded : br/wgc/omnibackend/core/utils/AppError$VertexAI {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$VertexAI$QuotaExceeded;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppError$VertexAI$ResponseBlocked : br/wgc/omnibackend/core/utils/AppError$VertexAI {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/utils/AppError$VertexAI$ResponseBlocked;
+}
+
+public final class br/wgc/omnibackend/core/utils/AppErrorKt {
+	public static final fun getMessage (Lbr/wgc/omnibackend/core/utils/AppError;)Ljava/lang/String;
+}
+
+public abstract interface class br/wgc/omnibackend/core/utils/DataResult {
+	public fun errorOrNull ()Lbr/wgc/omnibackend/core/utils/AppError;
+	public fun getOrNull ()Ljava/lang/Object;
+	public fun isFailure ()Z
+	public fun isSuccess ()Z
+}
+
+public final class br/wgc/omnibackend/core/utils/DataResult$DefaultImpls {
+	public static fun errorOrNull (Lbr/wgc/omnibackend/core/utils/DataResult;)Lbr/wgc/omnibackend/core/utils/AppError;
+	public static fun getOrNull (Lbr/wgc/omnibackend/core/utils/DataResult;)Ljava/lang/Object;
+	public static fun isFailure (Lbr/wgc/omnibackend/core/utils/DataResult;)Z
+	public static fun isSuccess (Lbr/wgc/omnibackend/core/utils/DataResult;)Z
+}
+
+public final class br/wgc/omnibackend/core/utils/DataResult$Failure : br/wgc/omnibackend/core/utils/DataResult {
+	public fun <init> (Lbr/wgc/omnibackend/core/utils/AppError;)V
+	public final fun component1 ()Lbr/wgc/omnibackend/core/utils/AppError;
+	public final fun copy (Lbr/wgc/omnibackend/core/utils/AppError;)Lbr/wgc/omnibackend/core/utils/DataResult$Failure;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/DataResult$Failure;Lbr/wgc/omnibackend/core/utils/AppError;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/DataResult$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun errorOrNull ()Lbr/wgc/omnibackend/core/utils/AppError;
+	public final fun getError ()Lbr/wgc/omnibackend/core/utils/AppError;
+	public synthetic fun getOrNull ()Ljava/lang/Object;
+	public fun getOrNull ()Ljava/lang/Void;
+	public fun hashCode ()I
+	public fun isFailure ()Z
+	public fun isSuccess ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/DataResult$Success : br/wgc/omnibackend/core/utils/DataResult {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lbr/wgc/omnibackend/core/utils/DataResult$Success;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/core/utils/DataResult$Success;Ljava/lang/Object;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/utils/DataResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun errorOrNull ()Lbr/wgc/omnibackend/core/utils/AppError;
+	public final fun getData ()Ljava/lang/Object;
+	public fun getOrNull ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun isFailure ()Z
+	public fun isSuccess ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/utils/DataResultKt {
+	public static final fun fold (Lbr/wgc/omnibackend/core/utils/DataResult;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun map (Lbr/wgc/omnibackend/core/utils/DataResult;Lkotlin/jvm/functions/Function1;)Lbr/wgc/omnibackend/core/utils/DataResult;
+	public static final fun onFailure (Lbr/wgc/omnibackend/core/utils/DataResult;Lkotlin/jvm/functions/Function1;)Lbr/wgc/omnibackend/core/utils/DataResult;
+	public static final fun onSuccess (Lbr/wgc/omnibackend/core/utils/DataResult;Lkotlin/jvm/functions/Function1;)Lbr/wgc/omnibackend/core/utils/DataResult;
+}
+

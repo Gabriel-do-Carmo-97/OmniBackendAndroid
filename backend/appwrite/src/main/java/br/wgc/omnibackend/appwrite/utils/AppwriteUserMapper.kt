@@ -32,7 +32,7 @@ internal object AppwriteUserMapper {
             displayName = user.name.orEmpty(),
             photoUrl = null,
             isEmailVerified = user.emailVerification,
-            isAnonymous = anonymous
+            isAnonymous = anonymous,
         )
     }
 }

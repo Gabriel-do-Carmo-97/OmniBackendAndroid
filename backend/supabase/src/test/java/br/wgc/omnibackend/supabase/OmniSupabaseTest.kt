@@ -42,7 +42,7 @@ class OmniSupabaseTest {
             url = testUrl,
             anonKey = testKey,
             sessionManager = io.github.jan.supabase.auth.MemorySessionManager(),
-            codeVerifierCache = io.github.jan.supabase.auth.MemoryCodeVerifierCache()
+            codeVerifierCache = io.github.jan.supabase.auth.MemoryCodeVerifierCache(),
         )
 
         assertTrue(OmniSupabase.initialized)

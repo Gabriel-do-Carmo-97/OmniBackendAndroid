@@ -23,9 +23,7 @@ import javax.inject.Inject
  *
  * @property firestore Instância do [FirebaseFirestore] injetada.
  */
-class FirestoreRepositoryImpl @Inject constructor(
-    private val firestore: FirebaseFirestore
-) : FirestoreRepository {
+class FirestoreRepositoryImpl @Inject constructor(private val firestore: FirebaseFirestore) : FirestoreRepository {
 
     /**
      * Adiciona ou cria um novo documento no Cloud Firestore.
@@ -36,11 +34,7 @@ class FirestoreRepositoryImpl @Inject constructor(
      * @param customId Identificador opcional. Se nulo, o Firestore gera um hash alfanumérico automático.
      * @return [DataResult.Success] contendo o ID do documento.
      */
-    override suspend fun <T : Any> addDocument(
-        collection: String,
-        data: T,
-        customId: String?
-    ): DataResult<String> = runCatching {
+    override suspend fun <T : Any> addDocument(collection: String, data: T, customId: String?): DataResult<String> = runCatching {
         val documentReference = if (customId != null) {
             firestore.collection(collection).document(customId)
         } else {
@@ -61,11 +55,7 @@ class FirestoreRepositoryImpl @Inject constructor(
      * @param clazz Classe de destino para a desserialização.
      * @return [DataResult.Success] com o objeto recuperado ou `null` se não existir.
      */
-    override suspend fun <T : Any> getDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): DataResult<T?> = runCatching {
+    override suspend fun <T : Any> getDocument(collection: String, documentId: String, clazz: Class<T>): DataResult<T?> = runCatching {
         val snapshot = firestore.collection(collection).document(documentId).get().await()
         DataResult.Success(snapshot.toObject(clazz))
     }.getOrElse {
@@ -79,11 +69,7 @@ class FirestoreRepositoryImpl @Inject constructor(
      * @param documentId Identificador do documento.
      * @param data Mapa de pares campo-valor a serem alterados.
      */
-    override suspend fun updateDocument(
-        collection: String,
-        documentId: String,
-        data: Map<String, Any>
-    ): DataResult<Unit> = runCatching {
+    override suspend fun updateDocument(collection: String, documentId: String, data: Map<String, Any>): DataResult<Unit> = runCatching {
         firestore.collection(collection).document(documentId).update(data).await()
         DataResult.Success(Unit)
     }.getOrElse {
@@ -96,10 +82,7 @@ class FirestoreRepositoryImpl @Inject constructor(
      * @param collection Nome da coleção.
      * @param documentId Identificador do documento a excluir.
      */
-    override suspend fun deleteDocument(
-        collection: String,
-        documentId: String
-    ): DataResult<Unit> = runCatching {
+    override suspend fun deleteDocument(collection: String, documentId: String): DataResult<Unit> = runCatching {
         firestore.collection(collection).document(documentId).delete().await()
         DataResult.Success(Unit)
     }.getOrElse {
@@ -115,21 +98,18 @@ class FirestoreRepositoryImpl @Inject constructor(
      * @param clazz Classe de destino para mapeamento reflexivo.
      * @return [DataResult.Success] contendo a lista dos objetos correspondentes.
      */
-    override suspend fun <T : Any> findDocuments(
-        collection: String,
-        filters: List<FilterRequest>,
-        clazz: Class<T>
-    ): DataResult<List<T>> = runCatching {
-        var query: Query = firestore.collection(collection)
-        filters.forEach { filter ->
-            query = applyFilter(query, filter)
+    override suspend fun <T : Any> findDocuments(collection: String, filters: List<FilterRequest>, clazz: Class<T>): DataResult<List<T>> =
+        runCatching {
+            var query: Query = firestore.collection(collection)
+            filters.forEach { filter ->
+                query = applyFilter(query, filter)
+            }
+            val querySnapshot = query.get().await()
+            val resultList = querySnapshot.documents.mapNotNull { it.toObject(clazz) }
+            DataResult.Success(resultList)
+        }.getOrElse {
+            DataResult.Failure(mapExceptionToAppError(it))
         }
-        val querySnapshot = query.get().await()
-        val resultList = querySnapshot.documents.mapNotNull { it.toObject(clazz) }
-        DataResult.Success(resultList)
-    }.getOrElse {
-        DataResult.Failure(mapExceptionToAppError(it))
-    }
 
     /**
      * Escuta atualizações de um documento em tempo real via snapshot listener.
@@ -140,11 +120,7 @@ class FirestoreRepositoryImpl @Inject constructor(
      * @param clazz Classe de destino.
      * @return [Flow] que emite atualizações contínuas do documento.
      */
-    override fun <T : Any> listenToDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): Flow<DataResult<T?>> = callbackFlow {
+    override fun <T : Any> listenToDocument(collection: String, documentId: String, clazz: Class<T>): Flow<DataResult<T?>> = callbackFlow {
         val listenerRegistration = firestore.collection(collection).document(documentId)
             .addSnapshotListener { snapshot, exception ->
                 if (exception != null) {
@@ -170,7 +146,7 @@ class FirestoreRepositoryImpl @Inject constructor(
     override fun <T : Any> listenToCollection(
         collection: String,
         filters: List<FilterRequest>,
-        clazz: Class<T>
+        clazz: Class<T>,
     ): Flow<DataResult<List<T>>> = callbackFlow {
         var query: Query = firestore.collection(collection)
         filters.forEach { filter ->
@@ -190,32 +166,28 @@ class FirestoreRepositoryImpl @Inject constructor(
         awaitClose { listenerRegistration.remove() }
     }
 
-    private fun applyFilter(query: Query, filter: FilterRequest): Query {
-        return when (filter.operatorType) {
-            OperatorType.EQUAL_TO -> query.whereEqualTo(filter.field, filter.value)
-            OperatorType.NOT_EQUAL_TO -> query.whereNotEqualTo(filter.field, filter.value)
-            OperatorType.GREATER_THAN -> query.whereGreaterThan(filter.field, filter.value)
-            OperatorType.LESS_THAN -> query.whereLessThan(filter.field, filter.value)
-            OperatorType.GREATER_THAN_OR_EQUAL_TO -> query.whereGreaterThanOrEqualTo(filter.field, filter.value)
-            OperatorType.LESS_THAN_OR_EQUAL_TO -> query.whereLessThanOrEqualTo(filter.field, filter.value)
-            OperatorType.ARRAY_CONTAINS -> query.whereArrayContains(filter.field, filter.value)
-            OperatorType.ARRAY_CONTAINS_ANY -> (filter.value as? List<*>)?.let { query.whereArrayContainsAny(filter.field, it) } ?: query
-            OperatorType.IN -> (filter.value as? List<*>)?.let { query.whereIn(filter.field, it) } ?: query
-            OperatorType.NOT_IN -> (filter.value as? List<*>)?.let { query.whereNotIn(filter.field, it) } ?: query
-        }
+    private fun applyFilter(query: Query, filter: FilterRequest): Query = when (filter.operatorType) {
+        OperatorType.EQUAL_TO -> query.whereEqualTo(filter.field, filter.value)
+        OperatorType.NOT_EQUAL_TO -> query.whereNotEqualTo(filter.field, filter.value)
+        OperatorType.GREATER_THAN -> query.whereGreaterThan(filter.field, filter.value)
+        OperatorType.LESS_THAN -> query.whereLessThan(filter.field, filter.value)
+        OperatorType.GREATER_THAN_OR_EQUAL_TO -> query.whereGreaterThanOrEqualTo(filter.field, filter.value)
+        OperatorType.LESS_THAN_OR_EQUAL_TO -> query.whereLessThanOrEqualTo(filter.field, filter.value)
+        OperatorType.ARRAY_CONTAINS -> query.whereArrayContains(filter.field, filter.value)
+        OperatorType.ARRAY_CONTAINS_ANY -> (filter.value as? List<*>)?.let { query.whereArrayContainsAny(filter.field, it) } ?: query
+        OperatorType.IN -> (filter.value as? List<*>)?.let { query.whereIn(filter.field, it) } ?: query
+        OperatorType.NOT_IN -> (filter.value as? List<*>)?.let { query.whereNotIn(filter.field, it) } ?: query
     }
 
-    private fun mapExceptionToAppError(throwable: Throwable): AppError {
-        return when (throwable) {
-            is FirebaseFirestoreException -> when (throwable.code) {
-                FirebaseFirestoreException.Code.PERMISSION_DENIED -> AppError.Firestore.PermissionDenied
-                FirebaseFirestoreException.Code.NOT_FOUND -> AppError.Firestore.DocumentNotFound
-                FirebaseFirestoreException.Code.ABORTED -> AppError.Firestore.Aborted
-                else -> AppError.Firestore.Generic(throwable)
-            }
-            is IOException -> AppError.Generic.Network
-            is Exception -> AppError.Generic.Unknown(throwable)
-            else -> AppError.Generic.Unknown(throwable)
+    private fun mapExceptionToAppError(throwable: Throwable): AppError = when (throwable) {
+        is FirebaseFirestoreException -> when (throwable.code) {
+            FirebaseFirestoreException.Code.PERMISSION_DENIED -> AppError.Firestore.PermissionDenied
+            FirebaseFirestoreException.Code.NOT_FOUND -> AppError.Firestore.DocumentNotFound
+            FirebaseFirestoreException.Code.ABORTED -> AppError.Firestore.Aborted
+            else -> AppError.Firestore.Generic(throwable)
         }
+        is IOException -> AppError.Generic.Network
+        is Exception -> AppError.Generic.Unknown(throwable)
+        else -> AppError.Generic.Unknown(throwable)
     }
 }

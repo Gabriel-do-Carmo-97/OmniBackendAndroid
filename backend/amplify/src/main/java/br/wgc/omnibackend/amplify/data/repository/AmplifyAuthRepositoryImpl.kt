@@ -65,7 +65,7 @@ internal class AmplifyAuthRepositoryImpl : AuthRepository {
                 email = email,
                 displayName = email.substringBefore("@"),
                 isEmailVerified = false,
-                isAnonymous = false
+                isAnonymous = false,
             )
         }
         activeUser = user
@@ -83,16 +83,13 @@ internal class AmplifyAuthRepositoryImpl : AuthRepository {
             email = email,
             displayName = email.substringBefore("@"),
             isEmailVerified = result.isSignUpComplete,
-            isAnonymous = false
+            isAnonymous = false,
         )
         activeUser = user
         user
     }
 
-    override suspend fun registerEmailWithPassword(
-        email: String,
-        pass: String
-    ): DataResult<RegisterUserResponse> = runCatchingAuth {
+    override suspend fun registerEmailWithPassword(email: String, pass: String): DataResult<RegisterUserResponse> = runCatchingAuth {
         val options = AuthSignUpOptions.builder()
             .userAttribute(AuthUserAttributeKey.email(), email)
             .build()
@@ -106,38 +103,38 @@ internal class AmplifyAuthRepositoryImpl : AuthRepository {
             provider = "amplify",
             isAnonymous = false,
             isEmailVerified = result.isSignUpComplete,
-            isNewUser = true
+            isNewUser = true,
         )
     }
 
     override suspend fun resetPassword(email: String): DataResult<Unit> = runCatchingAuth {
-        val _res = Amplify.Auth.resetPassword(email)
+        Amplify.Auth.resetPassword(email)
     }
 
     override suspend fun updatePassword(newPassword: String): DataResult<Unit> = runCatchingAuth {
-        val _res = Amplify.Auth.updatePassword("", newPassword)
+        Amplify.Auth.updatePassword("", newPassword)
     }
 
     override suspend fun sendEmailVerification(): DataResult<Unit> = runCatchingAuth {
         val email = activeUser?.email.orEmpty()
-        val _res = Amplify.Auth.resendSignUpCode(email)
+        Amplify.Auth.resendSignUpCode(email)
     }
 
     override suspend fun updateProfile(name: String?, photoUri: Uri?): DataResult<Unit> = runCatchingAuth {
         if (name != null) {
-            val _res = Amplify.Auth.updateUserAttribute(AuthUserAttribute(AuthUserAttributeKey.name(), name))
+            Amplify.Auth.updateUserAttribute(AuthUserAttribute(AuthUserAttributeKey.name(), name))
             activeUser = activeUser?.copy(displayName = name)
         }
     }
 
     override suspend fun updateEmail(newEmail: String): DataResult<Unit> = runCatchingAuth {
-        val _res = Amplify.Auth.updateUserAttribute(AuthUserAttribute(AuthUserAttributeKey.email(), newEmail))
+        Amplify.Auth.updateUserAttribute(AuthUserAttribute(AuthUserAttributeKey.email(), newEmail))
         activeUser = activeUser?.copy(email = newEmail)
     }
 
     override suspend fun reauthenticate(password: String): DataResult<Unit> = runCatchingAuth {
         val email = activeUser?.email.orEmpty()
-        val _res = Amplify.Auth.signIn(email, password)
+        Amplify.Auth.signIn(email, password)
     }
 
     override suspend fun loginAnonymously(): DataResult<String> = runCatchingAuth {
@@ -149,7 +146,7 @@ internal class AmplifyAuthRepositoryImpl : AuthRepository {
             email = "",
             displayName = "Guest",
             isEmailVerified = false,
-            isAnonymous = true
+            isAnonymous = true,
         )
         activeUser = anonUser
         identityId
@@ -161,28 +158,24 @@ internal class AmplifyAuthRepositoryImpl : AuthRepository {
     }
 
     override suspend fun deleteUser(): DataResult<Unit> = runCatchingAuth {
-        val _res = Amplify.Auth.deleteUser()
+        Amplify.Auth.deleteUser()
         activeUser = null
     }
 
-    override suspend fun signInWithGoogle(idToken: String): DataResult<OmniUser> {
-        return DataResult.Failure(
-            AppError.Auth.Generic(
-                IllegalStateException("AWS Cognito Google Identity Federation requer Hosted UI Web / Amplify.Auth.signInWithSocialWebUI")
-            )
-        )
-    }
+    override suspend fun signInWithGoogle(idToken: String): DataResult<OmniUser> = DataResult.Failure(
+        AppError.Auth.Generic(
+            IllegalStateException("AWS Cognito Google Identity Federation requer Hosted UI Web / Amplify.Auth.signInWithSocialWebUI"),
+        ),
+    )
 
     override suspend fun signOut(): DataResult<Unit> = runCatchingAuth {
         val _res = Amplify.Auth.signOut()
         activeUser = null
     }
 
-    private suspend inline fun <T> runCatchingAuth(crossinline block: suspend () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: Exception) {
-            DataResult.Failure(AmplifyErrorMapper.mapThrowable(e, "auth"))
-        }
+    private suspend inline fun <T> runCatchingAuth(crossinline block: suspend () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: Exception) {
+        DataResult.Failure(AmplifyErrorMapper.mapThrowable(e, "auth"))
     }
 }

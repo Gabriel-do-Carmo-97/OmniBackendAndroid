@@ -24,9 +24,7 @@ import javax.inject.Inject
  *
  * @property database Instância do [FirebaseDatabase] injetada.
  */
-class MessageRepositoryImpl @Inject constructor(
-    private val database: FirebaseDatabase,
-) : MessageRepository {
+class MessageRepositoryImpl @Inject constructor(private val database: FirebaseDatabase) : MessageRepository {
     private val messagesRef = database.getReference("messages")
     private val conversationsRef = database.getReference("conversations")
     private val usersRef = database.getReference("users")
@@ -37,10 +35,7 @@ class MessageRepositoryImpl @Inject constructor(
      * @param conversationId Identificador da conversa.
      * @param message Dados da mensagem.
      */
-    override suspend fun sendMessage(
-        conversationId: String,
-        message: MessageRequest
-    ): DataResult<Unit> = runCatching {
+    override suspend fun sendMessage(conversationId: String, message: MessageRequest): DataResult<Unit> = runCatching {
         val messageId = messagesRef.child(conversationId).push().key
             ?: throw IllegalStateException("Não foi possível gerar a chave da mensagem.")
 
@@ -48,7 +43,7 @@ class MessageRepositoryImpl @Inject constructor(
 
         val updates = mapOf(
             "/messages/$conversationId/$messageId" to messageToSend,
-            "/conversations/$conversationId/lastMessage" to messageToSend
+            "/conversations/$conversationId/lastMessage" to messageToSend,
         )
 
         database.reference.updateChildren(updates).await()
@@ -81,21 +76,18 @@ class MessageRepositoryImpl @Inject constructor(
     /**
      * Obtém o histórico paginado de mensagens.
      */
-    override suspend fun getMessageHistory(
-        conversationId: String,
-        lastMessageId: String?,
-        limit: Int
-    ): DataResult<List<MessageRequest>> = runCatching {
-        var query = messagesRef.child(conversationId).orderByKey().limitToLast(limit)
-        if (lastMessageId != null) {
-            query = query.endBefore(lastMessageId)
+    override suspend fun getMessageHistory(conversationId: String, lastMessageId: String?, limit: Int): DataResult<List<MessageRequest>> =
+        runCatching {
+            var query = messagesRef.child(conversationId).orderByKey().limitToLast(limit)
+            if (lastMessageId != null) {
+                query = query.endBefore(lastMessageId)
+            }
+            val snapshot = query.get().await()
+            val messages = snapshot.children.mapNotNull { it.getValue<MessageRequest>() }
+            DataResult.Success(messages)
+        }.getOrElse { exception ->
+            DataResult.Failure(mapExceptionToAppError(exception))
         }
-        val snapshot = query.get().await()
-        val messages = snapshot.children.mapNotNull { it.getValue<MessageRequest>() }
-        DataResult.Success(messages)
-    }.getOrElse { exception ->
-        DataResult.Failure(mapExceptionToAppError(exception))
-    }
 
     /**
      * Ouve as conversas de um usuário em tempo real.
@@ -144,39 +136,32 @@ class MessageRepositoryImpl @Inject constructor(
     /**
      * Atualiza o status de entrega de uma mensagem.
      */
-    override suspend fun updateMessageStatus(
-        conversationId: String,
-        messageId: String,
-        status: MessageStatus
-    ): DataResult<Unit> = runCatching {
-        messagesRef.child(conversationId).child(messageId).child("status").setValue(status).await()
-        DataResult.Success(Unit)
-    }.getOrElse { exception ->
-        DataResult.Failure(mapExceptionToAppError(exception))
+    override suspend fun updateMessageStatus(conversationId: String, messageId: String, status: MessageStatus): DataResult<Unit> =
+        runCatching {
+            messagesRef.child(conversationId).child(messageId).child("status").setValue(status).await()
+            DataResult.Success(Unit)
+        }.getOrElse { exception ->
+            DataResult.Failure(mapExceptionToAppError(exception))
+        }
+
+    private fun mapExceptionToAppError(exception: Throwable): AppError = when (exception) {
+        is DatabaseException -> AppError.RealtimeDatabase.OperationFailed
+        is IOException -> AppError.Generic.Network
+        else -> AppError.Generic.Unknown(exception)
     }
 
-    private fun mapExceptionToAppError(exception: Throwable): AppError {
-        return when (exception) {
-            is DatabaseException -> AppError.RealtimeDatabase.OperationFailed
-            is IOException -> AppError.Generic.Network
-            else -> AppError.Generic.Unknown(exception)
-        }
-    }
-
-    private fun mapDatabaseErrorToAppError(error: DatabaseError): AppError {
-        return when (error.code) {
-            DatabaseError.PERMISSION_DENIED -> AppError.RealtimeDatabase.PermissionDenied
-            DatabaseError.DATA_STALE -> AppError.RealtimeDatabase.DataStale
-            DatabaseError.DISCONNECTED -> AppError.RealtimeDatabase.Disconnected
-            DatabaseError.EXPIRED_TOKEN -> AppError.RealtimeDatabase.ExpiredToken
-            DatabaseError.INVALID_TOKEN -> AppError.RealtimeDatabase.InvalidToken
-            DatabaseError.MAX_RETRIES -> AppError.RealtimeDatabase.MaxRetries
-            DatabaseError.OVERRIDDEN_BY_SET -> AppError.RealtimeDatabase.OverriddenBySet
-            DatabaseError.UNAVAILABLE -> AppError.RealtimeDatabase.Unavailable
-            DatabaseError.WRITE_CANCELED -> AppError.RealtimeDatabase.WriteCanceled
-            DatabaseError.NETWORK_ERROR -> AppError.Generic.Network
-            DatabaseError.OPERATION_FAILED -> AppError.RealtimeDatabase.OperationFailed
-            else -> AppError.Generic.Unknown(error.toException())
-        }
+    private fun mapDatabaseErrorToAppError(error: DatabaseError): AppError = when (error.code) {
+        DatabaseError.PERMISSION_DENIED -> AppError.RealtimeDatabase.PermissionDenied
+        DatabaseError.DATA_STALE -> AppError.RealtimeDatabase.DataStale
+        DatabaseError.DISCONNECTED -> AppError.RealtimeDatabase.Disconnected
+        DatabaseError.EXPIRED_TOKEN -> AppError.RealtimeDatabase.ExpiredToken
+        DatabaseError.INVALID_TOKEN -> AppError.RealtimeDatabase.InvalidToken
+        DatabaseError.MAX_RETRIES -> AppError.RealtimeDatabase.MaxRetries
+        DatabaseError.OVERRIDDEN_BY_SET -> AppError.RealtimeDatabase.OverriddenBySet
+        DatabaseError.UNAVAILABLE -> AppError.RealtimeDatabase.Unavailable
+        DatabaseError.WRITE_CANCELED -> AppError.RealtimeDatabase.WriteCanceled
+        DatabaseError.NETWORK_ERROR -> AppError.Generic.Network
+        DatabaseError.OPERATION_FAILED -> AppError.RealtimeDatabase.OperationFailed
+        else -> AppError.Generic.Unknown(error.toException())
     }
 }

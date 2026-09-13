@@ -17,11 +17,7 @@ interface GeolocationRepository {
      * @param location Coordenadas geográficas e timestamp da posição ([LocationRequest]).
      * @return [DataResult.Success] com o identificador da entidade atualizada.
      */
-    suspend fun updateLocation(
-        entityType: String,
-        entityId: String,
-        location: LocationRequest
-    ): DataResult<String>
+    suspend fun updateLocation(entityType: String, entityId: String, location: LocationRequest): DataResult<String>
 
     /**
      * Observa o fluxo contínuo de coordenadas de uma entidade em tempo real.

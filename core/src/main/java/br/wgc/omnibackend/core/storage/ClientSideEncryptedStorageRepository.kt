@@ -22,7 +22,7 @@ import java.io.InputStream
 class ClientSideEncryptedStorageRepository(
     private val remoteStorage: StorageRepository,
     private val cryptoManager: KeystoreCryptoManager,
-    private val context: Context
+    private val context: Context,
 ) : StorageRepository {
 
     override fun uploadFile(path: String, fileData: ByteArray): Flow<DataResult<Uri>> {
@@ -57,13 +57,9 @@ class ClientSideEncryptedStorageRepository(
         return remoteStorage.uploadFileDirect(path, encryptedString.toByteArray(Charsets.UTF_8))
     }
 
-    override suspend fun getDownloadUrl(path: String): DataResult<Uri> {
-        return remoteStorage.getDownloadUrl(path)
-    }
+    override suspend fun getDownloadUrl(path: String): DataResult<Uri> = remoteStorage.getDownloadUrl(path)
 
-    override suspend fun delete(path: String): DataResult<Unit> {
-        return remoteStorage.delete(path)
-    }
+    override suspend fun delete(path: String): DataResult<Unit> = remoteStorage.delete(path)
 
     /**
      * Baixa os bytes do arquivo criptografado do armazenamento remoto e os descriptografa localmente.

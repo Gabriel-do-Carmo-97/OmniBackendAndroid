@@ -2,9 +2,35 @@
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.binary.compatibility.validator)
+    alias(libs.plugins.spotless)
+}
+
+apiValidation {
+    ignoredProjects.addAll(listOf("app", "testing"))
+}
+
+spotless {
+    kotlin {
+        target("**/*.kt")
+        targetExclude("**/build/**", "**/.gradle/**")
+        ktlint("1.4.1").editorConfigOverride(
+            mapOf(
+                "indent_size" to "4",
+                "standard:function-naming" to "disabled",
+                "standard:no-wildcard-imports" to "disabled",
+            ),
+        )
+    }
+    kotlinGradle {
+        target("**/*.kts")
+        targetExclude("**/build/**", "**/.gradle/**")
+        ktlint("1.4.1")
+    }
 }
 
 detekt {

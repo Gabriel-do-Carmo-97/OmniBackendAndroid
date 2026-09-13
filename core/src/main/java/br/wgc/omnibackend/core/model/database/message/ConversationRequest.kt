@@ -17,5 +17,5 @@ data class ConversationRequest(
     val type: ConversationType = ConversationType.ONE_TO_ONE,
     val participants: List<String> = emptyList(),
     val lastMessage: MessageRequest? = null,
-    val unreadCount: Int = 0
+    val unreadCount: Int = 0,
 )

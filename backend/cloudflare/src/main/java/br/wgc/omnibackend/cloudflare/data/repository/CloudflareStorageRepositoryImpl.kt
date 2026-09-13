@@ -15,10 +15,7 @@ import java.net.URL
 /**
  * Implementação de [StorageRepository] enviando arquivos para Cloudflare R2 via Worker R2 endpoint.
  */
-internal class CloudflareStorageRepositoryImpl(
-    private val context: Context,
-    private val workerBaseUrl: String
-) : StorageRepository {
+internal class CloudflareStorageRepositoryImpl(private val context: Context, private val workerBaseUrl: String) : StorageRepository {
 
     override fun uploadFile(path: String, fileData: ByteArray): Flow<DataResult<Uri>> = flow {
         emit(uploadFileDirect(path, fileData))
@@ -76,11 +73,9 @@ internal class CloudflareStorageRepositoryImpl(
         Unit
     }
 
-    private inline fun <T> runCatchingStorage(block: () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: Exception) {
-            DataResult.Failure(CloudflareErrorMapper.mapThrowable(e, "storage"))
-        }
+    private inline fun <T> runCatchingStorage(block: () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: Exception) {
+        DataResult.Failure(CloudflareErrorMapper.mapThrowable(e, "storage"))
     }
 }

@@ -25,7 +25,7 @@ class OmniRestBackendTest {
 
         OmniRestBackend.initialize(
             context = mockContext,
-            baseUrl = testUrl
+            baseUrl = testUrl,
         )
 
         assertTrue(OmniRestBackend.initialized)

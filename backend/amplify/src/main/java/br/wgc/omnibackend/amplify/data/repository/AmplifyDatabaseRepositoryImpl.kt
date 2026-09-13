@@ -14,17 +14,11 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Implementação de [FirestoreRepository] simulando persistência em memória/AppSync para AWS Amplify.
  */
-internal class AmplifyDatabaseRepositoryImpl(
-    private val gson: Gson = Gson()
-) : FirestoreRepository {
+internal class AmplifyDatabaseRepositoryImpl(private val gson: Gson = Gson()) : FirestoreRepository {
 
     private val storageMap = ConcurrentHashMap<String, MutableMap<String, Any>>()
 
-    override suspend fun <T : Any> addDocument(
-        collection: String,
-        data: T,
-        customId: String?
-    ): DataResult<String> = runCatchingDb {
+    override suspend fun <T : Any> addDocument(collection: String, data: T, customId: String?): DataResult<String> = runCatchingDb {
         val docId = customId ?: UUID.randomUUID().toString()
         val dataMap = gson.fromJson<Map<String, Any>>(gson.toJson(data), Map::class.java).toMutableMap()
         dataMap["id"] = docId
@@ -33,57 +27,40 @@ internal class AmplifyDatabaseRepositoryImpl(
         docId
     }
 
-    override suspend fun <T : Any> getDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): DataResult<T?> = runCatchingDb {
+    override suspend fun <T : Any> getDocument(collection: String, documentId: String, clazz: Class<T>): DataResult<T?> = runCatchingDb {
         val collectionStore = storageMap[collection]
         val dataMap = collectionStore?.get(documentId)
         dataMap?.let { gson.fromJson(gson.toJson(it), clazz) }
     }
 
-    override suspend fun updateDocument(
-        collection: String,
-        documentId: String,
-        data: Map<String, Any>
-    ): DataResult<Unit> = runCatchingDb {
+    override suspend fun updateDocument(collection: String, documentId: String, data: Map<String, Any>): DataResult<Unit> = runCatchingDb {
         val collectionStore = storageMap[collection]
             ?: return DataResult.Failure(br.wgc.omnibackend.core.utils.AppError.Firestore.DocumentNotFound)
+
         @Suppress("UNCHECKED_CAST")
         val existing = (collectionStore[documentId] as? MutableMap<String, Any>)
             ?: return DataResult.Failure(br.wgc.omnibackend.core.utils.AppError.Firestore.DocumentNotFound)
         existing.putAll(data)
     }
 
-    override suspend fun deleteDocument(
-        collection: String,
-        documentId: String
-    ): DataResult<Unit> = runCatchingDb {
+    override suspend fun deleteDocument(collection: String, documentId: String): DataResult<Unit> = runCatchingDb {
         val collectionStore = storageMap[collection]
-        val _removed = collectionStore?.remove(documentId)
+        collectionStore?.remove(documentId)
     }
 
-    override suspend fun <T : Any> findDocuments(
-        collection: String,
-        filters: List<FilterRequest>,
-        clazz: Class<T>
-    ): DataResult<List<T>> = runCatchingDb {
-        val collectionStore = storageMap[collection] ?: emptyMap()
-        collectionStore.values.mapNotNull {
-            try {
-                gson.fromJson(gson.toJson(it), clazz)
-            } catch (e: Exception) {
-                null
+    override suspend fun <T : Any> findDocuments(collection: String, filters: List<FilterRequest>, clazz: Class<T>): DataResult<List<T>> =
+        runCatchingDb {
+            val collectionStore = storageMap[collection] ?: emptyMap()
+            collectionStore.values.mapNotNull {
+                try {
+                    gson.fromJson(gson.toJson(it), clazz)
+                } catch (e: Exception) {
+                    null
+                }
             }
         }
-    }
 
-    override fun <T : Any> listenToDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): Flow<DataResult<T?>> = callbackFlow {
+    override fun <T : Any> listenToDocument(collection: String, documentId: String, clazz: Class<T>): Flow<DataResult<T?>> = callbackFlow {
         try {
             val docResult = getDocument(collection, documentId, clazz)
             trySend(docResult)
@@ -96,7 +73,7 @@ internal class AmplifyDatabaseRepositoryImpl(
     override fun <T : Any> listenToCollection(
         collection: String,
         filters: List<FilterRequest>,
-        clazz: Class<T>
+        clazz: Class<T>,
     ): Flow<DataResult<List<T>>> = callbackFlow {
         try {
             val listResult = findDocuments(collection, filters, clazz)
@@ -107,11 +84,9 @@ internal class AmplifyDatabaseRepositoryImpl(
         awaitClose()
     }
 
-    private inline fun <T> runCatchingDb(block: () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: Exception) {
-            DataResult.Failure(AmplifyErrorMapper.mapThrowable(e, "firestore"))
-        }
+    private inline fun <T> runCatchingDb(block: () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: Exception) {
+        DataResult.Failure(AmplifyErrorMapper.mapThrowable(e, "firestore"))
     }
 }

@@ -2,7 +2,6 @@ package br.wgc.omnibackend.core.security
 
 import java.security.MessageDigest
 import java.security.cert.X509Certificate
-import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 /**
@@ -32,11 +31,8 @@ object SslPinningHelper {
      * @param defaultTrustManager TrustManager padrão do sistema.
      * @return Instance de [X509TrustManager] com verificação de pinning.
      */
-    fun createPinningTrustManager(
-        expectedPins: Set<String>,
-        defaultTrustManager: X509TrustManager
-    ): X509TrustManager {
-        return object : X509TrustManager {
+    fun createPinningTrustManager(expectedPins: Set<String>, defaultTrustManager: X509TrustManager): X509TrustManager =
+        object : X509TrustManager {
             override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
                 defaultTrustManager.checkClientTrusted(chain, authType)
             }
@@ -51,13 +47,12 @@ object SslPinningHelper {
                     expectedPins.contains(pin)
                 }
                 if (!match && expectedPins.isNotEmpty()) {
-                    throw javax.net.ssl.SSLHandshakeException("Falha no SSL Pinning: certificado do servidor não corresponde aos pins esperados.")
+                    throw javax.net.ssl.SSLHandshakeException(
+                        "Falha no SSL Pinning: certificado do servidor não corresponde aos pins esperados.",
+                    )
                 }
             }
 
-            override fun getAcceptedIssuers(): Array<X509Certificate> {
-                return defaultTrustManager.acceptedIssuers
-            }
+            override fun getAcceptedIssuers(): Array<X509Certificate> = defaultTrustManager.acceptedIssuers
         }
-    }
 }

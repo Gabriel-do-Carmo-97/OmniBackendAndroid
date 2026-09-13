@@ -14,5 +14,5 @@ enum class ConversationType {
     GROUP,
 
     /** Atendimento ou suporte direto entre cliente e equipe de assistência. */
-    SUPPORT
+    SUPPORT,
 }

@@ -21,6 +21,9 @@ android {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":testing"))
+    implementation(project(":bundle:hybrid"))
+    implementation(project(":bundle:firebase-supabase"))
     implementation(project(":backend:firebase"))
 
     implementation(platform(libs.androidx.compose.bom))

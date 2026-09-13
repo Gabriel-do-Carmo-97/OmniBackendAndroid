@@ -1,0 +1,19 @@
+public final class br/wgc/omnibackend/bundle/hybrid/OmniHybrid {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/hybrid/OmniHybrid;
+	public final fun createAuth (Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/AuthRepository;)Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun createDatabase (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/repository/FirestoreRepository;)Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun createStorage (Lbr/wgc/omnibackend/core/repository/StorageRepository;Lbr/wgc/omnibackend/core/repository/StorageRepository;)Lbr/wgc/omnibackend/core/repository/StorageRepository;
+}
+
+public final class br/wgc/omnibackend/bundle/hybrid/di/HybridBackendModule {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/hybrid/di/HybridBackendModule;
+	public static final field QUALIFIER_ACTIVE Ljava/lang/String;
+	public static final field QUALIFIER_FAILOVER Ljava/lang/String;
+	public final fun provideActiveAuthRepository (Lbr/wgc/omnibackend/core/repository/AuthRepository;)Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun provideActiveFirestoreRepository (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;)Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun provideActiveStorageRepository (Lbr/wgc/omnibackend/core/repository/StorageRepository;)Lbr/wgc/omnibackend/core/repository/StorageRepository;
+	public final fun provideHybridFailoverAuthRepository (Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/AuthRepository;)Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun provideHybridFailoverFirestoreRepository (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/repository/FirestoreRepository;)Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun provideHybridFailoverStorageRepository (Lbr/wgc/omnibackend/core/repository/StorageRepository;Lbr/wgc/omnibackend/core/repository/StorageRepository;)Lbr/wgc/omnibackend/core/repository/StorageRepository;
+}
+

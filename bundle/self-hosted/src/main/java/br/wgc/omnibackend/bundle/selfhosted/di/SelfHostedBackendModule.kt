@@ -34,7 +34,7 @@ object SelfHostedBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideSelfHostedFailoverAuth(
         @PocketBaseBackend primary: AuthRepository,
-        @AppwriteBackend secondary: AuthRepository
+        @AppwriteBackend secondary: AuthRepository,
     ): AuthRepository = OmniHybrid.createAuth(primary, secondary)
 
     /**
@@ -45,7 +45,7 @@ object SelfHostedBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideSelfHostedFailoverDatabase(
         @PocketBaseBackend primary: FirestoreRepository,
-        @AppwriteBackend secondary: FirestoreRepository
+        @AppwriteBackend secondary: FirestoreRepository,
     ): FirestoreRepository = OmniHybrid.createDatabase(primary, secondary)
 
     /**
@@ -56,6 +56,6 @@ object SelfHostedBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideSelfHostedFailoverStorage(
         @PocketBaseBackend primary: StorageRepository,
-        @AppwriteBackend secondary: StorageRepository
+        @AppwriteBackend secondary: StorageRepository,
     ): StorageRepository = OmniHybrid.createStorage(primary, secondary)
 }

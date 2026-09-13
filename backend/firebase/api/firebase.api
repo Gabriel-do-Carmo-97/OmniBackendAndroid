@@ -1,0 +1,309 @@
+public final class br/wgc/omnibackend/firebase/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class br/wgc/omnibackend/firebase/OmniFirebase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/OmniFirebase;
+	public final fun getAnalytics ()Lbr/wgc/omnibackend/core/repository/AnalyticsRepository;
+	public final fun getAppCheck ()Lbr/wgc/omnibackend/firebase/security/AppCheckManager;
+	public final fun getAuth ()Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun getFirestore ()Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun getGeolocation ()Lbr/wgc/omnibackend/core/repository/realtime/GeolocationRepository;
+	public final fun getMessage ()Lbr/wgc/omnibackend/core/repository/realtime/MessageRepository;
+	public final fun getPresence ()Lbr/wgc/omnibackend/core/repository/realtime/PresenceRepository;
+	public final fun getRealtimeDatabase ()Lbr/wgc/omnibackend/core/repository/RealtimeDatabaseRepository;
+	public final fun getRemoteConfig ()Lbr/wgc/omnibackend/core/repository/RemoteConfigRepository;
+	public final fun getStorage ()Lbr/wgc/omnibackend/core/repository/StorageRepository;
+	public final fun getTelemetry ()Lbr/wgc/omnibackend/firebase/telemetry/FirebaseTelemetry;
+	public final fun getVertexAI ()Lbr/wgc/omnibackend/core/repository/VertexAIRepository;
+	public final fun initialize (Landroid/content/Context;ZZ)V
+	public static synthetic fun initialize$default (Lbr/wgc/omnibackend/firebase/OmniFirebase;Landroid/content/Context;ZZILjava/lang/Object;)V
+}
+
+public final class br/wgc/omnibackend/firebase/data/repository/AnalyticsRepositoryImpl : br/wgc/omnibackend/core/repository/AnalyticsRepository {
+	public fun <init> (Lcom/google/firebase/analytics/FirebaseAnalytics;)V
+	public fun logEvent (Ljava/lang/String;Ljava/util/Map;)V
+	public fun setUserId (Ljava/lang/String;)V
+	public fun setUserProperty (Ljava/lang/String;Ljava/lang/String;)V
+	public fun trackAppOpen ()V
+	public fun trackScreenView (Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class br/wgc/omnibackend/firebase/data/repository/AuthRepositoryImpl : br/wgc/omnibackend/core/repository/AuthRepository {
+	public static final field Companion Lbr/wgc/omnibackend/firebase/data/repository/AuthRepositoryImpl$Companion;
+	public fun <init> (Lcom/google/firebase/auth/FirebaseAuth;)V
+	public fun createUser (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun deleteUser (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getAuthState ()Lkotlinx/coroutines/flow/Flow;
+	public fun getCurrentUser ()Lbr/wgc/omnibackend/core/model/OmniUser;
+	public fun isUserLogged (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun login (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun loginAnonymously (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun reauthenticate (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun registerEmailWithPassword (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun resetPassword (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun sendEmailVerification (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun signInWithCredential (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun signInWithGoogle (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun signOut (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateEmail (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updatePassword (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateProfile (Ljava/lang/String;Landroid/net/Uri;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/firebase/data/repository/AuthRepositoryImpl$Companion {
+}
+
+public final class br/wgc/omnibackend/firebase/data/repository/FirestoreRepositoryImpl : br/wgc/omnibackend/core/repository/FirestoreRepository {
+	public fun <init> (Lcom/google/firebase/firestore/FirebaseFirestore;)V
+	public fun addDocument (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun deleteDocument (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun findDocuments (Ljava/lang/String;Ljava/util/List;Ljava/lang/Class;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getDocument (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun listenToCollection (Ljava/lang/String;Ljava/util/List;Ljava/lang/Class;)Lkotlinx/coroutines/flow/Flow;
+	public fun listenToDocument (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)Lkotlinx/coroutines/flow/Flow;
+	public fun updateDocument (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/firebase/data/repository/RealtimeDatabaseRepositoryImpl : br/wgc/omnibackend/core/repository/RealtimeDatabaseRepository {
+	public fun <init> (Lbr/wgc/omnibackend/core/repository/realtime/MessageRepository;Lbr/wgc/omnibackend/core/repository/realtime/GeolocationRepository;Lbr/wgc/omnibackend/core/repository/realtime/PresenceRepository;)V
+	public fun geo ()Lbr/wgc/omnibackend/core/repository/realtime/GeolocationRepository;
+	public fun messages ()Lbr/wgc/omnibackend/core/repository/realtime/MessageRepository;
+	public fun presence ()Lbr/wgc/omnibackend/core/repository/realtime/PresenceRepository;
+}
+
+public final class br/wgc/omnibackend/firebase/data/repository/RemoteConfigRepositoryImpl : br/wgc/omnibackend/core/repository/RemoteConfigRepository {
+	public fun <init> (Lcom/google/firebase/remoteconfig/FirebaseRemoteConfig;)V
+	public fun detectedUpdateFlagInLive (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;)V
+	public fun fetchAndActivate (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getBoolean (Ljava/lang/String;)Lbr/wgc/omnibackend/core/utils/DataResult;
+	public fun getDouble (Ljava/lang/String;)Lbr/wgc/omnibackend/core/utils/DataResult;
+	public fun getLong (Ljava/lang/String;)Lbr/wgc/omnibackend/core/utils/DataResult;
+	public fun getString (Ljava/lang/String;)Lbr/wgc/omnibackend/core/utils/DataResult;
+	public fun observeKeyUpdates (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class br/wgc/omnibackend/firebase/data/repository/StorageRepositoryImpl : br/wgc/omnibackend/core/repository/StorageRepository {
+	public fun <init> (Lcom/google/firebase/storage/FirebaseStorage;)V
+	public fun delete (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getDownloadUrl (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun uploadFile (Ljava/lang/String;Landroid/net/Uri;)Lkotlinx/coroutines/flow/Flow;
+	public fun uploadFile (Ljava/lang/String;Ljava/io/InputStream;)Lkotlinx/coroutines/flow/Flow;
+	public fun uploadFile (Ljava/lang/String;[B)Lkotlinx/coroutines/flow/Flow;
+	public fun uploadFileDirect (Ljava/lang/String;Landroid/net/Uri;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun uploadFileDirect (Ljava/lang/String;[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/firebase/data/repository/VertexAIRepositoryImpl : br/wgc/omnibackend/core/repository/VertexAIRepository {
+	public fun <init> (Lcom/google/firebase/vertexai/FirebaseVertexAI;)V
+	public fun generateText (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun generateTextStream (Ljava/lang/String;Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class br/wgc/omnibackend/firebase/data/repository/realtime/GeolocationRepositoryImpl : br/wgc/omnibackend/core/repository/realtime/GeolocationRepository {
+	public fun <init> (Lcom/google/firebase/database/FirebaseDatabase;)V
+	public fun trackLocation (Ljava/lang/String;Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public fun updateLocation (Ljava/lang/String;Ljava/lang/String;Lbr/wgc/omnibackend/core/model/database/geo/LocationRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/firebase/data/repository/realtime/MessageRepositoryImpl : br/wgc/omnibackend/core/repository/realtime/MessageRepository {
+	public fun <init> (Lcom/google/firebase/database/FirebaseDatabase;)V
+	public fun createConversation (Lbr/wgc/omnibackend/core/model/database/message/ConversationRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getConversations (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public fun getMessageHistory (Ljava/lang/String;Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getMessages (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public fun searchUsers (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun sendMessage (Ljava/lang/String;Lbr/wgc/omnibackend/core/model/database/message/MessageRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateMessageStatus (Ljava/lang/String;Ljava/lang/String;Lbr/wgc/omnibackend/core/model/database/message/MessageStatus;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/firebase/data/repository/realtime/PresenceRepositoryImpl : br/wgc/omnibackend/core/repository/realtime/PresenceRepository {
+	public fun <init> (Lcom/google/firebase/database/FirebaseDatabase;)V
+	public fun goOffline (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun goOnline (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun trackPresence (Ljava/lang/String;Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class br/wgc/omnibackend/firebase/di/FirebaseBackendModule {
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/di/FirebaseBackendModule;
+	public static final field QUALIFIER_NAME Ljava/lang/String;
+	public final fun provideFirebaseAuthRepository ()Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun provideFirebaseFirestoreRepository ()Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun provideFirebaseStorageRepository ()Lbr/wgc/omnibackend/core/repository/StorageRepository;
+}
+
+public final class br/wgc/omnibackend/firebase/domain/usecase/LoginUseCase {
+	public fun <init> (Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/RealtimeDatabaseRepository;)V
+	public final fun createGoogleSignInRequest (Ljava/lang/String;)Landroidx/credentials/GetCredentialRequest;
+	public final fun handleGoogleSignInSuccess (Lcom/google/android/libraries/identity/googleid/GoogleIdTokenCredential;Z)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun handleGoogleSignInSuccess$default (Lbr/wgc/omnibackend/firebase/domain/usecase/LoginUseCase;Lcom/google/android/libraries/identity/googleid/GoogleIdTokenCredential;ZILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
+	public final fun invoke (Ljava/lang/String;Ljava/lang/String;Z)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun invoke$default (Lbr/wgc/omnibackend/firebase/domain/usecase/LoginUseCase;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
+	public final fun loginAnonymous (Z)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun loginAnonymous$default (Lbr/wgc/omnibackend/firebase/domain/usecase/LoginUseCase;ZILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class br/wgc/omnibackend/firebase/domain/usecase/UserRegisterUseCase {
+	public fun <init> (Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/repository/RealtimeDatabaseRepository;Lbr/wgc/omnibackend/core/repository/StorageRepository;)V
+	public final fun invoke (Lbr/wgc/omnibackend/core/model/auth/NewUser;Ljava/lang/String;Z)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun invoke$default (Lbr/wgc/omnibackend/firebase/domain/usecase/UserRegisterUseCase;Lbr/wgc/omnibackend/core/model/auth/NewUser;Ljava/lang/String;ZILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class br/wgc/omnibackend/firebase/security/AppCheckManager {
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/security/AppCheckManager;
+	public final fun initialize (Z)V
+	public static synthetic fun initialize$default (Lbr/wgc/omnibackend/firebase/security/AppCheckManager;ZILjava/lang/Object;)V
+	public final fun setTokenAutoRefreshEnabled (Z)V
+}
+
+public final class br/wgc/omnibackend/firebase/telemetry/AppErrorException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class br/wgc/omnibackend/firebase/telemetry/FirebaseTelemetry : br/wgc/omnibackend/core/telemetry/TelemetryProvider {
+	public static final field Companion Lbr/wgc/omnibackend/firebase/telemetry/FirebaseTelemetry$Companion;
+	public fun <init> (Lcom/google/firebase/crashlytics/FirebaseCrashlytics;Lcom/google/firebase/perf/FirebasePerformance;)V
+	public final fun getPerformance ()Lcom/google/firebase/perf/FirebasePerformance;
+	public fun log (Ljava/lang/String;)V
+	public fun recordError (Lbr/wgc/omnibackend/core/utils/AppError;Ljava/util/Map;)V
+	public fun recordException (Ljava/lang/Throwable;Ljava/util/Map;)V
+	public fun setAttribute (Ljava/lang/String;Ljava/lang/Object;)V
+	public fun setUserId (Ljava/lang/String;)V
+	public final fun trace (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public final fun traceAsync (Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/firebase/telemetry/FirebaseTelemetry$Companion {
+	public final fun get ()Lbr/wgc/omnibackend/firebase/telemetry/FirebaseTelemetry;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ErrorMessages {
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/ErrorMessages;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ErrorMessages$Auth {
+	public static final field EMAIL_ALREADY_IN_USE Ljava/lang/String;
+	public static final field EMAIL_SEND_FAILED Ljava/lang/String;
+	public static final field GENERIC_AUTH_ERROR Ljava/lang/String;
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/ErrorMessages$Auth;
+	public static final field INVALID_ACTION_CODE Ljava/lang/String;
+	public static final field INVALID_CREDENTIALS Ljava/lang/String;
+	public static final field MULTI_FACTOR_AUTH_REQUIRED Ljava/lang/String;
+	public static final field RECAPTCHA_ACTIVITY_MISSING Ljava/lang/String;
+	public static final field REQUIRES_RECENT_LOGIN Ljava/lang/String;
+	public static final field USER_NOT_FOUND Ljava/lang/String;
+	public static final field WEAK_PASSWORD Ljava/lang/String;
+	public static final field WEB_OPERATION_FAILED Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ErrorMessages$Database {
+	public static final field DATA_STALE Ljava/lang/String;
+	public static final field DISCONNECTED Ljava/lang/String;
+	public static final field EXPIRED_TOKEN Ljava/lang/String;
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/ErrorMessages$Database;
+	public static final field INVALID_TOKEN Ljava/lang/String;
+	public static final field MAX_RETRIES Ljava/lang/String;
+	public static final field OPERATION_FAILED Ljava/lang/String;
+	public static final field OVERRIDDEN_BY_SET Ljava/lang/String;
+	public static final field PERMISSION_DENIED Ljava/lang/String;
+	public static final field UNAVAILABLE Ljava/lang/String;
+	public static final field WRITE_CANCELED Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ErrorMessages$Firestore {
+	public static final field ABORTED Ljava/lang/String;
+	public static final field DOCUMENT_NOT_FOUND Ljava/lang/String;
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/ErrorMessages$Firestore;
+	public static final field PERMISSION_DENIED Ljava/lang/String;
+	public static final field TRANSACTION_FAILED Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ErrorMessages$Functions {
+	public static final field FUNCTION_NOT_FOUND Ljava/lang/String;
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/ErrorMessages$Functions;
+	public static final field INTERNAL_ERROR Ljava/lang/String;
+	public static final field TIMEOUT Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ErrorMessages$Generic {
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/ErrorMessages$Generic;
+	public static final field NETWORK_ERROR Ljava/lang/String;
+	public static final field UNKNOWN_ERROR Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ErrorMessages$InAppMessaging {
+	public static final field IMAGE_FETCH_FAILED Ljava/lang/String;
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/ErrorMessages$InAppMessaging;
+	public static final field MESSAGE_DISPLAY_ERROR Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ErrorMessages$Messaging {
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/ErrorMessages$Messaging;
+	public static final field SEND_MESSAGE_FAILED Ljava/lang/String;
+	public static final field TOKEN_FETCH_FAILED Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ErrorMessages$RemoteConfig {
+	public static final field CONFIG_UPDATE_UNAVAILABLE Ljava/lang/String;
+	public static final field FETCH_THROTTLED Ljava/lang/String;
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/ErrorMessages$RemoteConfig;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ErrorMessages$Storage {
+	public static final field BUCKET_NOT_FOUND Ljava/lang/String;
+	public static final field DOWNLOAD_FAILED Ljava/lang/String;
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/ErrorMessages$Storage;
+	public static final field INVALID_ARGUMENT Ljava/lang/String;
+	public static final field OBJECT_NOT_FOUND Ljava/lang/String;
+	public static final field PERMISSION_DENIED Ljava/lang/String;
+	public static final field PROJECT_NOT_FOUND Ljava/lang/String;
+	public static final field QUOTA_EXCEEDED Ljava/lang/String;
+	public static final field UPLOAD_CANCELLED Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ErrorMessages$VertexAI {
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/ErrorMessages$VertexAI;
+	public static final field INVALID_API_KEY Ljava/lang/String;
+	public static final field MODEL_UNAVAILABLE Ljava/lang/String;
+	public static final field QUOTA_EXCEEDED Ljava/lang/String;
+	public static final field RESPONSE_BLOCKED Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/ResponsesMapperKt {
+	public static final fun toOmniUser (Lcom/google/firebase/auth/FirebaseUser;)Lbr/wgc/omnibackend/core/model/OmniUser;
+	public static final fun toRegisteredUser (Lbr/wgc/omnibackend/core/model/auth/RegisterUserResponse;Landroid/net/Uri;Z)Lbr/wgc/omnibackend/core/model/auth/RegisteredUser;
+	public static synthetic fun toRegisteredUser$default (Lbr/wgc/omnibackend/core/model/auth/RegisterUserResponse;Landroid/net/Uri;ZILjava/lang/Object;)Lbr/wgc/omnibackend/core/model/auth/RegisteredUser;
+}
+
+public abstract class br/wgc/omnibackend/firebase/utils/UseCaseResult {
+}
+
+public final class br/wgc/omnibackend/firebase/utils/UseCaseResult$Failure : br/wgc/omnibackend/firebase/utils/UseCaseResult {
+	public fun <init> (Lbr/wgc/omnibackend/core/utils/AppError;)V
+	public final fun component1 ()Lbr/wgc/omnibackend/core/utils/AppError;
+	public final fun copy (Lbr/wgc/omnibackend/core/utils/AppError;)Lbr/wgc/omnibackend/firebase/utils/UseCaseResult$Failure;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/firebase/utils/UseCaseResult$Failure;Lbr/wgc/omnibackend/core/utils/AppError;ILjava/lang/Object;)Lbr/wgc/omnibackend/firebase/utils/UseCaseResult$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lbr/wgc/omnibackend/core/utils/AppError;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/UseCaseResult$Loading : br/wgc/omnibackend/firebase/utils/UseCaseResult {
+	public static final field INSTANCE Lbr/wgc/omnibackend/firebase/utils/UseCaseResult$Loading;
+}
+
+public final class br/wgc/omnibackend/firebase/utils/UseCaseResult$Success : br/wgc/omnibackend/firebase/utils/UseCaseResult {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lbr/wgc/omnibackend/firebase/utils/UseCaseResult$Success;
+	public static synthetic fun copy$default (Lbr/wgc/omnibackend/firebase/utils/UseCaseResult$Success;Ljava/lang/Object;ILjava/lang/Object;)Lbr/wgc/omnibackend/firebase/utils/UseCaseResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

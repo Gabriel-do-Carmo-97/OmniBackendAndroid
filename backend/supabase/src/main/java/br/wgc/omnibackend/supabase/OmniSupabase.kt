@@ -63,7 +63,7 @@ object OmniSupabase {
         url: String,
         anonKey: String,
         sessionManager: io.github.jan.supabase.auth.SessionManager? = null,
-        codeVerifierCache: io.github.jan.supabase.auth.CodeVerifierCache? = null
+        codeVerifierCache: io.github.jan.supabase.auth.CodeVerifierCache? = null,
     ) {
         if (!isInitialized) {
             synchronized(this) {
@@ -73,7 +73,7 @@ object OmniSupabase {
                     projectAnonKey = anonKey
                     supabaseClient = createSupabaseClient(
                         supabaseUrl = url,
-                        supabaseKey = anonKey
+                        supabaseKey = anonKey,
                     ) {
                         install(Auth) {
                             sessionManager?.let { this.sessionManager = it }
@@ -140,7 +140,7 @@ object OmniSupabase {
         check(isInitialized) { "OmniSupabase deve ser inicializado antes do uso. Chame OmniSupabase.initialize(...)" }
         SupabaseDatabaseRepositoryImpl(
             postgrest = supabaseClient.postgrest,
-            realtime = supabaseClient.realtime
+            realtime = supabaseClient.realtime,
         )
     }
 
@@ -151,7 +151,7 @@ object OmniSupabase {
         check(isInitialized) { "OmniSupabase deve ser inicializado antes do uso. Chame OmniSupabase.initialize(...)" }
         SupabaseStorageRepositoryImpl(
             storage = supabaseClient.storage,
-            context = appContext
+            context = appContext,
         )
     }
 }

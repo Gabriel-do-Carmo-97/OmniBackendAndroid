@@ -263,4 +263,3 @@ val AppError.message: String
         is AppError.Storage.Generic -> exception.message ?: "Erro no armazenamento de arquivos."
         else -> javaClass.simpleName
     }
-

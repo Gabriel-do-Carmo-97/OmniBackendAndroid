@@ -26,4 +26,3 @@ sealed class UseCaseResult<out T> {
      */
     data class Failure(val error: AppError) : UseCaseResult<Nothing>()
 }
-

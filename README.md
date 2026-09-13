@@ -80,6 +80,7 @@ graph TD
 Se você desejar importar apenas 1 único provedor específico para minimizar o tamanho do APK:
 
 - [**:core**](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/core/README.md) — Núcleo puro e agnóstico de domínio.
+- [**:testing**](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/testing) — Módulo com Fakes em memória (`FakeAuthRepository`, `FakeFirestoreRepository`, `FakeStorageRepository`) para testes unitários em apps clientes sem nuvem.
 - [**:backend:firebase**](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/backend/firebase/README.md) — Google Firebase BoM 33.9.0.
 - [**:backend:supabase**](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/backend/supabase/README.md) — Supabase Kotlin SDK 3.1.3.
 - [**:backend:appwrite**](file:///C:/Users/gcarm/AndroidStudioProjects/OmniBackendAndroid/backend/appwrite/README.md) — Appwrite Android SDK 24.1.1.
@@ -127,16 +128,34 @@ class UserViewModel(
 
 ---
 
-## 🧪 Testes e Compilação
+## 🧪 Padrões de Qualidade Empresarial (QA & CI/CD)
 
-Executar a suíte completa de testes unitários em todos os módulos:
-
+### 1. Testes Unitários
+Executar a suíte completa em todos os módulos:
 ```bash
 ./gradlew testDebugUnitTest
 ```
 
-Executar o linter Detekt e gerar a documentação web da API com Dokka:
-
+### 2. Formatação Automatizada e Linter (Spotless + ktlint + Detekt)
 ```bash
-./gradlew detekt dokkaGeneratePublicationHtml
+# Aplica formatação automática em todos os arquivos .kt e .kts
+./gradlew spotlessApply
+
+# Valida regras de estilo e conformidade
+./gradlew spotlessCheck detekt
+```
+
+### 3. Validação de Compatibilidade Binária de API (BCV)
+Gera e verifica os snapshots de API pública (`.api`) para prevenir quebras binárias acidentais em produção:
+```bash
+# Atualiza os arquivos de assinatura pública
+./gradlew apiDump
+
+# Verifica integridade da API pública
+./gradlew apiCheck
+```
+
+### 4. Documentação Técnica Automatizada (Dokka)
+```bash
+./gradlew dokkaGeneratePublicationHtml
 ```

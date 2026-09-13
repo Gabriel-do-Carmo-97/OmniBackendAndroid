@@ -8,17 +8,15 @@ import br.wgc.omnibackend.core.repository.AuthRepository
 import br.wgc.omnibackend.core.utils.AppError
 import br.wgc.omnibackend.core.utils.DataResult
 import br.wgc.omnibackend.firebase.utils.toOmniUser
-import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -34,9 +32,7 @@ import javax.inject.Inject
  *
  * @property auth Instância do [FirebaseAuth] utilizada para as chamadas de API.
  */
-class AuthRepositoryImpl @Inject constructor(
-    private val auth: FirebaseAuth
-) : AuthRepository {
+class AuthRepositoryImpl @Inject constructor(private val auth: FirebaseAuth) : AuthRepository {
 
     /**
      * Fluxo reativo do estado de autenticação em tempo real emitindo [OmniUser] ou `null`.
@@ -110,10 +106,7 @@ class AuthRepositoryImpl @Inject constructor(
      * @param pass Senha de acesso.
      * @return [DataResult.Success] com o [RegisterUserResponse].
      */
-    override suspend fun registerEmailWithPassword(
-        email: String,
-        pass: String
-    ): DataResult<RegisterUserResponse> = runCatching {
+    override suspend fun registerEmailWithPassword(email: String, pass: String): DataResult<RegisterUserResponse> = runCatching {
         val authResult = auth.createUserWithEmailAndPassword(email, pass).await()
         authResult.user?.sendEmailVerification()?.await()
         DataResult.Success(
@@ -124,8 +117,8 @@ class AuthRepositoryImpl @Inject constructor(
                 provider = authResult.credential?.provider.toString(),
                 isAnonymous = authResult.user?.isAnonymous ?: false,
                 isEmailVerified = authResult.user?.isEmailVerified ?: false,
-                isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
-            )
+                isNewUser = authResult.additionalUserInfo?.isNewUser ?: false,
+            ),
         )
     }.getOrElse { exception ->
         Log.e(TAG, "Falha no registro detalhado: ${exception.message}", exception)
@@ -205,10 +198,7 @@ class AuthRepositoryImpl @Inject constructor(
      * @param name Novo nome de exibição.
      * @param photoUri URI da nova foto.
      */
-    override suspend fun updateProfile(
-        name: String?,
-        photoUri: Uri?
-    ): DataResult<Unit> = runCatching {
+    override suspend fun updateProfile(name: String?, photoUri: Uri?): DataResult<Unit> = runCatching {
         val user = auth.currentUser
             ?: throw FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Nenhum usuário logado.")
 

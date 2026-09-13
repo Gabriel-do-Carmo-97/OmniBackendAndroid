@@ -20,5 +20,5 @@ enum class MessageStatus {
     READ,
 
     /** Falha no envio ou processamento da mensagem. */
-    FAILED
+    FAILED,
 }

@@ -1,6 +1,5 @@
 ﻿package br.wgc.omnibackend.firebase.utils
 
-
 /**
  * Objeto centralizado que contém as mensagens de erro padrão para o usuário,
  * correspondendo aos tipos definidos em [AppError].
@@ -88,4 +87,3 @@ object ErrorMessages {
         const val MODEL_UNAVAILABLE = "O modelo de IA está temporariamente indisponível."
     }
 }
-

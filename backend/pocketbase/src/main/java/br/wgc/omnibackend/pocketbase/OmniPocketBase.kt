@@ -41,10 +41,7 @@ object OmniPocketBase {
      * @param context Contexto da aplicação Android.
      * @param baseUrl URL base da instância do PocketBase (ex: "https://seu-pocketbase.app").
      */
-    fun initialize(
-        context: Context,
-        baseUrl: String
-    ) {
+    fun initialize(context: Context, baseUrl: String) {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
@@ -87,7 +84,7 @@ object OmniPocketBase {
         check(isInitialized) { "OmniPocketBase deve ser inicializado antes do uso." }
         PocketBaseStorageRepositoryImpl(
             context = appContext ?: error("OmniPocketBase deve ser inicializado antes do uso."),
-            baseUrl = pocketBaseUrl
+            baseUrl = pocketBaseUrl,
         )
     }
 

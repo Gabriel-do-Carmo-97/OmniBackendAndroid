@@ -39,7 +39,7 @@ object HybridBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideHybridFailoverAuthRepository(
         @FirebaseBackend primary: AuthRepository,
-        @SupabaseBackend secondary: AuthRepository
+        @SupabaseBackend secondary: AuthRepository,
     ): AuthRepository = OmniHybrid.createAuth(primary, secondary)
 
     /**
@@ -50,7 +50,7 @@ object HybridBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideHybridFailoverFirestoreRepository(
         @FirebaseBackend primary: FirestoreRepository,
-        @SupabaseBackend secondary: FirestoreRepository
+        @SupabaseBackend secondary: FirestoreRepository,
     ): FirestoreRepository = OmniHybrid.createDatabase(primary, secondary)
 
     /**
@@ -61,7 +61,7 @@ object HybridBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideHybridFailoverStorageRepository(
         @FirebaseBackend primary: StorageRepository,
-        @SupabaseBackend secondary: StorageRepository
+        @SupabaseBackend secondary: StorageRepository,
     ): StorageRepository = OmniHybrid.createStorage(primary, secondary)
 
     /**
@@ -72,11 +72,8 @@ object HybridBackendModule {
     @Singleton
     @ActiveBackend
     @Named(QUALIFIER_ACTIVE)
-    fun provideActiveAuthRepository(
-        @FirebaseBackend defaultPrimary: AuthRepository
-    ): AuthRepository {
-        return OmniBackendSelector.getActiveAuthRepository() ?: defaultPrimary
-    }
+    fun provideActiveAuthRepository(@FirebaseBackend defaultPrimary: AuthRepository): AuthRepository =
+        OmniBackendSelector.getActiveAuthRepository() ?: defaultPrimary
 
     /**
      * Provê o [FirestoreRepository] ativo da aplicação, resolvido dinamicamente pelo [OmniBackendSelector]
@@ -86,11 +83,8 @@ object HybridBackendModule {
     @Singleton
     @ActiveBackend
     @Named(QUALIFIER_ACTIVE)
-    fun provideActiveFirestoreRepository(
-        @FirebaseBackend defaultPrimary: FirestoreRepository
-    ): FirestoreRepository {
-        return OmniBackendSelector.getActiveFirestoreRepository() ?: defaultPrimary
-    }
+    fun provideActiveFirestoreRepository(@FirebaseBackend defaultPrimary: FirestoreRepository): FirestoreRepository =
+        OmniBackendSelector.getActiveFirestoreRepository() ?: defaultPrimary
 
     /**
      * Provê o [StorageRepository] ativo da aplicação, resolvido dinamicamente pelo [OmniBackendSelector]
@@ -100,9 +94,6 @@ object HybridBackendModule {
     @Singleton
     @ActiveBackend
     @Named(QUALIFIER_ACTIVE)
-    fun provideActiveStorageRepository(
-        @FirebaseBackend defaultPrimary: StorageRepository
-    ): StorageRepository {
-        return OmniBackendSelector.getActiveStorageRepository() ?: defaultPrimary
-    }
+    fun provideActiveStorageRepository(@FirebaseBackend defaultPrimary: StorageRepository): StorageRepository =
+        OmniBackendSelector.getActiveStorageRepository() ?: defaultPrimary
 }

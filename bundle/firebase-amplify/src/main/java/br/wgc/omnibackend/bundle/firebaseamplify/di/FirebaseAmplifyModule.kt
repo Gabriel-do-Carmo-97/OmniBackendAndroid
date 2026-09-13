@@ -27,10 +27,8 @@ object FirebaseAmplifyModule {
     @Provides
     @Singleton
     @Named(QUALIFIER_NAME)
-    fun provideAuthRepository(
-        @FirebaseBackend primary: AuthRepository,
-        @AmplifyBackend secondary: AuthRepository
-    ): AuthRepository = OmniFirebaseAmplify.createAuth(primary, secondary)
+    fun provideAuthRepository(@FirebaseBackend primary: AuthRepository, @AmplifyBackend secondary: AuthRepository): AuthRepository =
+        OmniFirebaseAmplify.createAuth(primary, secondary)
 
     /** Provê o [FirestoreRepository] multi-cloud Firestore + DynamoDB/AppSync. */
     @Provides
@@ -38,7 +36,7 @@ object FirebaseAmplifyModule {
     @Named(QUALIFIER_NAME)
     fun provideFirestoreRepository(
         @FirebaseBackend primary: FirestoreRepository,
-        @AmplifyBackend secondary: FirestoreRepository
+        @AmplifyBackend secondary: FirestoreRepository,
     ): FirestoreRepository = OmniFirebaseAmplify.createDatabase(primary, secondary)
 
     /** Provê o [StorageRepository] multi-cloud Firebase Storage + Amazon S3. */
@@ -47,6 +45,6 @@ object FirebaseAmplifyModule {
     @Named(QUALIFIER_NAME)
     fun provideStorageRepository(
         @FirebaseBackend primary: StorageRepository,
-        @AmplifyBackend secondary: StorageRepository
+        @AmplifyBackend secondary: StorageRepository,
     ): StorageRepository = OmniFirebaseAmplify.createStorage(primary, secondary)
 }

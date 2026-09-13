@@ -27,10 +27,8 @@ object FirebaseSupabaseModule {
     @Provides
     @Singleton
     @Named(QUALIFIER_NAME)
-    fun provideAuthRepository(
-        @FirebaseBackend primary: AuthRepository,
-        @SupabaseBackend secondary: AuthRepository
-    ): AuthRepository = OmniFirebaseSupabase.createAuth(primary, secondary)
+    fun provideAuthRepository(@FirebaseBackend primary: AuthRepository, @SupabaseBackend secondary: AuthRepository): AuthRepository =
+        OmniFirebaseSupabase.createAuth(primary, secondary)
 
     /** Provê o [FirestoreRepository] híbrido Firestore + PostgREST. */
     @Provides
@@ -38,7 +36,7 @@ object FirebaseSupabaseModule {
     @Named(QUALIFIER_NAME)
     fun provideFirestoreRepository(
         @FirebaseBackend primary: FirestoreRepository,
-        @SupabaseBackend secondary: FirestoreRepository
+        @SupabaseBackend secondary: FirestoreRepository,
     ): FirestoreRepository = OmniFirebaseSupabase.createDatabase(primary, secondary)
 
     /** Provê o [StorageRepository] híbrido Firebase Storage + Supabase Storage. */
@@ -47,6 +45,6 @@ object FirebaseSupabaseModule {
     @Named(QUALIFIER_NAME)
     fun provideStorageRepository(
         @FirebaseBackend primary: StorageRepository,
-        @SupabaseBackend secondary: StorageRepository
+        @SupabaseBackend secondary: StorageRepository,
     ): StorageRepository = OmniFirebaseSupabase.createStorage(primary, secondary)
 }

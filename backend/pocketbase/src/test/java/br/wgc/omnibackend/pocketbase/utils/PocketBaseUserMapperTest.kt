@@ -15,7 +15,7 @@ class PocketBaseUserMapperTest {
             "name" to "Gabriel do Carmo",
             "avatar" to "avatar_1.png",
             "collectionId" to "users_col_456",
-            "verified" to true
+            "verified" to true,
         )
 
         val user = PocketBaseUserMapper.toOmniUser(record, "https://pb.example.com")

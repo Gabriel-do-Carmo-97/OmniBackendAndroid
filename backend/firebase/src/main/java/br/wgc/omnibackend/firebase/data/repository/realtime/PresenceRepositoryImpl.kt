@@ -24,9 +24,7 @@ import javax.inject.Inject
  *
  * @property database Instância do [FirebaseDatabase] injetada.
  */
-class PresenceRepositoryImpl @Inject constructor(
-    private val database: FirebaseDatabase,
-) : PresenceRepository {
+class PresenceRepositoryImpl @Inject constructor(private val database: FirebaseDatabase) : PresenceRepository {
     private val presenceRef = database.getReference("presence")
     private val connectedRef = database.getReference(".info/connected")
     private val activeConnectedListeners = ConcurrentHashMap<String, ValueEventListener>()
@@ -100,24 +98,20 @@ class PresenceRepositoryImpl @Inject constructor(
         awaitClose { entityPresenceRef.removeEventListener(listener) }
     }
 
-    private fun mapExceptionToAppError(exception: Throwable): AppError {
-        return when (exception) {
-            is DatabaseException -> {
-                when {
-                    exception.message?.contains("permission_denied", ignoreCase = true) == true ->
-                        AppError.RealtimeDatabase.PermissionDenied
-                    else -> AppError.RealtimeDatabase.OperationFailed
-                }
+    private fun mapExceptionToAppError(exception: Throwable): AppError = when (exception) {
+        is DatabaseException -> {
+            when {
+                exception.message?.contains("permission_denied", ignoreCase = true) == true ->
+                    AppError.RealtimeDatabase.PermissionDenied
+                else -> AppError.RealtimeDatabase.OperationFailed
             }
-            is IOException -> AppError.Generic.Network
-            else -> AppError.Generic.Unknown(exception)
         }
+        is IOException -> AppError.Generic.Network
+        else -> AppError.Generic.Unknown(exception)
     }
 
-    private fun mapDatabaseErrorToAppError(error: DatabaseError): AppError {
-        return when (error.code) {
-            DatabaseError.PERMISSION_DENIED -> AppError.RealtimeDatabase.PermissionDenied
-            else -> AppError.Generic.Unknown(error.toException())
-        }
+    private fun mapDatabaseErrorToAppError(error: DatabaseError): AppError = when (error.code) {
+        DatabaseError.PERMISSION_DENIED -> AppError.RealtimeDatabase.PermissionDenied
+        else -> AppError.Generic.Unknown(error.toException())
     }
 }

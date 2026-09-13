@@ -1,16 +1,6 @@
 package br.wgc.omnibackend.firebase
 
 import android.content.Context
-import br.wgc.omnibackend.firebase.data.repository.AnalyticsRepositoryImpl
-import br.wgc.omnibackend.firebase.data.repository.AuthRepositoryImpl
-import br.wgc.omnibackend.firebase.data.repository.FirestoreRepositoryImpl
-import br.wgc.omnibackend.firebase.data.repository.RealtimeDatabaseRepositoryImpl
-import br.wgc.omnibackend.firebase.data.repository.RemoteConfigRepositoryImpl
-import br.wgc.omnibackend.firebase.data.repository.StorageRepositoryImpl
-import br.wgc.omnibackend.firebase.data.repository.VertexAIRepositoryImpl
-import br.wgc.omnibackend.firebase.data.repository.realtime.GeolocationRepositoryImpl
-import br.wgc.omnibackend.firebase.data.repository.realtime.MessageRepositoryImpl
-import br.wgc.omnibackend.firebase.data.repository.realtime.PresenceRepositoryImpl
 import br.wgc.omnibackend.core.repository.AnalyticsRepository
 import br.wgc.omnibackend.core.repository.AuthRepository
 import br.wgc.omnibackend.core.repository.FirestoreRepository
@@ -21,7 +11,16 @@ import br.wgc.omnibackend.core.repository.VertexAIRepository
 import br.wgc.omnibackend.core.repository.realtime.GeolocationRepository
 import br.wgc.omnibackend.core.repository.realtime.MessageRepository
 import br.wgc.omnibackend.core.repository.realtime.PresenceRepository
-import br.wgc.omnibackend.core.telemetry.TelemetryProvider
+import br.wgc.omnibackend.firebase.data.repository.AnalyticsRepositoryImpl
+import br.wgc.omnibackend.firebase.data.repository.AuthRepositoryImpl
+import br.wgc.omnibackend.firebase.data.repository.FirestoreRepositoryImpl
+import br.wgc.omnibackend.firebase.data.repository.RealtimeDatabaseRepositoryImpl
+import br.wgc.omnibackend.firebase.data.repository.RemoteConfigRepositoryImpl
+import br.wgc.omnibackend.firebase.data.repository.StorageRepositoryImpl
+import br.wgc.omnibackend.firebase.data.repository.VertexAIRepositoryImpl
+import br.wgc.omnibackend.firebase.data.repository.realtime.GeolocationRepositoryImpl
+import br.wgc.omnibackend.firebase.data.repository.realtime.MessageRepositoryImpl
+import br.wgc.omnibackend.firebase.data.repository.realtime.PresenceRepositoryImpl
 import br.wgc.omnibackend.firebase.security.AppCheckManager
 import br.wgc.omnibackend.firebase.telemetry.FirebaseTelemetry
 import com.google.firebase.Firebase
@@ -63,11 +62,7 @@ object OmniFirebase {
      * @param enableAppCheck Whether to enable Firebase App Check (default false).
      * @param isDebug Whether running in debug mode (uses Debug App Check Provider).
      */
-    fun initialize(
-        context: Context,
-        enableAppCheck: Boolean = false,
-        isDebug: Boolean = false
-    ) {
+    fun initialize(context: Context, enableAppCheck: Boolean = false, isDebug: Boolean = false) {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
@@ -103,7 +98,7 @@ object OmniFirebase {
         RealtimeDatabaseRepositoryImpl(
             messageRepository = message,
             geolocationRepository = geolocation,
-            presenceRepository = presence
+            presenceRepository = presence,
         )
     }
 
@@ -130,4 +125,3 @@ object OmniFirebase {
  * Backward compatibility alias for WgcFirebase.
  */
 typealias WgcFirebase = OmniFirebase
-

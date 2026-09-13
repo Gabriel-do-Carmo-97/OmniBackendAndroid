@@ -15,10 +15,7 @@ import java.net.URL
 /**
  * Implementação de [StorageRepository] enviando arquivos para endpoints REST (`/api/v1/storage/{path}`).
  */
-internal class RestStorageRepositoryImpl(
-    private val context: Context,
-    private val baseUrl: String
-) : StorageRepository {
+internal class RestStorageRepositoryImpl(private val context: Context, private val baseUrl: String) : StorageRepository {
 
     override fun uploadFile(path: String, fileData: ByteArray): Flow<DataResult<Uri>> = flow {
         emit(uploadFileDirect(path, fileData))
@@ -76,11 +73,9 @@ internal class RestStorageRepositoryImpl(
         Unit
     }
 
-    private inline fun <T> runCatchingStorage(block: () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: Exception) {
-            DataResult.Failure(RestErrorMapper.mapThrowable(e, "storage"))
-        }
+    private inline fun <T> runCatchingStorage(block: () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: Exception) {
+        DataResult.Failure(RestErrorMapper.mapThrowable(e, "storage"))
     }
 }

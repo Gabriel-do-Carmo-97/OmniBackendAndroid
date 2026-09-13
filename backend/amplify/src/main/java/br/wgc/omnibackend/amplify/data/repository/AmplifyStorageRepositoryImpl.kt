@@ -17,9 +17,7 @@ import java.io.InputStream
  * Implementação corporativa de [StorageRepository] para AWS S3 via AWS Amplify.
  */
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class, kotlinx.coroutines.FlowPreview::class)
-internal class AmplifyStorageRepositoryImpl(
-    private val context: Context
-) : StorageRepository {
+internal class AmplifyStorageRepositoryImpl(private val context: Context) : StorageRepository {
 
     override fun uploadFile(path: String, fileData: ByteArray): Flow<DataResult<Uri>> = flow {
         emit(uploadFileDirect(path, fileData))
@@ -72,11 +70,9 @@ internal class AmplifyStorageRepositoryImpl(
         Amplify.Storage.remove(storagePath)
     }
 
-    private suspend inline fun <T> runCatchingStorage(crossinline block: suspend () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: Exception) {
-            DataResult.Failure(AmplifyErrorMapper.mapThrowable(e, "storage"))
-        }
+    private suspend inline fun <T> runCatchingStorage(crossinline block: suspend () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: Exception) {
+        DataResult.Failure(AmplifyErrorMapper.mapThrowable(e, "storage"))
     }
 }

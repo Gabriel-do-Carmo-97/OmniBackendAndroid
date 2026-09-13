@@ -12,6 +12,7 @@ class OmniAndroidLibraryConventionPlugin : Plugin<Project> {
         with(target) {
             with(pluginManager) {
                 apply("com.android.library")
+                apply("org.jetbrains.kotlin.android")
                 apply("maven-publish")
             }
 
@@ -92,4 +93,3 @@ class OmniAndroidLibraryConventionPlugin : Plugin<Project> {
         }
     }
 }
-

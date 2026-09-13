@@ -11,15 +11,11 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * @param remoteRepository Provedor remoto de Feature Flags (ex: RemoteConfigRepository).
  */
-class HybridFeatureFlagRepository(
-    private val remoteRepository: FeatureFlagRepository? = null
-) : FeatureFlagRepository {
+class HybridFeatureFlagRepository(private val remoteRepository: FeatureFlagRepository? = null) : FeatureFlagRepository {
 
     private val localOverrides = ConcurrentHashMap<String, Any>()
 
-    override suspend fun fetchAndActivate(): DataResult<Boolean> {
-        return remoteRepository?.fetchAndActivate() ?: DataResult.Success(true)
-    }
+    override suspend fun fetchAndActivate(): DataResult<Boolean> = remoteRepository?.fetchAndActivate() ?: DataResult.Success(true)
 
     override fun getBoolean(key: String, defaultValue: Boolean): Boolean {
         val override = localOverrides[key] as? Boolean

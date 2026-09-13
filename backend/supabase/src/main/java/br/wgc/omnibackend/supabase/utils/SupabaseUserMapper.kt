@@ -36,7 +36,7 @@ internal object SupabaseUserMapper {
             displayName = displayName,
             photoUrl = avatarUrl,
             isEmailVerified = userInfo.emailConfirmedAt != null,
-            isAnonymous = isAnonymous
+            isAnonymous = isAnonymous,
         )
     }
 }

@@ -28,9 +28,7 @@ import javax.inject.Inject
  *
  * @property auth Módulo de autenticação [Auth] do cliente Supabase.
  */
-class SupabaseAuthRepositoryImpl @Inject constructor(
-    private val auth: Auth
-) : AuthRepository {
+class SupabaseAuthRepositoryImpl @Inject constructor(private val auth: Auth) : AuthRepository {
 
     /**
      * Fluxo reativo do estado da sessão do usuário em tempo real.
@@ -96,10 +94,7 @@ class SupabaseAuthRepositoryImpl @Inject constructor(
      * @param pass Senha de acesso.
      * @return [DataResult.Success] com os dados do registro concluído.
      */
-    override suspend fun registerEmailWithPassword(
-        email: String,
-        pass: String
-    ): DataResult<RegisterUserResponse> = runCatching {
+    override suspend fun registerEmailWithPassword(email: String, pass: String): DataResult<RegisterUserResponse> = runCatching {
         auth.signUpWith(Email) {
             this.email = email
             this.password = pass
@@ -115,14 +110,14 @@ class SupabaseAuthRepositoryImpl @Inject constructor(
                 provider = "supabase",
                 isAnonymous = user.identities.isNullOrEmpty(),
                 isEmailVerified = user.emailConfirmedAt != null,
-                isNewUser = true
+                isNewUser = true,
             )
         } else {
             RegisterUserResponse(
                 email = email,
                 method = "password",
                 provider = "supabase",
-                isNewUser = true
+                isNewUser = true,
             )
         }
         DataResult.Success(response)

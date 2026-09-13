@@ -11,9 +11,7 @@ import javax.inject.Inject
  *
  * @property analytics Instância do [FirebaseAnalytics] injetada.
  */
-class AnalyticsRepositoryImpl @Inject constructor(
-    private val analytics: FirebaseAnalytics
-) : AnalyticsRepository {
+class AnalyticsRepositoryImpl @Inject constructor(private val analytics: FirebaseAnalytics) : AnalyticsRepository {
 
     /**
      * Rastreia o evento de abertura do aplicativo.

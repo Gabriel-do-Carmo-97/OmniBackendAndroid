@@ -27,10 +27,8 @@ object SupabaseCloudflareModule {
     @Provides
     @Singleton
     @Named(QUALIFIER_NAME)
-    fun provideAuthRepository(
-        @SupabaseBackend primary: AuthRepository,
-        @CloudflareBackend secondary: AuthRepository
-    ): AuthRepository = OmniSupabaseCloudflare.createAuth(primary, secondary)
+    fun provideAuthRepository(@SupabaseBackend primary: AuthRepository, @CloudflareBackend secondary: AuthRepository): AuthRepository =
+        OmniSupabaseCloudflare.createAuth(primary, secondary)
 
     /** Provê o [FirestoreRepository] híbrido Supabase + Cloudflare. */
     @Provides
@@ -38,7 +36,7 @@ object SupabaseCloudflareModule {
     @Named(QUALIFIER_NAME)
     fun provideFirestoreRepository(
         @SupabaseBackend primary: FirestoreRepository,
-        @CloudflareBackend secondary: FirestoreRepository
+        @CloudflareBackend secondary: FirestoreRepository,
     ): FirestoreRepository = OmniSupabaseCloudflare.createDatabase(primary, secondary)
 
     /** Provê o [StorageRepository] híbrido Supabase Storage + Cloudflare R2. */
@@ -47,6 +45,6 @@ object SupabaseCloudflareModule {
     @Named(QUALIFIER_NAME)
     fun provideStorageRepository(
         @SupabaseBackend primary: StorageRepository,
-        @CloudflareBackend secondary: StorageRepository
+        @CloudflareBackend secondary: StorageRepository,
     ): StorageRepository = OmniSupabaseCloudflare.createStorage(primary, secondary)
 }

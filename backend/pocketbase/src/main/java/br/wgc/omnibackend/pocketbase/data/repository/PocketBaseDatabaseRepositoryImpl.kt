@@ -16,16 +16,9 @@ import java.net.URLEncoder
 /**
  * Implementação de [FirestoreRepository] utilizando a API de Collections do PocketBase (`/api/collections/{collection}/records`).
  */
-internal class PocketBaseDatabaseRepositoryImpl(
-    private val baseUrl: String,
-    private val gson: Gson = Gson()
-) : FirestoreRepository {
+internal class PocketBaseDatabaseRepositoryImpl(private val baseUrl: String, private val gson: Gson = Gson()) : FirestoreRepository {
 
-    override suspend fun <T : Any> addDocument(
-        collection: String,
-        data: T,
-        customId: String?
-    ): DataResult<String> = runCatchingDb {
+    override suspend fun <T : Any> addDocument(collection: String, data: T, customId: String?): DataResult<String> = runCatchingDb {
         val url = "$baseUrl/api/collections/$collection/records"
         val dataMap = gson.fromJson<Map<String, Any>>(gson.toJson(data), Map::class.java).toMutableMap()
         if (customId != null) {
@@ -35,60 +28,43 @@ internal class PocketBaseDatabaseRepositoryImpl(
         response["id"]?.toString() ?: throw IllegalStateException("PocketBase didn't return record id")
     }
 
-    override suspend fun <T : Any> getDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): DataResult<T?> = runCatchingDb {
+    override suspend fun <T : Any> getDocument(collection: String, documentId: String, clazz: Class<T>): DataResult<T?> = runCatchingDb {
         val url = "$baseUrl/api/collections/$collection/records/$documentId"
         val response = httpGet(url)
         gson.fromJson(gson.toJson(response), clazz)
     }
 
-    override suspend fun updateDocument(
-        collection: String,
-        documentId: String,
-        data: Map<String, Any>
-    ): DataResult<Unit> = runCatchingDb {
+    override suspend fun updateDocument(collection: String, documentId: String, data: Map<String, Any>): DataResult<Unit> = runCatchingDb {
         val url = "$baseUrl/api/collections/$collection/records/$documentId"
         httpPatch(url, data)
         Unit
     }
 
-    override suspend fun deleteDocument(
-        collection: String,
-        documentId: String
-    ): DataResult<Unit> = runCatchingDb {
+    override suspend fun deleteDocument(collection: String, documentId: String): DataResult<Unit> = runCatchingDb {
         val url = "$baseUrl/api/collections/$collection/records/$documentId"
         httpDelete(url)
         Unit
     }
 
-    override suspend fun <T : Any> findDocuments(
-        collection: String,
-        filters: List<FilterRequest>,
-        clazz: Class<T>
-    ): DataResult<List<T>> = runCatchingDb {
-        val filterQuery = buildFilterQuery(filters)
-        val encodedFilter = if (filterQuery.isNotBlank()) "?filter=" + URLEncoder.encode(filterQuery, "UTF-8") else ""
-        val url = "$baseUrl/api/collections/$collection/records$encodedFilter"
-        val response = httpGet(url)
-        @Suppress("UNCHECKED_CAST")
-        val items = response["items"] as? List<Map<String, Any?>> ?: emptyList()
-        items.mapNotNull { item ->
-            try {
-                gson.fromJson(gson.toJson(item), clazz)
-            } catch (e: Exception) {
-                null
+    override suspend fun <T : Any> findDocuments(collection: String, filters: List<FilterRequest>, clazz: Class<T>): DataResult<List<T>> =
+        runCatchingDb {
+            val filterQuery = buildFilterQuery(filters)
+            val encodedFilter = if (filterQuery.isNotBlank()) "?filter=" + URLEncoder.encode(filterQuery, "UTF-8") else ""
+            val url = "$baseUrl/api/collections/$collection/records$encodedFilter"
+            val response = httpGet(url)
+
+            @Suppress("UNCHECKED_CAST")
+            val items = response["items"] as? List<Map<String, Any?>> ?: emptyList()
+            items.mapNotNull { item ->
+                try {
+                    gson.fromJson(gson.toJson(item), clazz)
+                } catch (e: Exception) {
+                    null
+                }
             }
         }
-    }
 
-    override fun <T : Any> listenToDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): Flow<DataResult<T?>> = callbackFlow {
+    override fun <T : Any> listenToDocument(collection: String, documentId: String, clazz: Class<T>): Flow<DataResult<T?>> = callbackFlow {
         try {
             val docResult = getDocument(collection, documentId, clazz)
             trySend(docResult)
@@ -101,7 +77,7 @@ internal class PocketBaseDatabaseRepositoryImpl(
     override fun <T : Any> listenToCollection(
         collection: String,
         filters: List<FilterRequest>,
-        clazz: Class<T>
+        clazz: Class<T>,
     ): Flow<DataResult<List<T>>> = callbackFlow {
         try {
             val listResult = findDocuments(collection, filters, clazz)
@@ -112,22 +88,20 @@ internal class PocketBaseDatabaseRepositoryImpl(
         awaitClose()
     }
 
-    private fun buildFilterQuery(filters: List<FilterRequest>): String {
-        return filters.joinToString(" && ") { filter ->
-            val field = filter.field
-            val value = filter.value
-            when (filter.operatorType) {
-                OperatorType.EQUAL_TO -> "$field = '$value'"
-                OperatorType.NOT_EQUAL_TO -> "$field != '$value'"
-                OperatorType.GREATER_THAN -> "$field > '$value'"
-                OperatorType.LESS_THAN -> "$field < '$value'"
-                OperatorType.GREATER_THAN_OR_EQUAL_TO -> "$field >= '$value'"
-                OperatorType.LESS_THAN_OR_EQUAL_TO -> "$field <= '$value'"
-                OperatorType.ARRAY_CONTAINS -> "$field ~ '$value'"
-                OperatorType.ARRAY_CONTAINS_ANY -> "$field ~ '$value'"
-                OperatorType.IN -> "$field = '$value'"
-                OperatorType.NOT_IN -> "$field != '$value'"
-            }
+    private fun buildFilterQuery(filters: List<FilterRequest>): String = filters.joinToString(" && ") { filter ->
+        val field = filter.field
+        val value = filter.value
+        when (filter.operatorType) {
+            OperatorType.EQUAL_TO -> "$field = '$value'"
+            OperatorType.NOT_EQUAL_TO -> "$field != '$value'"
+            OperatorType.GREATER_THAN -> "$field > '$value'"
+            OperatorType.LESS_THAN -> "$field < '$value'"
+            OperatorType.GREATER_THAN_OR_EQUAL_TO -> "$field >= '$value'"
+            OperatorType.LESS_THAN_OR_EQUAL_TO -> "$field <= '$value'"
+            OperatorType.ARRAY_CONTAINS -> "$field ~ '$value'"
+            OperatorType.ARRAY_CONTAINS_ANY -> "$field ~ '$value'"
+            OperatorType.IN -> "$field = '$value'"
+            OperatorType.NOT_IN -> "$field != '$value'"
         }
     }
 
@@ -181,11 +155,9 @@ internal class PocketBaseDatabaseRepositoryImpl(
         conn.responseCode
     }
 
-    private inline fun <T> runCatchingDb(block: () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: Exception) {
-            DataResult.Failure(PocketBaseErrorMapper.mapThrowable(e, "firestore"))
-        }
+    private inline fun <T> runCatchingDb(block: () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: Exception) {
+        DataResult.Failure(PocketBaseErrorMapper.mapThrowable(e, "firestore"))
     }
 }

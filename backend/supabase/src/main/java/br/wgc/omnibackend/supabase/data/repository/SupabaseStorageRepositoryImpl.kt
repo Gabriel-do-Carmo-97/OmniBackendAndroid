@@ -26,7 +26,7 @@ import javax.inject.Inject
 class SupabaseStorageRepositoryImpl @Inject constructor(
     private val storage: Storage,
     private val context: Context? = null,
-    private val defaultBucket: String = "public"
+    private val defaultBucket: String = "public",
 ) : StorageRepository {
 
     /**
@@ -83,7 +83,9 @@ class SupabaseStorageRepositoryImpl @Inject constructor(
      */
     override suspend fun uploadFileDirect(path: String, fileUri: Uri): DataResult<Uri> = runCatching {
         val cr = context?.contentResolver
-            ?: throw IllegalStateException("Context é necessário para resolver URIs locais. Forneça o contexto em OmniSupabase.initialize().")
+            ?: throw IllegalStateException(
+                "Context é necessário para resolver URIs locais. Forneça o contexto em OmniSupabase.initialize().",
+            )
         val bytes = cr.openInputStream(fileUri)?.use { it.readBytes() }
             ?: throw IOException("Falha ao abrir stream de leitura para a URI: $fileUri")
         uploadFileDirect(path, bytes)

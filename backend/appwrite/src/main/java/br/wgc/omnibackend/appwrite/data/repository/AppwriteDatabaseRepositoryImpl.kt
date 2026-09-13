@@ -35,7 +35,7 @@ internal class AppwriteDatabaseRepositoryImpl(
     private val databases: Databases,
     private val realtime: Realtime,
     private val databaseId: String,
-    private val gson: Gson = Gson()
+    private val gson: Gson = Gson(),
 ) : FirestoreRepository {
 
     // ─── Add Document ─────────────────────────────────────────────────────────
@@ -49,11 +49,7 @@ internal class AppwriteDatabaseRepositoryImpl(
      * @param customId ID personalizado opcional; se `null`, usa [ID.unique].
      * @return [DataResult.Success] com o ID do documento criado.
      */
-    override suspend fun <T : Any> addDocument(
-        collection: String,
-        data: T,
-        customId: String?
-    ): DataResult<String> = runCatchingDb {
+    override suspend fun <T : Any> addDocument(collection: String, data: T, customId: String?): DataResult<String> = runCatchingDb {
         val docId = customId ?: ID.unique()
         val dataMap = gson.fromJson<Map<String, Any>>(gson.toJson(data), Map::class.java)
         val document = databases.createDocument(databaseId, collection, docId, dataMap)
@@ -71,11 +67,7 @@ internal class AppwriteDatabaseRepositoryImpl(
      * @param clazz Classe de destino para conversão.
      * @return [DataResult.Success] com o objeto ou `null` se não encontrado.
      */
-    override suspend fun <T : Any> getDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): DataResult<T?> = runCatchingDb {
+    override suspend fun <T : Any> getDocument(collection: String, documentId: String, clazz: Class<T>): DataResult<T?> = runCatchingDb {
         val document = databases.getDocument(databaseId, collection, documentId)
         documentToObject(document.data, clazz)
     }
@@ -89,11 +81,7 @@ internal class AppwriteDatabaseRepositoryImpl(
      * @param documentId ID do documento a ser alterado.
      * @param data Mapa com os campos e novos valores.
      */
-    override suspend fun updateDocument(
-        collection: String,
-        documentId: String,
-        data: Map<String, Any>
-    ): DataResult<Unit> = runCatchingDb {
+    override suspend fun updateDocument(collection: String, documentId: String, data: Map<String, Any>): DataResult<Unit> = runCatchingDb {
         databases.updateDocument(databaseId, collection, documentId, data)
         Unit
     }
@@ -106,10 +94,7 @@ internal class AppwriteDatabaseRepositoryImpl(
      * @param collection Nome da coleção.
      * @param documentId ID do documento a ser excluído.
      */
-    override suspend fun deleteDocument(
-        collection: String,
-        documentId: String
-    ): DataResult<Unit> = runCatchingDb {
+    override suspend fun deleteDocument(collection: String, documentId: String): DataResult<Unit> = runCatchingDb {
         databases.deleteDocument(databaseId, collection, documentId)
         Unit
     }
@@ -124,15 +109,12 @@ internal class AppwriteDatabaseRepositoryImpl(
      * @param filters Lista de [FilterRequest] a serem aplicados.
      * @param clazz Classe de destino para conversão.
      */
-    override suspend fun <T : Any> findDocuments(
-        collection: String,
-        filters: List<FilterRequest>,
-        clazz: Class<T>
-    ): DataResult<List<T>> = runCatchingDb {
-        val queries = filters.map { filter -> filter.toAppwriteQuery() }
-        val result = databases.listDocuments(databaseId, collection, queries)
-        result.documents.mapNotNull { doc -> documentToObject(doc.data, clazz) }
-    }
+    override suspend fun <T : Any> findDocuments(collection: String, filters: List<FilterRequest>, clazz: Class<T>): DataResult<List<T>> =
+        runCatchingDb {
+            val queries = filters.map { filter -> filter.toAppwriteQuery() }
+            val result = databases.listDocuments(databaseId, collection, queries)
+            result.documents.mapNotNull { doc -> documentToObject(doc.data, clazz) }
+        }
 
     // ─── Listen To Document ───────────────────────────────────────────────────
 
@@ -145,11 +127,7 @@ internal class AppwriteDatabaseRepositoryImpl(
      * @param clazz Classe de destino para mapeamento.
      * @return [Flow] que emite atualizações contínuas do documento.
      */
-    override fun <T : Any> listenToDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): Flow<DataResult<T?>> = callbackFlow {
+    override fun <T : Any> listenToDocument(collection: String, documentId: String, clazz: Class<T>): Flow<DataResult<T?>> = callbackFlow {
         val channel = "databases.$databaseId.collections.$collection.documents.$documentId"
         val subscription = realtime.subscribe(channel) { event: RealtimeResponseEvent<Any> ->
             try {
@@ -190,7 +168,7 @@ internal class AppwriteDatabaseRepositoryImpl(
     override fun <T : Any> listenToCollection(
         collection: String,
         filters: List<FilterRequest>,
-        clazz: Class<T>
+        clazz: Class<T>,
     ): Flow<DataResult<List<T>>> = callbackFlow {
         val channel = "databases.$databaseId.collections.$collection.documents"
         val queries = filters.map { it.toAppwriteQuery() }
@@ -218,12 +196,10 @@ internal class AppwriteDatabaseRepositoryImpl(
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    private fun <T : Any> documentToObject(data: Map<String, Any>, clazz: Class<T>): T? {
-        return try {
-            gson.fromJson(gson.toJson(data), clazz)
-        } catch (e: Exception) {
-            null
-        }
+    private fun <T : Any> documentToObject(data: Map<String, Any>, clazz: Class<T>): T? = try {
+        gson.fromJson(gson.toJson(data), clazz)
+    } catch (e: Exception) {
+        null
     }
 
     @Suppress("ComplexMethod")
@@ -247,13 +223,11 @@ internal class AppwriteDatabaseRepositoryImpl(
         OperatorType.NOT_IN -> Query.notEqual(field, value)
     }
 
-    private suspend inline fun <T> runCatchingDb(crossinline block: suspend () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: AppwriteException) {
-            DataResult.Failure(AppwriteErrorMapper.mapException(e, "firestore"))
-        } catch (e: Exception) {
-            DataResult.Failure(AppwriteErrorMapper.mapThrowable(e, "firestore"))
-        }
+    private suspend inline fun <T> runCatchingDb(crossinline block: suspend () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: AppwriteException) {
+        DataResult.Failure(AppwriteErrorMapper.mapException(e, "firestore"))
+    } catch (e: Exception) {
+        DataResult.Failure(AppwriteErrorMapper.mapThrowable(e, "firestore"))
     }
 }

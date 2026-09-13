@@ -9,7 +9,4 @@ import androidx.annotation.Keep
  * @property lastSeen Carimbo de data/hora em milissegundos UTC da última atividade ou desconexão registrada.
  */
 @Keep
-data class PresenceStateRequest(
-    val isOnline: Boolean = false,
-    val lastSeen: Long = System.currentTimeMillis()
-)
+data class PresenceStateRequest(val isOnline: Boolean = false, val lastSeen: Long = System.currentTimeMillis())

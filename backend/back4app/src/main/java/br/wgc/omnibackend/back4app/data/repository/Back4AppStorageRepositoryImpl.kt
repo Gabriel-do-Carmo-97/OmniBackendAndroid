@@ -16,10 +16,8 @@ import java.io.InputStream
 /**
  * Implementação concreta de [StorageRepository] para Back4App utilizando [ParseFile].
  */
-internal class Back4AppStorageRepositoryImpl(
-    private val context: Context,
-    private val defaultClassName: String = "Files"
-) : StorageRepository {
+internal class Back4AppStorageRepositoryImpl(private val context: Context, private val defaultClassName: String = "Files") :
+    StorageRepository {
 
     override fun uploadFile(path: String, fileData: ByteArray): Flow<DataResult<Uri>> = flow {
         emit(uploadFileDirect(path, fileData))
@@ -66,13 +64,11 @@ internal class Back4AppStorageRepositoryImpl(
         Unit
     }
 
-    private inline fun <T> runCatchingStorage(block: () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: ParseException) {
-            DataResult.Failure(Back4AppErrorMapper.mapException(e, "storage"))
-        } catch (e: Exception) {
-            DataResult.Failure(Back4AppErrorMapper.mapThrowable(e, "storage"))
-        }
+    private inline fun <T> runCatchingStorage(block: () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: ParseException) {
+        DataResult.Failure(Back4AppErrorMapper.mapException(e, "storage"))
+    } catch (e: Exception) {
+        DataResult.Failure(Back4AppErrorMapper.mapThrowable(e, "storage"))
     }
 }

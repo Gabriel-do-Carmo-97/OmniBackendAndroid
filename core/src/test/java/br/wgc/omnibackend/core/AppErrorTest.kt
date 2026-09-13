@@ -38,7 +38,7 @@ class AppErrorTest {
             email = "dev@omni.io",
             displayName = "Omni Dev",
             isEmailVerified = true,
-            isAnonymous = false
+            isAnonymous = false,
         )
 
         assertEquals("abc_123", user.id)

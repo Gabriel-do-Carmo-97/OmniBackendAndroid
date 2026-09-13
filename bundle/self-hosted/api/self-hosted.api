@@ -1,0 +1,15 @@
+public final class br/wgc/omnibackend/bundle/selfhosted/OmniSelfHosted {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/selfhosted/OmniSelfHosted;
+	public final fun getAppwrite ()Lbr/wgc/omnibackend/appwrite/OmniAppwrite;
+	public final fun getHybrid ()Lbr/wgc/omnibackend/bundle/hybrid/OmniHybrid;
+	public final fun getPocketBase ()Lbr/wgc/omnibackend/pocketbase/OmniPocketBase;
+}
+
+public final class br/wgc/omnibackend/bundle/selfhosted/di/SelfHostedBackendModule {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/selfhosted/di/SelfHostedBackendModule;
+	public static final field QUALIFIER_FAILOVER Ljava/lang/String;
+	public final fun provideSelfHostedFailoverAuth (Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/AuthRepository;)Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun provideSelfHostedFailoverDatabase (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/repository/FirestoreRepository;)Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun provideSelfHostedFailoverStorage (Lbr/wgc/omnibackend/core/repository/StorageRepository;Lbr/wgc/omnibackend/core/repository/StorageRepository;)Lbr/wgc/omnibackend/core/repository/StorageRepository;
+}
+

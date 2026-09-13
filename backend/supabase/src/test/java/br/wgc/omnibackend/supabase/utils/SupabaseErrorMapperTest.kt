@@ -17,10 +17,7 @@ import java.io.IOException
 
 class SupabaseErrorMapperTest {
 
-    private fun createRestException(
-        statusCode: Int,
-        message: String
-    ): RestException {
+    private fun createRestException(statusCode: Int, message: String): RestException {
         val mockResponse = mockk<HttpResponse>(relaxed = true)
         val mockRequest = mockk<HttpRequest>(relaxed = true)
         every { mockResponse.status } returns HttpStatusCode.fromValue(statusCode)
@@ -31,7 +28,7 @@ class SupabaseErrorMapperTest {
         return RestException(
             error = message,
             description = message,
-            response = mockResponse
+            response = mockResponse,
         )
     }
 

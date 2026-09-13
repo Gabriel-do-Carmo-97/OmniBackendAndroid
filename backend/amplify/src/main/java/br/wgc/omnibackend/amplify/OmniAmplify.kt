@@ -8,8 +8,8 @@ import br.wgc.omnibackend.core.repository.AuthRepository
 import br.wgc.omnibackend.core.repository.FirestoreRepository
 import br.wgc.omnibackend.core.repository.StorageRepository
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
-import com.amplifyframework.core.Amplify as AmplifyCore
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin
+import com.amplifyframework.core.Amplify as AmplifyCore
 
 /**
  * Ponto de entrada e Fachada corporativa do driver AWS Amplify para o OmniBackend Android.
@@ -77,7 +77,7 @@ object OmniAmplify {
     val storage: StorageRepository by lazy {
         check(isInitialized) { "OmniAmplify deve ser inicializado antes do uso." }
         AmplifyStorageRepositoryImpl(
-            context = appContext ?: error("OmniAmplify deve ser inicializado antes do uso.")
+            context = appContext ?: error("OmniAmplify deve ser inicializado antes do uso."),
         )
     }
 

@@ -32,10 +32,8 @@ object EdgeServerlessBackendModule {
     @Provides
     @Singleton
     @Named(QUALIFIER_FAILOVER)
-    fun provideEdgeFailoverAuth(
-        @CloudflareBackend primary: AuthRepository,
-        @SupabaseBackend secondary: AuthRepository
-    ): AuthRepository = OmniHybrid.createAuth(primary, secondary)
+    fun provideEdgeFailoverAuth(@CloudflareBackend primary: AuthRepository, @SupabaseBackend secondary: AuthRepository): AuthRepository =
+        OmniHybrid.createAuth(primary, secondary)
 
     /**
      * Provê banco de dados com failover entre Cloudflare D1/KV e Supabase PostgREST.
@@ -45,7 +43,7 @@ object EdgeServerlessBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideEdgeFailoverDatabase(
         @CloudflareBackend primary: FirestoreRepository,
-        @SupabaseBackend secondary: FirestoreRepository
+        @SupabaseBackend secondary: FirestoreRepository,
     ): FirestoreRepository = OmniHybrid.createDatabase(primary, secondary)
 
     /**
@@ -56,6 +54,6 @@ object EdgeServerlessBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideEdgeFailoverStorage(
         @CloudflareBackend primary: StorageRepository,
-        @SupabaseBackend secondary: StorageRepository
+        @SupabaseBackend secondary: StorageRepository,
     ): StorageRepository = OmniHybrid.createStorage(primary, secondary)
 }

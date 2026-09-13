@@ -33,7 +33,7 @@ internal object AmplifyUserMapper {
             displayName = name,
             photoUrl = picture,
             isEmailVerified = verified,
-            isAnonymous = email.isBlank()
+            isAnonymous = email.isBlank(),
         )
     }
 
@@ -56,7 +56,7 @@ internal object AmplifyUserMapper {
             displayName = name,
             photoUrl = picture,
             isEmailVerified = verified,
-            isAnonymous = email.isBlank()
+            isAnonymous = email.isBlank(),
         )
     }
 }

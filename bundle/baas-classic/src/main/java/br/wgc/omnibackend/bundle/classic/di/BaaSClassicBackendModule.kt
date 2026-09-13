@@ -32,10 +32,8 @@ object BaaSClassicBackendModule {
     @Provides
     @Singleton
     @Named(QUALIFIER_FAILOVER)
-    fun provideClassicFailoverAuth(
-        @Back4AppBackend primary: AuthRepository,
-        @FirebaseBackend secondary: AuthRepository
-    ): AuthRepository = OmniHybrid.createAuth(primary, secondary)
+    fun provideClassicFailoverAuth(@Back4AppBackend primary: AuthRepository, @FirebaseBackend secondary: AuthRepository): AuthRepository =
+        OmniHybrid.createAuth(primary, secondary)
 
     /**
      * Provê banco de dados com failover entre Back4App e Firebase Firestore.
@@ -45,7 +43,7 @@ object BaaSClassicBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideClassicFailoverDatabase(
         @Back4AppBackend primary: FirestoreRepository,
-        @FirebaseBackend secondary: FirestoreRepository
+        @FirebaseBackend secondary: FirestoreRepository,
     ): FirestoreRepository = OmniHybrid.createDatabase(primary, secondary)
 
     /**
@@ -56,6 +54,6 @@ object BaaSClassicBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideClassicFailoverStorage(
         @Back4AppBackend primary: StorageRepository,
-        @FirebaseBackend secondary: StorageRepository
+        @FirebaseBackend secondary: StorageRepository,
     ): StorageRepository = OmniHybrid.createStorage(primary, secondary)
 }

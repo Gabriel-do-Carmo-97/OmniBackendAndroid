@@ -13,4 +13,3 @@ class OmniFirebaseTest {
         assert(appCheck === AppCheckManager)
     }
 }
-

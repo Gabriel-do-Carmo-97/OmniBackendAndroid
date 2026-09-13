@@ -19,7 +19,7 @@ import javax.inject.Singleton
 @Singleton
 class FirebaseTelemetry @Inject constructor(
     private val crashlytics: FirebaseCrashlytics,
-    @PublishedApi internal val performance: FirebasePerformance
+    @PublishedApi internal val performance: FirebasePerformance,
 ) : TelemetryProvider {
 
     /**
@@ -120,13 +120,12 @@ class FirebaseTelemetry @Inject constructor(
         /**
          * Retorna a instância singleton padrão de [FirebaseTelemetry].
          */
-        fun get(): FirebaseTelemetry =
-            instance ?: synchronized(this) {
-                instance ?: FirebaseTelemetry(
-                    FirebaseCrashlytics.getInstance(),
-                    FirebasePerformance.getInstance()
-                ).also { instance = it }
-            }
+        fun get(): FirebaseTelemetry = instance ?: synchronized(this) {
+            instance ?: FirebaseTelemetry(
+                FirebaseCrashlytics.getInstance(),
+                FirebasePerformance.getInstance(),
+            ).also { instance = it }
+        }
     }
 }
 

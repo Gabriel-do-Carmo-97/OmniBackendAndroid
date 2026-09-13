@@ -26,17 +26,15 @@ object OmniFirebaseAmplify {
     /**
      * Cria repositório de autenticação híbrido com failover Firebase Auth -> AWS Cognito.
      */
-    fun createAuth(
-        primary: AuthRepository = OmniFirebase.auth,
-        secondary: AuthRepository = OmniAmplify.auth
-    ): AuthRepository = OmniHybrid.createAuth(primary, secondary)
+    fun createAuth(primary: AuthRepository = OmniFirebase.auth, secondary: AuthRepository = OmniAmplify.auth): AuthRepository =
+        OmniHybrid.createAuth(primary, secondary)
 
     /**
      * Cria repositório de banco de dados híbrido com failover Firestore -> AWS AppSync/DynamoDB.
      */
     fun createDatabase(
         primary: FirestoreRepository = OmniFirebase.firestore,
-        secondary: FirestoreRepository = OmniAmplify.database
+        secondary: FirestoreRepository = OmniAmplify.database,
     ): FirestoreRepository = OmniHybrid.createDatabase(primary, secondary)
 
     /**
@@ -44,6 +42,6 @@ object OmniFirebaseAmplify {
      */
     fun createStorage(
         primary: StorageRepository = OmniFirebase.storage,
-        secondary: StorageRepository = OmniAmplify.storage
+        secondary: StorageRepository = OmniAmplify.storage,
     ): StorageRepository = OmniHybrid.createStorage(primary, secondary)
 }

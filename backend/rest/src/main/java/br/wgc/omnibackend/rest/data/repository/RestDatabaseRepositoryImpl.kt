@@ -14,16 +14,9 @@ import java.net.URL
 /**
  * Implementação de [FirestoreRepository] comunicando-se com endpoints REST de coleção (`/api/v1/{collection}`).
  */
-internal class RestDatabaseRepositoryImpl(
-    private val baseUrl: String,
-    private val gson: Gson = Gson()
-) : FirestoreRepository {
+internal class RestDatabaseRepositoryImpl(private val baseUrl: String, private val gson: Gson = Gson()) : FirestoreRepository {
 
-    override suspend fun <T : Any> addDocument(
-        collection: String,
-        data: T,
-        customId: String?
-    ): DataResult<String> = runCatchingDb {
+    override suspend fun <T : Any> addDocument(collection: String, data: T, customId: String?): DataResult<String> = runCatchingDb {
         val url = "$baseUrl/api/v1/$collection"
         val dataMap = gson.fromJson<Map<String, Any>>(gson.toJson(data), Map::class.java).toMutableMap()
         if (customId != null) {
@@ -33,58 +26,41 @@ internal class RestDatabaseRepositoryImpl(
         response["id"]?.toString() ?: throw IllegalStateException("REST API did not return document id")
     }
 
-    override suspend fun <T : Any> getDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): DataResult<T?> = runCatchingDb {
+    override suspend fun <T : Any> getDocument(collection: String, documentId: String, clazz: Class<T>): DataResult<T?> = runCatchingDb {
         val url = "$baseUrl/api/v1/$collection/$documentId"
         val response = httpGet(url)
         gson.fromJson(gson.toJson(response), clazz)
     }
 
-    override suspend fun updateDocument(
-        collection: String,
-        documentId: String,
-        data: Map<String, Any>
-    ): DataResult<Unit> = runCatchingDb {
+    override suspend fun updateDocument(collection: String, documentId: String, data: Map<String, Any>): DataResult<Unit> = runCatchingDb {
         val url = "$baseUrl/api/v1/$collection/$documentId"
         httpPut(url, data)
         Unit
     }
 
-    override suspend fun deleteDocument(
-        collection: String,
-        documentId: String
-    ): DataResult<Unit> = runCatchingDb {
+    override suspend fun deleteDocument(collection: String, documentId: String): DataResult<Unit> = runCatchingDb {
         val url = "$baseUrl/api/v1/$collection/$documentId"
         httpDelete(url)
         Unit
     }
 
-    override suspend fun <T : Any> findDocuments(
-        collection: String,
-        filters: List<FilterRequest>,
-        clazz: Class<T>
-    ): DataResult<List<T>> = runCatchingDb {
-        val url = "$baseUrl/api/v1/$collection/query"
-        val response = httpPost(url, mapOf("filters" to filters))
-        @Suppress("UNCHECKED_CAST")
-        val items = response["items"] as? List<Map<String, Any?>> ?: emptyList()
-        items.mapNotNull { item ->
-            try {
-                gson.fromJson(gson.toJson(item), clazz)
-            } catch (e: Exception) {
-                null
+    override suspend fun <T : Any> findDocuments(collection: String, filters: List<FilterRequest>, clazz: Class<T>): DataResult<List<T>> =
+        runCatchingDb {
+            val url = "$baseUrl/api/v1/$collection/query"
+            val response = httpPost(url, mapOf("filters" to filters))
+
+            @Suppress("UNCHECKED_CAST")
+            val items = response["items"] as? List<Map<String, Any?>> ?: emptyList()
+            items.mapNotNull { item ->
+                try {
+                    gson.fromJson(gson.toJson(item), clazz)
+                } catch (e: Exception) {
+                    null
+                }
             }
         }
-    }
 
-    override fun <T : Any> listenToDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): Flow<DataResult<T?>> = callbackFlow {
+    override fun <T : Any> listenToDocument(collection: String, documentId: String, clazz: Class<T>): Flow<DataResult<T?>> = callbackFlow {
         try {
             val docResult = getDocument(collection, documentId, clazz)
             trySend(docResult)
@@ -97,7 +73,7 @@ internal class RestDatabaseRepositoryImpl(
     override fun <T : Any> listenToCollection(
         collection: String,
         filters: List<FilterRequest>,
-        clazz: Class<T>
+        clazz: Class<T>,
     ): Flow<DataResult<List<T>>> = callbackFlow {
         try {
             val listResult = findDocuments(collection, filters, clazz)
@@ -158,11 +134,9 @@ internal class RestDatabaseRepositoryImpl(
         conn.responseCode
     }
 
-    private inline fun <T> runCatchingDb(block: () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: Exception) {
-            DataResult.Failure(RestErrorMapper.mapThrowable(e, "firestore"))
-        }
+    private inline fun <T> runCatchingDb(block: () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: Exception) {
+        DataResult.Failure(RestErrorMapper.mapThrowable(e, "firestore"))
     }
 }

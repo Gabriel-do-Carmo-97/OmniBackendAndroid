@@ -19,10 +19,7 @@ import java.util.UUID
 /**
  * Implementação de [AuthRepository] interagindo com endpoints REST de autenticação.
  */
-internal class RestAuthRepositoryImpl(
-    private val baseUrl: String,
-    private val gson: Gson = Gson()
-) : AuthRepository {
+internal class RestAuthRepositoryImpl(private val baseUrl: String, private val gson: Gson = Gson()) : AuthRepository {
 
     @Volatile
     private var activeUser: OmniUser? = null
@@ -52,10 +49,7 @@ internal class RestAuthRepositoryImpl(
         user
     }
 
-    override suspend fun registerEmailWithPassword(
-        email: String,
-        pass: String
-    ): DataResult<RegisterUserResponse> = runCatchingAuth {
+    override suspend fun registerEmailWithPassword(email: String, pass: String): DataResult<RegisterUserResponse> = runCatchingAuth {
         val url = "$baseUrl/auth/register"
         val response = postJson(url, mapOf("email" to email, "password" to pass))
         val uid = response["id"]?.toString() ?: response["uid"]?.toString().orEmpty()
@@ -68,7 +62,7 @@ internal class RestAuthRepositoryImpl(
             provider = "rest",
             isAnonymous = false,
             isEmailVerified = response["isEmailVerified"] as? Boolean ?: false,
-            isNewUser = true
+            isNewUser = true,
         )
     }
 
@@ -161,17 +155,17 @@ internal class RestAuthRepositoryImpl(
             val responseText = conn.inputStream.use { it.bufferedReader().readText() }
             return if (responseText.isNotBlank()) {
                 gson.fromJson(responseText, Map::class.java) as Map<String, Any?>
-            } else emptyMap()
+            } else {
+                emptyMap()
+            }
         } else {
             throw IllegalStateException("REST API HTTP $code: ${conn.responseMessage}")
         }
     }
 
-    private inline fun <T> runCatchingAuth(block: () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: Exception) {
-            DataResult.Failure(RestErrorMapper.mapThrowable(e, "auth"))
-        }
+    private inline fun <T> runCatchingAuth(block: () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: Exception) {
+        DataResult.Failure(RestErrorMapper.mapThrowable(e, "auth"))
     }
 }

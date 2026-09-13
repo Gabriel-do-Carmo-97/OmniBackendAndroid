@@ -19,7 +19,7 @@ data class OmniUser(
     val displayName: String? = null,
     val photoUrl: String? = null,
     val isEmailVerified: Boolean = false,
-    val isAnonymous: Boolean = false
+    val isAnonymous: Boolean = false,
 ) {
     /** Alias ergonômico para [uid]. */
     val id: String get() = uid

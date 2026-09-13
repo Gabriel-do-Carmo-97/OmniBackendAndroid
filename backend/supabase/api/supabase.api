@@ -1,0 +1,72 @@
+public final class br/wgc/omnibackend/supabase/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class br/wgc/omnibackend/supabase/OmniSupabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/supabase/OmniSupabase;
+	public final fun getAnonKey ()Ljava/lang/String;
+	public final fun getAuth ()Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun getDatabase ()Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun getInitialized ()Z
+	public final fun getStorage ()Lbr/wgc/omnibackend/core/repository/StorageRepository;
+	public final fun getUrl ()Ljava/lang/String;
+	public final fun initialize (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Lio/github/jan/supabase/auth/SessionManager;Lio/github/jan/supabase/auth/CodeVerifierCache;)V
+	public static synthetic fun initialize$default (Lbr/wgc/omnibackend/supabase/OmniSupabase;Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Lio/github/jan/supabase/auth/SessionManager;Lio/github/jan/supabase/auth/CodeVerifierCache;ILjava/lang/Object;)V
+}
+
+public final class br/wgc/omnibackend/supabase/data/repository/SupabaseAuthRepositoryImpl : br/wgc/omnibackend/core/repository/AuthRepository {
+	public fun <init> (Lio/github/jan/supabase/auth/Auth;)V
+	public fun createUser (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun deleteUser (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getAuthState ()Lkotlinx/coroutines/flow/Flow;
+	public fun getCurrentUser ()Lbr/wgc/omnibackend/core/model/OmniUser;
+	public fun isUserLogged (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun login (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun loginAnonymously (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun reauthenticate (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun registerEmailWithPassword (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun resetPassword (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun sendEmailVerification (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun signInWithCredential (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun signInWithGoogle (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun signOut (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateEmail (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updatePassword (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateProfile (Ljava/lang/String;Landroid/net/Uri;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/supabase/data/repository/SupabaseDatabaseRepositoryImpl : br/wgc/omnibackend/core/repository/FirestoreRepository {
+	public fun <init> (Lio/github/jan/supabase/postgrest/Postgrest;Lio/github/jan/supabase/realtime/Realtime;Lcom/google/gson/Gson;)V
+	public synthetic fun <init> (Lio/github/jan/supabase/postgrest/Postgrest;Lio/github/jan/supabase/realtime/Realtime;Lcom/google/gson/Gson;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun addDocument (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun deleteDocument (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun findDocuments (Ljava/lang/String;Ljava/util/List;Ljava/lang/Class;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getDocument (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun listenToCollection (Ljava/lang/String;Ljava/util/List;Ljava/lang/Class;)Lkotlinx/coroutines/flow/Flow;
+	public fun listenToDocument (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)Lkotlinx/coroutines/flow/Flow;
+	public fun updateDocument (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/supabase/data/repository/SupabaseStorageRepositoryImpl : br/wgc/omnibackend/core/repository/StorageRepository {
+	public fun <init> (Lio/github/jan/supabase/storage/Storage;Landroid/content/Context;Ljava/lang/String;)V
+	public synthetic fun <init> (Lio/github/jan/supabase/storage/Storage;Landroid/content/Context;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun delete (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getDownloadUrl (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun uploadFile (Ljava/lang/String;Landroid/net/Uri;)Lkotlinx/coroutines/flow/Flow;
+	public fun uploadFile (Ljava/lang/String;Ljava/io/InputStream;)Lkotlinx/coroutines/flow/Flow;
+	public fun uploadFile (Ljava/lang/String;[B)Lkotlinx/coroutines/flow/Flow;
+	public fun uploadFileDirect (Ljava/lang/String;Landroid/net/Uri;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun uploadFileDirect (Ljava/lang/String;[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/supabase/di/SupabaseBackendModule {
+	public static final field INSTANCE Lbr/wgc/omnibackend/supabase/di/SupabaseBackendModule;
+	public static final field QUALIFIER_NAME Ljava/lang/String;
+	public final fun provideSupabaseAuthRepository ()Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun provideSupabaseFirestoreRepository ()Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun provideSupabaseStorageRepository ()Lbr/wgc/omnibackend/core/repository/StorageRepository;
+}
+

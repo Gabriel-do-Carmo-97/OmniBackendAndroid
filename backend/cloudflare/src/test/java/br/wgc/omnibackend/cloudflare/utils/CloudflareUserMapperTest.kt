@@ -15,7 +15,7 @@ class CloudflareUserMapperTest {
             "displayName" to "Gabriel do Carmo",
             "photoUrl" to "https://r2.example.com/avatar.png",
             "isEmailVerified" to true,
-            "isAnonymous" to false
+            "isAnonymous" to false,
         )
 
         val user = CloudflareUserMapper.toOmniUser(response)

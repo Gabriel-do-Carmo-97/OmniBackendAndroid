@@ -32,10 +32,8 @@ object EnterpriseHybridBackendModule {
     @Provides
     @Singleton
     @Named(QUALIFIER_FAILOVER)
-    fun provideEnterpriseFailoverAuth(
-        @RestBackend primary: AuthRepository,
-        @FirebaseBackend secondary: AuthRepository
-    ): AuthRepository = OmniHybrid.createAuth(primary, secondary)
+    fun provideEnterpriseFailoverAuth(@RestBackend primary: AuthRepository, @FirebaseBackend secondary: AuthRepository): AuthRepository =
+        OmniHybrid.createAuth(primary, secondary)
 
     /**
      * Provê banco de dados com failover entre API REST própria e Firebase Firestore.
@@ -45,7 +43,7 @@ object EnterpriseHybridBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideEnterpriseFailoverDatabase(
         @RestBackend primary: FirestoreRepository,
-        @FirebaseBackend secondary: FirestoreRepository
+        @FirebaseBackend secondary: FirestoreRepository,
     ): FirestoreRepository = OmniHybrid.createDatabase(primary, secondary)
 
     /**
@@ -56,6 +54,6 @@ object EnterpriseHybridBackendModule {
     @Named(QUALIFIER_FAILOVER)
     fun provideEnterpriseFailoverStorage(
         @RestBackend primary: StorageRepository,
-        @FirebaseBackend secondary: StorageRepository
+        @FirebaseBackend secondary: StorageRepository,
     ): StorageRepository = OmniHybrid.createStorage(primary, secondary)
 }

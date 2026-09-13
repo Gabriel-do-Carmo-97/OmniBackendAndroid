@@ -119,4 +119,3 @@ class LoginUseCaseTest {
         coVerify(exactly = 0) { presenceRepository.goOnline(any(), any()) }
     }
 }
-

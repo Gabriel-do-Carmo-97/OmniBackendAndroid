@@ -41,4 +41,3 @@ class AuthRepositoryTest {
         verify { firebaseAuth.addAuthStateListener(any()) }
     }
 }
-

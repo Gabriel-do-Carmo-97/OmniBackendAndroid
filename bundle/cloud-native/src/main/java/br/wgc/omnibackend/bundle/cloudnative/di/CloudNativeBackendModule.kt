@@ -1,7 +1,6 @@
 package br.wgc.omnibackend.bundle.cloudnative.di
 
 import br.wgc.omnibackend.bundle.hybrid.OmniHybrid
-import br.wgc.omnibackend.core.di.ActiveBackend
 import br.wgc.omnibackend.core.di.AmplifyBackend
 import br.wgc.omnibackend.core.di.FirebaseBackend
 import br.wgc.omnibackend.core.di.OmniBackendSelector
@@ -38,10 +37,8 @@ object CloudNativeBackendModule {
     @Provides
     @Singleton
     @Named(QUALIFIER_FAILOVER_AWS)
-    fun provideGcpAwsFailoverAuth(
-        @FirebaseBackend primary: AuthRepository,
-        @AmplifyBackend secondary: AuthRepository
-    ): AuthRepository = OmniHybrid.createAuth(primary, secondary)
+    fun provideGcpAwsFailoverAuth(@FirebaseBackend primary: AuthRepository, @AmplifyBackend secondary: AuthRepository): AuthRepository =
+        OmniHybrid.createAuth(primary, secondary)
 
     /**
      * Provê armazenamento híbrido com failover entre Firebase Storage (primário) e AWS S3 via Amplify (secundário).
@@ -51,7 +48,7 @@ object CloudNativeBackendModule {
     @Named(QUALIFIER_FAILOVER_AWS)
     fun provideGcpAwsFailoverStorage(
         @FirebaseBackend primary: StorageRepository,
-        @AmplifyBackend secondary: StorageRepository
+        @AmplifyBackend secondary: StorageRepository,
     ): StorageRepository = OmniHybrid.createStorage(primary, secondary)
 
     /**
@@ -62,6 +59,6 @@ object CloudNativeBackendModule {
     @Named(QUALIFIER_FAILOVER_SUPABASE)
     fun provideGcpSupabaseFailoverDatabase(
         @FirebaseBackend primary: FirestoreRepository,
-        @SupabaseBackend secondary: FirestoreRepository
+        @SupabaseBackend secondary: FirestoreRepository,
     ): FirestoreRepository = OmniHybrid.createDatabase(primary, secondary)
 }

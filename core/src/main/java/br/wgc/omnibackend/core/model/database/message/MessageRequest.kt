@@ -17,5 +17,5 @@ data class MessageRequest(
     val senderId: String = "",
     val content: String = "",
     val timestamp: Long = System.currentTimeMillis(),
-    val status: MessageStatus = MessageStatus.SENDING
+    val status: MessageStatus = MessageStatus.SENDING,
 )

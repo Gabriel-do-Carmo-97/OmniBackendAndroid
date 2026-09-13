@@ -19,10 +19,7 @@ import java.util.UUID
 /**
  * Implementação de [AuthRepository] utilizando a API de usuários do PocketBase.
  */
-internal class PocketBaseAuthRepositoryImpl(
-    private val baseUrl: String,
-    private val gson: Gson = Gson()
-) : AuthRepository {
+internal class PocketBaseAuthRepositoryImpl(private val baseUrl: String, private val gson: Gson = Gson()) : AuthRepository {
 
     @Volatile
     private var activeUser: OmniUser? = null
@@ -40,6 +37,7 @@ internal class PocketBaseAuthRepositoryImpl(
         val url = "$baseUrl/api/collections/users/auth-with-password"
         val body = mapOf("identity" to email, "password" to pass)
         val response = postJson(url, body)
+
         @Suppress("UNCHECKED_CAST")
         val record = response["record"] as? Map<String, Any?>
             ?: throw IllegalStateException("Invalid record response from PocketBase")
@@ -54,7 +52,7 @@ internal class PocketBaseAuthRepositoryImpl(
             "email" to email,
             "password" to pass,
             "passwordConfirm" to pass,
-            "emailVisibility" to true
+            "emailVisibility" to true,
         )
         val record = postJson(url, body)
         val user = PocketBaseUserMapper.toOmniUser(record, baseUrl)
@@ -62,16 +60,13 @@ internal class PocketBaseAuthRepositoryImpl(
         user
     }
 
-    override suspend fun registerEmailWithPassword(
-        email: String,
-        pass: String
-    ): DataResult<RegisterUserResponse> = runCatchingAuth {
+    override suspend fun registerEmailWithPassword(email: String, pass: String): DataResult<RegisterUserResponse> = runCatchingAuth {
         val url = "$baseUrl/api/collections/users/records"
         val body = mapOf(
             "email" to email,
             "password" to pass,
             "passwordConfirm" to pass,
-            "emailVisibility" to true
+            "emailVisibility" to true,
         )
         val record = postJson(url, body)
         val id = record["id"]?.toString().orEmpty()
@@ -87,7 +82,7 @@ internal class PocketBaseAuthRepositoryImpl(
             provider = "pocketbase",
             isAnonymous = false,
             isEmailVerified = verified,
-            isNewUser = true
+            isNewUser = true,
         )
     }
 
@@ -157,13 +152,11 @@ internal class PocketBaseAuthRepositoryImpl(
         Unit
     }
 
-    override suspend fun signInWithGoogle(idToken: String): DataResult<OmniUser> {
-        return DataResult.Failure(
-            AppError.Auth.Generic(
-                IllegalStateException("OAuth2 no PocketBase é realizado via /api/collections/users/auth-with-oauth2")
-            )
-        )
-    }
+    override suspend fun signInWithGoogle(idToken: String): DataResult<OmniUser> = DataResult.Failure(
+        AppError.Auth.Generic(
+            IllegalStateException("OAuth2 no PocketBase é realizado via /api/collections/users/auth-with-oauth2"),
+        ),
+    )
 
     override suspend fun signOut(): DataResult<Unit> = runCatchingAuth {
         activeUser = null
@@ -172,13 +165,9 @@ internal class PocketBaseAuthRepositoryImpl(
 
     // --- HTTP Helpers ---
 
-    private fun postJson(urlString: String, bodyMap: Map<String, Any?>): Map<String, Any?> {
-        return httpRequest("POST", urlString, bodyMap)
-    }
+    private fun postJson(urlString: String, bodyMap: Map<String, Any?>): Map<String, Any?> = httpRequest("POST", urlString, bodyMap)
 
-    private fun patchJson(urlString: String, bodyMap: Map<String, Any?>): Map<String, Any?> {
-        return httpRequest("PATCH", urlString, bodyMap)
-    }
+    private fun patchJson(urlString: String, bodyMap: Map<String, Any?>): Map<String, Any?> = httpRequest("PATCH", urlString, bodyMap)
 
     private fun deleteRequest(urlString: String) {
         httpRequest("DELETE", urlString, null)
@@ -205,17 +194,17 @@ internal class PocketBaseAuthRepositoryImpl(
             val responseText = conn.inputStream.use { it.bufferedReader().readText() }
             return if (responseText.isNotBlank()) {
                 gson.fromJson(responseText, Map::class.java) as Map<String, Any?>
-            } else emptyMap()
+            } else {
+                emptyMap()
+            }
         } else {
             throw IllegalStateException("PocketBase HTTP $code: ${conn.responseMessage}")
         }
     }
 
-    private inline fun <T> runCatchingAuth(block: () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: Exception) {
-            DataResult.Failure(PocketBaseErrorMapper.mapThrowable(e, "auth"))
-        }
+    private inline fun <T> runCatchingAuth(block: () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: Exception) {
+        DataResult.Failure(PocketBaseErrorMapper.mapThrowable(e, "auth"))
     }
 }

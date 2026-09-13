@@ -36,4 +36,3 @@ class FirestoreRepositoryTest {
         verify(exactly = 1) { collectionRef.document("user_123") }
     }
 }
-

@@ -20,5 +20,5 @@ data class RegisterUserResponse(
     val provider: String? = null,
     val isAnonymous: Boolean? = false,
     val isEmailVerified: Boolean? = false,
-    val isNewUser: Boolean? = false
+    val isNewUser: Boolean? = false,
 )

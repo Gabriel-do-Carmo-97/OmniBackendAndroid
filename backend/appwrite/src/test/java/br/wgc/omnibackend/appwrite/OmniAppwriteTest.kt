@@ -46,7 +46,7 @@ class OmniAppwriteTest {
             endpoint = testEndpoint,
             projectId = testProjectId,
             databaseId = testDatabaseId,
-            defaultBucketId = testBucketId
+            defaultBucketId = testBucketId,
         )
 
         assertTrue(OmniAppwrite.initialized)

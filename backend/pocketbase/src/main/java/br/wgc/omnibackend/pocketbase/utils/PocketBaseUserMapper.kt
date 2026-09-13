@@ -24,7 +24,9 @@ internal object PocketBaseUserMapper {
 
         val photoUrl = if (avatar.isNotBlank() && collectionId.isNotBlank() && id.isNotBlank()) {
             "$baseUrl/api/files/$collectionId/$id/$avatar"
-        } else null
+        } else {
+            null
+        }
 
         return OmniUser(
             uid = id,
@@ -32,7 +34,7 @@ internal object PocketBaseUserMapper {
             displayName = name,
             photoUrl = photoUrl,
             isEmailVerified = verified,
-            isAnonymous = email.isBlank()
+            isAnonymous = email.isBlank(),
         )
     }
 }

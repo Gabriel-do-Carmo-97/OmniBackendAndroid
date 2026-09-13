@@ -4,7 +4,6 @@ import br.wgc.omnibackend.core.utils.AppError
 import io.appwrite.exceptions.AppwriteException
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.IOException
 import java.net.UnknownHostException
 
 class AppwriteErrorMapperTest {

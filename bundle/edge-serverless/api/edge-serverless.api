@@ -1,0 +1,15 @@
+public final class br/wgc/omnibackend/bundle/edge/OmniEdgeServerless {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/edge/OmniEdgeServerless;
+	public final fun getCloudflare ()Lbr/wgc/omnibackend/cloudflare/OmniCloudflare;
+	public final fun getHybrid ()Lbr/wgc/omnibackend/bundle/hybrid/OmniHybrid;
+	public final fun getSupabase ()Lbr/wgc/omnibackend/supabase/OmniSupabase;
+}
+
+public final class br/wgc/omnibackend/bundle/edge/di/EdgeServerlessBackendModule {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/edge/di/EdgeServerlessBackendModule;
+	public static final field QUALIFIER_FAILOVER Ljava/lang/String;
+	public final fun provideEdgeFailoverAuth (Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/AuthRepository;)Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun provideEdgeFailoverDatabase (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/repository/FirestoreRepository;)Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun provideEdgeFailoverStorage (Lbr/wgc/omnibackend/core/repository/StorageRepository;Lbr/wgc/omnibackend/core/repository/StorageRepository;)Lbr/wgc/omnibackend/core/repository/StorageRepository;
+}
+

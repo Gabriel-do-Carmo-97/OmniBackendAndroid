@@ -33,4 +33,3 @@ object AppCheckManager {
         FirebaseAppCheck.getInstance().setTokenAutoRefreshEnabled(enabled)
     }
 }
-

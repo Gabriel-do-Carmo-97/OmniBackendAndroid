@@ -32,5 +32,5 @@ enum class OperatorType {
     IN,
 
     /** Verifica se o campo NÃO está presente na lista de valores (`NOT IN`). */
-    NOT_IN
+    NOT_IN,
 }

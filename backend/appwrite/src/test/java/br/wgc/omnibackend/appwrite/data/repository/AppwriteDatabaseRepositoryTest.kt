@@ -5,7 +5,6 @@ import br.wgc.omnibackend.core.utils.DataResult
 import com.google.gson.Gson
 import io.appwrite.exceptions.AppwriteException
 import io.appwrite.models.Document
-import io.appwrite.models.DocumentList
 import io.appwrite.services.Databases
 import io.appwrite.services.Realtime
 import io.mockk.coEvery
@@ -35,7 +34,7 @@ class AppwriteDatabaseRepositoryTest {
             databases = mockDatabases,
             realtime = mockRealtime,
             databaseId = databaseId,
-            gson = gson
+            gson = gson,
         )
     }
 
@@ -50,7 +49,7 @@ class AppwriteDatabaseRepositoryTest {
                 databaseId = databaseId,
                 collectionId = "users",
                 documentId = any(),
-                data = any()
+                data = any(),
             )
         } returns mockDocument
 

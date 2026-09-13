@@ -78,11 +78,9 @@ inline fun <T> DataResult<T>.onFailure(action: (error: AppError) -> Unit): DataR
  * @param transform Função de transformação do dado.
  * @return Novo [DataResult] com o dado transformado ou a falha original.
  */
-inline fun <T, R> DataResult<T>.map(transform: (value: T) -> R): DataResult<R> {
-    return when (this) {
-        is DataResult.Success -> DataResult.Success(transform(data))
-        is DataResult.Failure -> DataResult.Failure(error)
-    }
+inline fun <T, R> DataResult<T>.map(transform: (value: T) -> R): DataResult<R> = when (this) {
+    is DataResult.Success -> DataResult.Success(transform(data))
+    is DataResult.Failure -> DataResult.Failure(error)
 }
 
 /**
@@ -92,13 +90,7 @@ inline fun <T, R> DataResult<T>.map(transform: (value: T) -> R): DataResult<R> {
  * @param onFailure Função executada com o erro [AppError] em caso de falha.
  * @return O valor resultante [R].
  */
-inline fun <T, R> DataResult<T>.fold(
-    onSuccess: (value: T) -> R,
-    onFailure: (error: AppError) -> R
-): R {
-    return when (this) {
-        is DataResult.Success -> onSuccess(data)
-        is DataResult.Failure -> onFailure(error)
-    }
+inline fun <T, R> DataResult<T>.fold(onSuccess: (value: T) -> R, onFailure: (error: AppError) -> R): R = when (this) {
+    is DataResult.Success -> onSuccess(data)
+    is DataResult.Failure -> onFailure(error)
 }
-

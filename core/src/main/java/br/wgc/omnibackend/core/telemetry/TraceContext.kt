@@ -35,6 +35,8 @@ object TraceContext {
         val parts = traceParent.split("-")
         return if (parts.size == 4 && parts[0] == "00" && parts[1].length == 32) {
             parts[1]
-        } else null
+        } else {
+            null
+        }
     }
 }

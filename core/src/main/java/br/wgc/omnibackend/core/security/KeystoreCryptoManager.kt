@@ -12,9 +12,7 @@ import javax.crypto.spec.GCMParameterSpec
  *
  * Utilizado para criptografar tokens de sessão, credenciais e payloads em repouso no dispositivo.
  */
-class KeystoreCryptoManager(
-    private val keyAlias: String = "OmniBackendMasterKey"
-) {
+class KeystoreCryptoManager(private val keyAlias: String = "OmniBackendMasterKey") {
 
     private val androidKeystore = "AndroidKeyStore"
     private val transformation = "AES/GCM/NoPadding"
@@ -30,7 +28,7 @@ class KeystoreCryptoManager(
             val keyGenerator = KeyGenerator.getInstance("AES", androidKeystore)
             val spec = android.security.keystore.KeyGenParameterSpec.Builder(
                 keyAlias,
-                android.security.keystore.KeyProperties.PURPOSE_ENCRYPT or android.security.keystore.KeyProperties.PURPOSE_DECRYPT
+                android.security.keystore.KeyProperties.PURPOSE_ENCRYPT or android.security.keystore.KeyProperties.PURPOSE_DECRYPT,
             )
                 .setBlockModes(android.security.keystore.KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(android.security.keystore.KeyProperties.ENCRYPTION_PADDING_NONE)

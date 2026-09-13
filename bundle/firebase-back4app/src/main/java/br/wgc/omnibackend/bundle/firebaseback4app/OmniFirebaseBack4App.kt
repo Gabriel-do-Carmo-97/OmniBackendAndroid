@@ -26,17 +26,15 @@ object OmniFirebaseBack4App {
     /**
      * Cria repositório de autenticação híbrido Firebase Auth -> Back4App ParseUser.
      */
-    fun createAuth(
-        primary: AuthRepository = OmniFirebase.auth,
-        secondary: AuthRepository = OmniBack4App.auth
-    ): AuthRepository = OmniHybrid.createAuth(primary, secondary)
+    fun createAuth(primary: AuthRepository = OmniFirebase.auth, secondary: AuthRepository = OmniBack4App.auth): AuthRepository =
+        OmniHybrid.createAuth(primary, secondary)
 
     /**
      * Cria repositório de banco de dados híbrido Firestore -> Back4App ParseObject.
      */
     fun createDatabase(
         primary: FirestoreRepository = OmniFirebase.firestore,
-        secondary: FirestoreRepository = OmniBack4App.database
+        secondary: FirestoreRepository = OmniBack4App.database,
     ): FirestoreRepository = OmniHybrid.createDatabase(primary, secondary)
 
     /**
@@ -44,6 +42,6 @@ object OmniFirebaseBack4App {
      */
     fun createStorage(
         primary: StorageRepository = OmniFirebase.storage,
-        secondary: StorageRepository = OmniBack4App.storage
+        secondary: StorageRepository = OmniBack4App.storage,
     ): StorageRepository = OmniHybrid.createStorage(primary, secondary)
 }

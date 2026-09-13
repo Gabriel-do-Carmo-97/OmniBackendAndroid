@@ -34,7 +34,7 @@ import javax.inject.Inject
 class SupabaseDatabaseRepositoryImpl @Inject constructor(
     private val postgrest: Postgrest,
     private val realtime: Realtime,
-    private val gson: Gson = Gson()
+    private val gson: Gson = Gson(),
 ) : FirestoreRepository {
 
     /**
@@ -46,14 +46,18 @@ class SupabaseDatabaseRepositoryImpl @Inject constructor(
      * @param customId Identificador customizado opcional. Se nulo, um UUID aleatório é atribuído.
      * @return [DataResult.Success] com o ID gerado ou atribuído ao documento.
      */
-    override suspend fun <T : Any> addDocument(
-        collection: String,
-        data: T,
-        customId: String?
-    ): DataResult<String> = runCatching {
+    override suspend fun <T : Any> addDocument(collection: String, data: T, customId: String?): DataResult<String> = runCatching {
         val jsonElement = gson.toJsonTree(data).asJsonObject
         val docId = customId
-            ?: (if (jsonElement.has("id") && !jsonElement.get("id").isJsonNull) jsonElement.get("id").asString else UUID.randomUUID().toString())
+            ?: (
+                if (jsonElement.has("id") &&
+                    !jsonElement.get("id").isJsonNull
+                ) {
+                    jsonElement.get("id").asString
+                } else {
+                    UUID.randomUUID().toString()
+                }
+                )
 
         if (!jsonElement.has("id")) {
             jsonElement.addProperty("id", docId)
@@ -74,11 +78,7 @@ class SupabaseDatabaseRepositoryImpl @Inject constructor(
      * @param clazz Classe de destino para conversão dos dados.
      * @return [DataResult.Success] com a entidade recuperada ou `null` se não existir.
      */
-    override suspend fun <T : Any> getDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): DataResult<T?> = runCatching {
+    override suspend fun <T : Any> getDocument(collection: String, documentId: String, clazz: Class<T>): DataResult<T?> = runCatching {
         val result = postgrest.from(collection).select {
             filter {
                 eq("id", documentId)
@@ -102,11 +102,7 @@ class SupabaseDatabaseRepositoryImpl @Inject constructor(
      * @param documentId Identificador do registro a alterar.
      * @param data Mapa chave-valor dos campos a serem atualizados.
      */
-    override suspend fun updateDocument(
-        collection: String,
-        documentId: String,
-        data: Map<String, Any>
-    ): DataResult<Unit> = runCatching {
+    override suspend fun updateDocument(collection: String, documentId: String, data: Map<String, Any>): DataResult<Unit> = runCatching {
         val jsonString = gson.toJson(data)
         postgrest.from(collection).update(jsonString) {
             filter {
@@ -124,10 +120,7 @@ class SupabaseDatabaseRepositoryImpl @Inject constructor(
      * @param collection Nome da tabela.
      * @param documentId Identificador do registro a ser excluído.
      */
-    override suspend fun deleteDocument(
-        collection: String,
-        documentId: String
-    ): DataResult<Unit> = runCatching {
+    override suspend fun deleteDocument(collection: String, documentId: String): DataResult<Unit> = runCatching {
         postgrest.from(collection).delete {
             filter {
                 eq("id", documentId)
@@ -146,22 +139,19 @@ class SupabaseDatabaseRepositoryImpl @Inject constructor(
      * @param filters Lista de filtros [FilterRequest] aplicados.
      * @param clazz Classe de destino para mapeamento dos registros.
      */
-    override suspend fun <T : Any> findDocuments(
-        collection: String,
-        filters: List<FilterRequest>,
-        clazz: Class<T>
-    ): DataResult<List<T>> = runCatching {
-        val result = postgrest.from(collection).select {
-            filter {
-                filters.forEach { applyFilter(it) }
+    override suspend fun <T : Any> findDocuments(collection: String, filters: List<FilterRequest>, clazz: Class<T>): DataResult<List<T>> =
+        runCatching {
+            val result = postgrest.from(collection).select {
+                filter {
+                    filters.forEach { applyFilter(it) }
+                }
             }
+            val jsonArray = JsonParser.parseString(result.data).asJsonArray
+            val items = jsonArray.map { gson.fromJson(it, clazz) }
+            DataResult.Success(items)
+        }.getOrElse {
+            DataResult.Failure(SupabaseErrorMapper.mapDatabaseError(it))
         }
-        val jsonArray = JsonParser.parseString(result.data).asJsonArray
-        val items = jsonArray.map { gson.fromJson(it, clazz) }
-        DataResult.Success(items)
-    }.getOrElse {
-        DataResult.Failure(SupabaseErrorMapper.mapDatabaseError(it))
-    }
 
     /**
      * Observa as modificações de um registro específico em tempo real.
@@ -171,11 +161,7 @@ class SupabaseDatabaseRepositoryImpl @Inject constructor(
      * @param documentId Identificador exclusivo do documento.
      * @param clazz Classe de destino para mapeamento.
      */
-    override fun <T : Any> listenToDocument(
-        collection: String,
-        documentId: String,
-        clazz: Class<T>
-    ): Flow<DataResult<T?>> = callbackFlow {
+    override fun <T : Any> listenToDocument(collection: String, documentId: String, clazz: Class<T>): Flow<DataResult<T?>> = callbackFlow {
         trySend(getDocument(collection, documentId, clazz))
 
         val channelName = "doc-$collection-$documentId-${UUID.randomUUID()}"
@@ -210,7 +196,7 @@ class SupabaseDatabaseRepositoryImpl @Inject constructor(
     override fun <T : Any> listenToCollection(
         collection: String,
         filters: List<FilterRequest>,
-        clazz: Class<T>
+        clazz: Class<T>,
     ): Flow<DataResult<List<T>>> = callbackFlow {
         trySend(findDocuments(collection, filters, clazz))
 

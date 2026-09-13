@@ -1,0 +1,15 @@
+public final class br/wgc/omnibackend/bundle/classic/OmniBaaSClassic {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/classic/OmniBaaSClassic;
+	public final fun getBack4App ()Lbr/wgc/omnibackend/back4app/OmniBack4App;
+	public final fun getFirebase ()Lbr/wgc/omnibackend/firebase/OmniFirebase;
+	public final fun getHybrid ()Lbr/wgc/omnibackend/bundle/hybrid/OmniHybrid;
+}
+
+public final class br/wgc/omnibackend/bundle/classic/di/BaaSClassicBackendModule {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/classic/di/BaaSClassicBackendModule;
+	public static final field QUALIFIER_FAILOVER Ljava/lang/String;
+	public final fun provideClassicFailoverAuth (Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/AuthRepository;)Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun provideClassicFailoverDatabase (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/repository/FirestoreRepository;)Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun provideClassicFailoverStorage (Lbr/wgc/omnibackend/core/repository/StorageRepository;Lbr/wgc/omnibackend/core/repository/StorageRepository;)Lbr/wgc/omnibackend/core/repository/StorageRepository;
+}
+

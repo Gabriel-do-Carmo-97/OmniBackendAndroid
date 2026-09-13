@@ -17,7 +17,7 @@ class AmplifyUserMapperTest {
             "email" to "gabriel@example.com",
             "name" to "Gabriel do Carmo",
             "picture" to "https://s3.amazonaws.com/avatar.png",
-            "email_verified" to true
+            "email_verified" to true,
         )
 
         val user = AmplifyUserMapper.toOmniUser(attributes)
@@ -36,7 +36,7 @@ class AmplifyUserMapperTest {
         val attrs = listOf(
             AuthUserAttribute(AuthUserAttributeKey.email(), "user@aws.com"),
             AuthUserAttribute(AuthUserAttributeKey.name(), "AWS User"),
-            AuthUserAttribute(AuthUserAttributeKey.emailVerified(), "true")
+            AuthUserAttribute(AuthUserAttributeKey.emailVerified(), "true"),
         )
 
         val user = AmplifyUserMapper.toOmniUser(authUser, attrs)

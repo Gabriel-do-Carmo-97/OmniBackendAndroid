@@ -46,7 +46,7 @@ class AppwriteStorageRepositoryTest {
             context = mockContext,
             endpoint = endpoint,
             projectId = projectId,
-            defaultBucketId = defaultBucket
+            defaultBucketId = defaultBucket,
         )
     }
 

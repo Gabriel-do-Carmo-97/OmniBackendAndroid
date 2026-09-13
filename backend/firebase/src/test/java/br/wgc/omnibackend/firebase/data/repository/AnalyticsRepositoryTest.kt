@@ -34,4 +34,3 @@ class AnalyticsRepositoryTest {
         verify(exactly = 1) { firebaseAnalytics.logEvent("purchase", any()) }
     }
 }
-

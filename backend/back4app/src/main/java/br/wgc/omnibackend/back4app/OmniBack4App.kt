@@ -47,12 +47,7 @@ object OmniBack4App {
      * @param clientKey Client Key pública gerada no painel do Back4App.
      * @param serverUrl URL base do servidor Parse (padrão: "https://parseapi.back4app.com").
      */
-    fun initialize(
-        context: Context,
-        appId: String,
-        clientKey: String,
-        serverUrl: String = "https://parseapi.back4app.com"
-    ) {
+    fun initialize(context: Context, appId: String, clientKey: String, serverUrl: String = "https://parseapi.back4app.com") {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
@@ -118,7 +113,7 @@ object OmniBack4App {
     val storage: StorageRepository by lazy {
         check(isInitialized) { "OmniBack4App deve ser inicializado antes do uso." }
         Back4AppStorageRepositoryImpl(
-            context = appContext ?: error("OmniBack4App deve ser inicializado antes do uso.")
+            context = appContext ?: error("OmniBack4App deve ser inicializado antes do uso."),
         )
     }
 

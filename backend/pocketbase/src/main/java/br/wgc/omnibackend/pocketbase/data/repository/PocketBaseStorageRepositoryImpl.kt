@@ -13,10 +13,7 @@ import java.io.InputStream
 /**
  * Implementação de [StorageRepository] para PocketBase (`/api/files/{collection}/{recordId}/{file}`).
  */
-internal class PocketBaseStorageRepositoryImpl(
-    private val context: Context,
-    private val baseUrl: String
-) : StorageRepository {
+internal class PocketBaseStorageRepositoryImpl(private val context: Context, private val baseUrl: String) : StorageRepository {
 
     override fun uploadFile(path: String, fileData: ByteArray): Flow<DataResult<Uri>> = flow {
         emit(uploadFileDirect(path, fileData))
@@ -56,11 +53,9 @@ internal class PocketBaseStorageRepositoryImpl(
         Unit
     }
 
-    private inline fun <T> runCatchingStorage(block: () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: Exception) {
-            DataResult.Failure(PocketBaseErrorMapper.mapThrowable(e, "storage"))
-        }
+    private inline fun <T> runCatchingStorage(block: () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: Exception) {
+        DataResult.Failure(PocketBaseErrorMapper.mapThrowable(e, "storage"))
     }
 }

@@ -27,17 +27,15 @@ object OmniFirebaseSupabase {
     /**
      * Cria repositório de autenticação híbrido com failover Firebase -> Supabase.
      */
-    fun createAuth(
-        primary: AuthRepository = OmniFirebase.auth,
-        secondary: AuthRepository = OmniSupabase.auth
-    ): AuthRepository = OmniHybrid.createAuth(primary, secondary)
+    fun createAuth(primary: AuthRepository = OmniFirebase.auth, secondary: AuthRepository = OmniSupabase.auth): AuthRepository =
+        OmniHybrid.createAuth(primary, secondary)
 
     /**
      * Cria repositório de banco de dados híbrido com failover Firestore -> PostgREST.
      */
     fun createDatabase(
         primary: FirestoreRepository = OmniFirebase.firestore,
-        secondary: FirestoreRepository = OmniSupabase.database
+        secondary: FirestoreRepository = OmniSupabase.database,
     ): FirestoreRepository = OmniHybrid.createDatabase(primary, secondary)
 
     /**
@@ -45,6 +43,6 @@ object OmniFirebaseSupabase {
      */
     fun createStorage(
         primary: StorageRepository = OmniFirebase.storage,
-        secondary: StorageRepository = OmniSupabase.storage
+        secondary: StorageRepository = OmniSupabase.storage,
     ): StorageRepository = OmniHybrid.createStorage(primary, secondary)
 }

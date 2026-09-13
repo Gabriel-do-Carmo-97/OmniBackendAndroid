@@ -45,10 +45,7 @@ internal class Back4AppAuthRepositoryImpl : AuthRepository {
         Back4AppUserMapper.toOmniUser(user)
     }
 
-    override suspend fun registerEmailWithPassword(
-        email: String,
-        pass: String
-    ): DataResult<RegisterUserResponse> = runCatchingAuth {
+    override suspend fun registerEmailWithPassword(email: String, pass: String): DataResult<RegisterUserResponse> = runCatchingAuth {
         val user = ParseUser().apply {
             username = email
             setEmail(email)
@@ -63,7 +60,7 @@ internal class Back4AppAuthRepositoryImpl : AuthRepository {
             provider = "back4app",
             isAnonymous = false,
             isEmailVerified = user.getBoolean("emailVerified"),
-            isNewUser = true
+            isNewUser = true,
         )
     }
 
@@ -126,26 +123,22 @@ internal class Back4AppAuthRepositoryImpl : AuthRepository {
         Unit
     }
 
-    override suspend fun signInWithGoogle(idToken: String): DataResult<OmniUser> {
-        return DataResult.Failure(
-            AppError.Auth.Generic(
-                IllegalStateException("OAuth2 para Google em Back4App requer integração via Activity e ParseFacebookUtils/ParseGoogleUtils")
-            )
-        )
-    }
+    override suspend fun signInWithGoogle(idToken: String): DataResult<OmniUser> = DataResult.Failure(
+        AppError.Auth.Generic(
+            IllegalStateException("OAuth2 para Google em Back4App requer integração via Activity e ParseFacebookUtils/ParseGoogleUtils"),
+        ),
+    )
 
     override suspend fun signOut(): DataResult<Unit> = runCatchingAuth {
         ParseUser.logOut()
         Unit
     }
 
-    private inline fun <T> runCatchingAuth(block: () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: ParseException) {
-            DataResult.Failure(Back4AppErrorMapper.mapException(e, "auth"))
-        } catch (e: Exception) {
-            DataResult.Failure(Back4AppErrorMapper.mapThrowable(e, "auth"))
-        }
+    private inline fun <T> runCatchingAuth(block: () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: ParseException) {
+        DataResult.Failure(Back4AppErrorMapper.mapException(e, "auth"))
+    } catch (e: Exception) {
+        DataResult.Failure(Back4AppErrorMapper.mapThrowable(e, "auth"))
     }
 }

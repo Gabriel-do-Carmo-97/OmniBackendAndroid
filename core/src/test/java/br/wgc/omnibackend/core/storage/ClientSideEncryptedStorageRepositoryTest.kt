@@ -32,7 +32,7 @@ class ClientSideEncryptedStorageRepositoryTest {
         encryptedStorageRepo = ClientSideEncryptedStorageRepository(
             remoteStorage = mockRemoteStorage,
             cryptoManager = mockCryptoManager,
-            context = mockContext
+            context = mockContext,
         )
     }
 

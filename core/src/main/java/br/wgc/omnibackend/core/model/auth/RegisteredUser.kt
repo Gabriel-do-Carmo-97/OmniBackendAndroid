@@ -26,5 +26,5 @@ data class RegisteredUser(
     val isAnonymous: Boolean,
     val isEmailVerified: Boolean,
     val isNewUser: Boolean,
-    val isClient: Boolean
+    val isClient: Boolean,
 )

@@ -77,4 +77,3 @@ class FirebaseTelemetryTest {
         verify(exactly = 1) { trace.stop() }
     }
 }
-

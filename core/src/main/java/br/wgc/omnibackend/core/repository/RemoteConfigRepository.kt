@@ -63,9 +63,5 @@ interface RemoteConfigRepository {
      * @param updateFlagResult Callback executado quando uma atualização for confirmada.
      * @param errorResult Callback executado se houver erro no processamento.
      */
-    fun detectedUpdateFlagInLive(
-        key: String,
-        updateFlagResult: suspend () -> Unit,
-        errorResult: suspend (AppError) -> Unit
-    )
+    fun detectedUpdateFlagInLive(key: String, updateFlagResult: suspend () -> Unit, errorResult: suspend (AppError) -> Unit)
 }

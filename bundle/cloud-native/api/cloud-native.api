@@ -1,0 +1,17 @@
+public final class br/wgc/omnibackend/bundle/cloudnative/OmniCloudNative {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/cloudnative/OmniCloudNative;
+	public final fun getAmplify ()Lbr/wgc/omnibackend/amplify/OmniAmplify;
+	public final fun getFirebase ()Lbr/wgc/omnibackend/firebase/OmniFirebase;
+	public final fun getHybrid ()Lbr/wgc/omnibackend/bundle/hybrid/OmniHybrid;
+	public final fun getSupabase ()Lbr/wgc/omnibackend/supabase/OmniSupabase;
+}
+
+public final class br/wgc/omnibackend/bundle/cloudnative/di/CloudNativeBackendModule {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/cloudnative/di/CloudNativeBackendModule;
+	public static final field QUALIFIER_FAILOVER_AWS Ljava/lang/String;
+	public static final field QUALIFIER_FAILOVER_SUPABASE Ljava/lang/String;
+	public final fun provideGcpAwsFailoverAuth (Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/AuthRepository;)Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun provideGcpAwsFailoverStorage (Lbr/wgc/omnibackend/core/repository/StorageRepository;Lbr/wgc/omnibackend/core/repository/StorageRepository;)Lbr/wgc/omnibackend/core/repository/StorageRepository;
+	public final fun provideGcpSupabaseFailoverDatabase (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/repository/FirestoreRepository;)Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+}
+

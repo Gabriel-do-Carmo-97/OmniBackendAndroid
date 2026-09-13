@@ -26,17 +26,15 @@ object OmniSupabaseCloudflare {
     /**
      * Cria repositório de autenticação híbrido com failover Supabase GoTrue -> Cloudflare Access.
      */
-    fun createAuth(
-        primary: AuthRepository = OmniSupabase.auth,
-        secondary: AuthRepository = OmniCloudflare.auth
-    ): AuthRepository = OmniHybrid.createAuth(primary, secondary)
+    fun createAuth(primary: AuthRepository = OmniSupabase.auth, secondary: AuthRepository = OmniCloudflare.auth): AuthRepository =
+        OmniHybrid.createAuth(primary, secondary)
 
     /**
      * Cria repositório de banco de dados híbrido com failover Supabase PostgREST -> Cloudflare D1/KV.
      */
     fun createDatabase(
         primary: FirestoreRepository = OmniSupabase.database,
-        secondary: FirestoreRepository = OmniCloudflare.database
+        secondary: FirestoreRepository = OmniCloudflare.database,
     ): FirestoreRepository = OmniHybrid.createDatabase(primary, secondary)
 
     /**
@@ -44,6 +42,6 @@ object OmniSupabaseCloudflare {
      */
     fun createStorage(
         primary: StorageRepository = OmniSupabase.storage,
-        secondary: StorageRepository = OmniCloudflare.storage
+        secondary: StorageRepository = OmniCloudflare.storage,
     ): StorageRepository = OmniHybrid.createStorage(primary, secondary)
 }

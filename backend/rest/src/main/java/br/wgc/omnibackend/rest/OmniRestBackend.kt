@@ -41,10 +41,7 @@ object OmniRestBackend {
      * @param context Contexto da aplicação Android.
      * @param baseUrl URL base da API REST corporativa (ex: "https://api.empresa.com").
      */
-    fun initialize(
-        context: Context,
-        baseUrl: String
-    ) {
+    fun initialize(context: Context, baseUrl: String) {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
@@ -87,7 +84,7 @@ object OmniRestBackend {
         check(isInitialized) { "OmniRestBackend deve ser inicializado antes do uso." }
         RestStorageRepositoryImpl(
             context = appContext ?: error("OmniRestBackend deve ser inicializado antes do uso."),
-            baseUrl = restBaseUrl
+            baseUrl = restBaseUrl,
         )
     }
 

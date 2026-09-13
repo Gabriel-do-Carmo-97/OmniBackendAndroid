@@ -33,7 +33,7 @@ internal class AppwriteStorageRepositoryImpl(
     private val context: Context,
     private val endpoint: String,
     private val projectId: String,
-    private val defaultBucketId: String
+    private val defaultBucketId: String,
 ) : StorageRepository {
 
     // ─── Upload — Flow ────────────────────────────────────────────────────────
@@ -78,8 +78,7 @@ internal class AppwriteStorageRepositoryImpl(
      * @param path Caminho de destino no Appwrite Storage.
      * @param fileData Conteúdo do arquivo.
      */
-    override suspend fun uploadFileDirect(path: String, fileData: ByteArray): DataResult<Uri> =
-        uploadBytesInternal(path, fileData)
+    override suspend fun uploadFileDirect(path: String, fileData: ByteArray): DataResult<Uri> = uploadBytesInternal(path, fileData)
 
     /**
      * Faz upload direto (suspenso) a partir de uma [Uri] local.
@@ -87,8 +86,7 @@ internal class AppwriteStorageRepositoryImpl(
      * @param path Caminho de destino no Appwrite Storage.
      * @param fileUri URI local do arquivo.
      */
-    override suspend fun uploadFileDirect(path: String, fileUri: Uri): DataResult<Uri> =
-        uploadUriInternal(path, fileUri)
+    override suspend fun uploadFileDirect(path: String, fileUri: Uri): DataResult<Uri> = uploadUriInternal(path, fileUri)
 
     // ─── Download URL ─────────────────────────────────────────────────────────
 
@@ -118,23 +116,21 @@ internal class AppwriteStorageRepositoryImpl(
 
     // ─── Internal Helpers ─────────────────────────────────────────────────────
 
-    private suspend fun uploadBytesInternal(path: String, bytes: ByteArray): DataResult<Uri> =
-        runCatchingStorage {
-            val (bucketId, fileId) = parsePath(path)
-            val inputFile = InputFile.fromBytes(bytes, fileId, "application/octet-stream")
-            storage.createFile(bucketId, fileId, inputFile)
-            Uri.parse(buildViewUrl(bucketId, fileId))
-        }
+    private suspend fun uploadBytesInternal(path: String, bytes: ByteArray): DataResult<Uri> = runCatchingStorage {
+        val (bucketId, fileId) = parsePath(path)
+        val inputFile = InputFile.fromBytes(bytes, fileId, "application/octet-stream")
+        storage.createFile(bucketId, fileId, inputFile)
+        Uri.parse(buildViewUrl(bucketId, fileId))
+    }
 
-    private suspend fun uploadUriInternal(path: String, fileUri: Uri): DataResult<Uri> =
-        runCatchingStorage {
-            val (bucketId, fileId) = parsePath(path)
-            val bytes = context.contentResolver.openInputStream(fileUri)?.use { it.readBytes() }
-                ?: throw IllegalStateException("Não foi possível abrir o InputStream para URI: $fileUri")
-            val inputFile = InputFile.fromBytes(bytes, fileId, "application/octet-stream")
-            storage.createFile(bucketId, fileId, inputFile)
-            Uri.parse(buildViewUrl(bucketId, fileId))
-        }
+    private suspend fun uploadUriInternal(path: String, fileUri: Uri): DataResult<Uri> = runCatchingStorage {
+        val (bucketId, fileId) = parsePath(path)
+        val bytes = context.contentResolver.openInputStream(fileUri)?.use { it.readBytes() }
+            ?: throw IllegalStateException("Não foi possível abrir o InputStream para URI: $fileUri")
+        val inputFile = InputFile.fromBytes(bytes, fileId, "application/octet-stream")
+        storage.createFile(bucketId, fileId, inputFile)
+        Uri.parse(buildViewUrl(bucketId, fileId))
+    }
 
     /**
      * Interpreta o `path` como `bucketId/fileId`.
@@ -153,13 +149,11 @@ internal class AppwriteStorageRepositoryImpl(
     private fun buildViewUrl(bucketId: String, fileId: String): String =
         "$endpoint/storage/buckets/$bucketId/files/$fileId/view?project=$projectId"
 
-    private suspend inline fun <T> runCatchingStorage(crossinline block: suspend () -> T): DataResult<T> {
-        return try {
-            DataResult.Success(block())
-        } catch (e: AppwriteException) {
-            DataResult.Failure(AppwriteErrorMapper.mapException(e, "storage"))
-        } catch (e: Exception) {
-            DataResult.Failure(AppwriteErrorMapper.mapThrowable(e, "storage"))
-        }
+    private suspend inline fun <T> runCatchingStorage(crossinline block: suspend () -> T): DataResult<T> = try {
+        DataResult.Success(block())
+    } catch (e: AppwriteException) {
+        DataResult.Failure(AppwriteErrorMapper.mapException(e, "storage"))
+    } catch (e: Exception) {
+        DataResult.Failure(AppwriteErrorMapper.mapThrowable(e, "storage"))
     }
 }

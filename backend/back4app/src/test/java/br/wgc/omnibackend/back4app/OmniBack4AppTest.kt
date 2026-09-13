@@ -34,7 +34,7 @@ class OmniBack4AppTest {
             context = mockContext,
             appId = appId,
             clientKey = clientKey,
-            serverUrl = serverUrl
+            serverUrl = serverUrl,
         )
 
         assertTrue(OmniBack4App.initialized)

@@ -15,7 +15,7 @@ class RestUserMapperTest {
             "name" to "Gabriel do Carmo",
             "photoUrl" to "https://api.empresa.com/avatars/user_123.jpg",
             "isEmailVerified" to true,
-            "isAnonymous" to false
+            "isAnonymous" to false,
         )
 
         val user = RestUserMapper.toOmniUser(json)

@@ -27,7 +27,7 @@ internal object RestUserMapper {
             displayName = name,
             photoUrl = photoUrl,
             isEmailVerified = verified,
-            isAnonymous = anonymous
+            isAnonymous = anonymous,
         )
     }
 }

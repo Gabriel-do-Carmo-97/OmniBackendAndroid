@@ -17,5 +17,5 @@ data class NewUser(
     val email: String,
     val password: String,
     val photo: String? = null,
-    val isClient: Boolean = true
+    val isClient: Boolean = true,
 )

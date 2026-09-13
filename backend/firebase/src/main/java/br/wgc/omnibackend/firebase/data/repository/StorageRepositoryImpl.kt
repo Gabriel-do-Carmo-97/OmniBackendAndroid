@@ -20,24 +20,19 @@ import javax.inject.Inject
  *
  * @property storage Instância do [FirebaseStorage] injetada.
  */
-class StorageRepositoryImpl @Inject constructor(
-    private val storage: FirebaseStorage
-) : StorageRepository {
+class StorageRepositoryImpl @Inject constructor(private val storage: FirebaseStorage) : StorageRepository {
 
     /**
      * Envia um array de bytes para o caminho especificado e emite a [Uri] pública de download via [Flow].
      */
-    override fun uploadFile(
-        path: String,
-        fileData: ByteArray
-    ): Flow<DataResult<Uri>> = flow {
+    override fun uploadFile(path: String, fileData: ByteArray): Flow<DataResult<Uri>> = flow {
         val storageRef = storage.getReference(path)
         val result = runCatching {
             val uploadTask = storageRef.putBytes(fileData)
             uploadTask.await().storage.downloadUrl.await()
         }.fold(
             onSuccess = { downloadUri -> DataResult.Success(downloadUri) },
-            onFailure = { exception -> DataResult.Failure(toMapperError(exception)) }
+            onFailure = { exception -> DataResult.Failure(toMapperError(exception)) },
         )
         emit(result)
     }
@@ -52,7 +47,7 @@ class StorageRepositoryImpl @Inject constructor(
             uploadTask.await().storage.downloadUrl.await()
         }.fold(
             onSuccess = { downloadUri -> DataResult.Success(downloadUri) },
-            onFailure = { exception -> DataResult.Failure(toMapperError(exception)) }
+            onFailure = { exception -> DataResult.Failure(toMapperError(exception)) },
         )
         emit(result)
     }
@@ -67,7 +62,7 @@ class StorageRepositoryImpl @Inject constructor(
             uploadTask.await().storage.downloadUrl.await()
         }.fold(
             onSuccess = { downloadUri -> DataResult.Success(downloadUri) },
-            onFailure = { exception -> DataResult.Failure(toMapperError(exception)) }
+            onFailure = { exception -> DataResult.Failure(toMapperError(exception)) },
         )
         emit(result)
     }
@@ -118,21 +113,19 @@ class StorageRepositoryImpl @Inject constructor(
         DataResult.Failure(toMapperError(exception))
     }
 
-    private fun toMapperError(exception: Throwable): AppError {
-        return when (exception) {
-            is StorageException -> when (exception.errorCode) {
-                StorageException.ERROR_OBJECT_NOT_FOUND -> AppError.Storage.ObjectNotFound
-                StorageException.ERROR_BUCKET_NOT_FOUND -> AppError.Storage.BucketNotFound
-                StorageException.ERROR_PROJECT_NOT_FOUND -> AppError.Storage.ProjectNotFound
-                StorageException.ERROR_QUOTA_EXCEEDED -> AppError.Storage.QuotaExceeded
-                StorageException.ERROR_NOT_AUTHENTICATED -> AppError.Storage.PermissionDenied
-                StorageException.ERROR_NOT_AUTHORIZED -> AppError.Storage.PermissionDenied
-                StorageException.ERROR_CANCELED -> AppError.Storage.UploadCancelled
-                else -> AppError.Storage.Generic(exception)
-            }
-            is IOException -> AppError.Generic.Network
-            is Exception -> AppError.Generic.Unknown(exception)
-            else -> AppError.Generic.Unknown(exception)
+    private fun toMapperError(exception: Throwable): AppError = when (exception) {
+        is StorageException -> when (exception.errorCode) {
+            StorageException.ERROR_OBJECT_NOT_FOUND -> AppError.Storage.ObjectNotFound
+            StorageException.ERROR_BUCKET_NOT_FOUND -> AppError.Storage.BucketNotFound
+            StorageException.ERROR_PROJECT_NOT_FOUND -> AppError.Storage.ProjectNotFound
+            StorageException.ERROR_QUOTA_EXCEEDED -> AppError.Storage.QuotaExceeded
+            StorageException.ERROR_NOT_AUTHENTICATED -> AppError.Storage.PermissionDenied
+            StorageException.ERROR_NOT_AUTHORIZED -> AppError.Storage.PermissionDenied
+            StorageException.ERROR_CANCELED -> AppError.Storage.UploadCancelled
+            else -> AppError.Storage.Generic(exception)
         }
+        is IOException -> AppError.Generic.Network
+        is Exception -> AppError.Generic.Unknown(exception)
+        else -> AppError.Generic.Unknown(exception)
     }
 }

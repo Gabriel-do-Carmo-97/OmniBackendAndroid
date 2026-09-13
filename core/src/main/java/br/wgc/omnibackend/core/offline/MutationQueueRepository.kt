@@ -6,7 +6,7 @@ package br.wgc.omnibackend.core.offline
 enum class MutationType {
     ADD,
     UPDATE,
-    DELETE
+    DELETE,
 }
 
 /**
@@ -18,7 +18,7 @@ data class PendingMutation(
     val documentId: String,
     val type: MutationType,
     val payloadJson: String,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
 )
 
 /**

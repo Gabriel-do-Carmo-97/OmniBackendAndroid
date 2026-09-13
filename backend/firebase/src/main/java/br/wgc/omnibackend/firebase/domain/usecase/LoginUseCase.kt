@@ -3,7 +3,6 @@ package br.wgc.omnibackend.firebase.domain.usecase
 import androidx.credentials.GetCredentialRequest
 import br.wgc.omnibackend.core.repository.AuthRepository
 import br.wgc.omnibackend.core.repository.RealtimeDatabaseRepository
-import br.wgc.omnibackend.core.utils.AppError
 import br.wgc.omnibackend.core.utils.DataResult
 import br.wgc.omnibackend.firebase.utils.UseCaseResult
 import br.wgc.omnibackend.firebase.utils.UseCaseResult.Failure
@@ -35,11 +34,7 @@ class LoginUseCase @Inject constructor(
      * @param updatePresence Se verdadeiro, marca presença online no Realtime Database. Padrão: false.
      * @return [Flow] reativo que emite [UseCaseResult] contendo o ID do usuário em caso de sucesso.
      */
-    operator fun invoke(
-        email: String,
-        password: String,
-        updatePresence: Boolean = false,
-    ): Flow<UseCaseResult<String>> = flow {
+    operator fun invoke(email: String, password: String, updatePresence: Boolean = false): Flow<UseCaseResult<String>> = flow {
         emit(Loading)
 
         when (val authResult = authRepository.login(email, password)) {
@@ -50,7 +45,7 @@ class LoginUseCase @Inject constructor(
                         .presence()
                         .goOnline(
                             entityType = "users",
-                            entityId = userId
+                            entityId = userId,
                         )
                     if (presenceResult is DataResult.Failure) {
                         authRepository.signOut()
@@ -79,7 +74,7 @@ class LoginUseCase @Inject constructor(
                 if (updatePresence) {
                     val presenceResult = databaseRepository.presence().goOnline(
                         entityType = "users",
-                        entityId = authResult.data
+                        entityId = authResult.data,
                     )
                     if (presenceResult is DataResult.Failure) {
                         authRepository.signOut()
@@ -117,34 +112,31 @@ class LoginUseCase @Inject constructor(
      * @param updatePresence Se verdadeiro, marca presença online no Realtime Database. Padrão: false.
      * @return [Flow] reativo que emite [UseCaseResult] contendo o ID do usuário autenticado.
      */
-    fun handleGoogleSignInSuccess(
-        credential: GoogleIdTokenCredential,
-        updatePresence: Boolean = false
-    ): Flow<UseCaseResult<String>> = flow {
-        emit(Loading)
+    fun handleGoogleSignInSuccess(credential: GoogleIdTokenCredential, updatePresence: Boolean = false): Flow<UseCaseResult<String>> =
+        flow {
+            emit(Loading)
 
-        when (val signInResult = authRepository.signInWithGoogle(credential.idToken)) {
-            is DataResult.Success -> {
-                val userId = signInResult.data.id
+            when (val signInResult = authRepository.signInWithGoogle(credential.idToken)) {
+                is DataResult.Success -> {
+                    val userId = signInResult.data.id
 
-                if (updatePresence) {
-                    val presenceResult = databaseRepository.presence().goOnline(
-                        entityType = "users",
-                        entityId = userId
-                    )
+                    if (updatePresence) {
+                        val presenceResult = databaseRepository.presence().goOnline(
+                            entityType = "users",
+                            entityId = userId,
+                        )
 
-                    if (presenceResult is DataResult.Failure) {
-                        authRepository.signOut()
-                        emit(Failure(presenceResult.error))
-                        return@flow
+                        if (presenceResult is DataResult.Failure) {
+                            authRepository.signOut()
+                            emit(Failure(presenceResult.error))
+                            return@flow
+                        }
                     }
+                    emit(Success(userId))
                 }
-                emit(Success(userId))
-            }
-            is DataResult.Failure -> {
-                emit(Failure(signInResult.error))
+                is DataResult.Failure -> {
+                    emit(Failure(signInResult.error))
+                }
             }
         }
-    }
 }
-

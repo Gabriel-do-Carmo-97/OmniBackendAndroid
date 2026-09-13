@@ -20,7 +20,7 @@ fun FirebaseUser?.toOmniUser(): OmniUser? {
         displayName = displayName,
         photoUrl = photoUrl?.toString(),
         isEmailVerified = isEmailVerified,
-        isAnonymous = isAnonymous
+        isAnonymous = isAnonymous,
     )
 }
 
@@ -31,10 +31,7 @@ fun FirebaseUser?.toOmniUser(): OmniUser? {
  * @param isClient Flag indicando se a conta pertence a um cliente final.
  * @return Entidade [RegisteredUser] preenchida.
  */
-fun RegisterUserResponse.toRegisteredUser(
-    photo: Uri? = null,
-    isClient: Boolean = true
-): RegisteredUser = RegisteredUser(
+fun RegisterUserResponse.toRegisteredUser(photo: Uri? = null, isClient: Boolean = true): RegisteredUser = RegisteredUser(
     id = this.id.orEmpty(),
     completedName = this.name.orEmpty(),
     email = this.email.orEmpty(),
@@ -44,5 +41,5 @@ fun RegisterUserResponse.toRegisteredUser(
     isAnonymous = this.isAnonymous ?: false,
     isEmailVerified = this.isEmailVerified ?: false,
     isNewUser = this.isNewUser ?: false,
-    isClient = isClient
+    isClient = isClient,
 )

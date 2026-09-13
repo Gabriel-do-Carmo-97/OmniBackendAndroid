@@ -1,0 +1,21 @@
+public final class br/wgc/omnibackend/bundle/firebasesupabase/OmniFirebaseSupabase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/firebasesupabase/OmniFirebaseSupabase;
+	public final fun createAuth (Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/AuthRepository;)Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public static synthetic fun createAuth$default (Lbr/wgc/omnibackend/bundle/firebasesupabase/OmniFirebaseSupabase;Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/AuthRepository;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun createDatabase (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/repository/FirestoreRepository;)Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public static synthetic fun createDatabase$default (Lbr/wgc/omnibackend/bundle/firebasesupabase/OmniFirebaseSupabase;Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/repository/FirestoreRepository;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun createStorage (Lbr/wgc/omnibackend/core/repository/StorageRepository;Lbr/wgc/omnibackend/core/repository/StorageRepository;)Lbr/wgc/omnibackend/core/repository/StorageRepository;
+	public static synthetic fun createStorage$default (Lbr/wgc/omnibackend/bundle/firebasesupabase/OmniFirebaseSupabase;Lbr/wgc/omnibackend/core/repository/StorageRepository;Lbr/wgc/omnibackend/core/repository/StorageRepository;ILjava/lang/Object;)Lbr/wgc/omnibackend/core/repository/StorageRepository;
+	public final fun getFirebase ()Lbr/wgc/omnibackend/firebase/OmniFirebase;
+	public final fun getHybrid ()Lbr/wgc/omnibackend/bundle/hybrid/OmniHybrid;
+	public final fun getSupabase ()Lbr/wgc/omnibackend/supabase/OmniSupabase;
+}
+
+public final class br/wgc/omnibackend/bundle/firebasesupabase/di/FirebaseSupabaseModule {
+	public static final field INSTANCE Lbr/wgc/omnibackend/bundle/firebasesupabase/di/FirebaseSupabaseModule;
+	public static final field QUALIFIER_NAME Ljava/lang/String;
+	public final fun provideAuthRepository (Lbr/wgc/omnibackend/core/repository/AuthRepository;Lbr/wgc/omnibackend/core/repository/AuthRepository;)Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun provideFirestoreRepository (Lbr/wgc/omnibackend/core/repository/FirestoreRepository;Lbr/wgc/omnibackend/core/repository/FirestoreRepository;)Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun provideStorageRepository (Lbr/wgc/omnibackend/core/repository/StorageRepository;Lbr/wgc/omnibackend/core/repository/StorageRepository;)Lbr/wgc/omnibackend/core/repository/StorageRepository;
+}
+

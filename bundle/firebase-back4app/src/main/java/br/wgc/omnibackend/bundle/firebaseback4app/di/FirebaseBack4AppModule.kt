@@ -27,10 +27,8 @@ object FirebaseBack4AppModule {
     @Provides
     @Singleton
     @Named(QUALIFIER_NAME)
-    fun provideAuthRepository(
-        @FirebaseBackend primary: AuthRepository,
-        @Back4AppBackend secondary: AuthRepository
-    ): AuthRepository = OmniFirebaseBack4App.createAuth(primary, secondary)
+    fun provideAuthRepository(@FirebaseBackend primary: AuthRepository, @Back4AppBackend secondary: AuthRepository): AuthRepository =
+        OmniFirebaseBack4App.createAuth(primary, secondary)
 
     /** Provê o [FirestoreRepository] híbrido Firestore + Back4App Parse. */
     @Provides
@@ -38,7 +36,7 @@ object FirebaseBack4AppModule {
     @Named(QUALIFIER_NAME)
     fun provideFirestoreRepository(
         @FirebaseBackend primary: FirestoreRepository,
-        @Back4AppBackend secondary: FirestoreRepository
+        @Back4AppBackend secondary: FirestoreRepository,
     ): FirestoreRepository = OmniFirebaseBack4App.createDatabase(primary, secondary)
 
     /** Provê o [StorageRepository] híbrido Firebase Storage + Back4App ParseFile. */
@@ -47,6 +45,6 @@ object FirebaseBack4AppModule {
     @Named(QUALIFIER_NAME)
     fun provideStorageRepository(
         @FirebaseBackend primary: StorageRepository,
-        @Back4AppBackend secondary: StorageRepository
+        @Back4AppBackend secondary: StorageRepository,
     ): StorageRepository = OmniFirebaseBack4App.createStorage(primary, secondary)
 }

@@ -27,6 +27,7 @@ dependencyResolutionManagement {
 rootProject.name = "OmniBackendAndroid"
 include(":app")
 include(":core")
+include(":testing")
 
 // 🚀 Registra drivers especializados da pasta backend/
 fun registerBackend(name: String) {

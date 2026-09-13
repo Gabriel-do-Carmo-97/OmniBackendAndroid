@@ -22,9 +22,7 @@ import javax.inject.Inject
  *
  * @property database Instância do [FirebaseDatabase] configurada.
  */
-class GeolocationRepositoryImpl @Inject constructor(
-    private val database: FirebaseDatabase,
-) : GeolocationRepository {
+class GeolocationRepositoryImpl @Inject constructor(private val database: FirebaseDatabase) : GeolocationRepository {
 
     private val locationsRef = database.getReference("locations")
 
@@ -36,11 +34,7 @@ class GeolocationRepositoryImpl @Inject constructor(
      * @param location Modelo com latitude, longitude e timestamp.
      * @return [DataResult.Success] com mensagem de confirmação.
      */
-    override suspend fun updateLocation(
-        entityType: String,
-        entityId: String,
-        location: LocationRequest
-    ): DataResult<String> = runCatching {
+    override suspend fun updateLocation(entityType: String, entityId: String, location: LocationRequest): DataResult<String> = runCatching {
         locationsRef.child(entityType)
             .child(entityId)
             .setValue(location)
@@ -85,40 +79,39 @@ class GeolocationRepositoryImpl @Inject constructor(
      * @param entityId ID da entidade.
      * @return [Flow] emitindo o [LocationRequest] sempre que a posição mudar.
      */
-    override fun trackLocation(entityType: String, entityId: String): Flow<DataResult<LocationRequest>> =
-        callbackFlow {
-            val listener = object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    snapshot.getValue<LocationRequest>()?.let {
-                        trySend(DataResult.Success(it))
-                    } ?: trySend(DataResult.Failure(AppError.RealtimeDatabase.OperationFailed))
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    val appError = when (error.code) {
-                        DatabaseError.PERMISSION_DENIED -> AppError.RealtimeDatabase.PermissionDenied
-                        DatabaseError.DATA_STALE -> AppError.RealtimeDatabase.DataStale
-                        DatabaseError.DISCONNECTED -> AppError.RealtimeDatabase.Disconnected
-                        DatabaseError.EXPIRED_TOKEN -> AppError.RealtimeDatabase.ExpiredToken
-                        DatabaseError.INVALID_TOKEN -> AppError.RealtimeDatabase.InvalidToken
-                        DatabaseError.MAX_RETRIES -> AppError.RealtimeDatabase.MaxRetries
-                        DatabaseError.OVERRIDDEN_BY_SET -> AppError.RealtimeDatabase.OverriddenBySet
-                        DatabaseError.UNAVAILABLE -> AppError.RealtimeDatabase.Unavailable
-                        DatabaseError.WRITE_CANCELED -> AppError.RealtimeDatabase.WriteCanceled
-                        DatabaseError.NETWORK_ERROR -> AppError.Generic.Network
-                        DatabaseError.OPERATION_FAILED -> AppError.RealtimeDatabase.OperationFailed
-                        else -> AppError.Generic.Unknown(error.toException())
-                    }
-                    trySend(DataResult.Failure(appError))
-                    close()
-                }
+    override fun trackLocation(entityType: String, entityId: String): Flow<DataResult<LocationRequest>> = callbackFlow {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                snapshot.getValue<LocationRequest>()?.let {
+                    trySend(DataResult.Success(it))
+                } ?: trySend(DataResult.Failure(AppError.RealtimeDatabase.OperationFailed))
             }
 
-            val entityLocationRef = locationsRef
-                .child(entityType)
-                .child(entityId)
-            entityLocationRef.addValueEventListener(listener)
-
-            awaitClose { entityLocationRef.removeEventListener(listener) }
+            override fun onCancelled(error: DatabaseError) {
+                val appError = when (error.code) {
+                    DatabaseError.PERMISSION_DENIED -> AppError.RealtimeDatabase.PermissionDenied
+                    DatabaseError.DATA_STALE -> AppError.RealtimeDatabase.DataStale
+                    DatabaseError.DISCONNECTED -> AppError.RealtimeDatabase.Disconnected
+                    DatabaseError.EXPIRED_TOKEN -> AppError.RealtimeDatabase.ExpiredToken
+                    DatabaseError.INVALID_TOKEN -> AppError.RealtimeDatabase.InvalidToken
+                    DatabaseError.MAX_RETRIES -> AppError.RealtimeDatabase.MaxRetries
+                    DatabaseError.OVERRIDDEN_BY_SET -> AppError.RealtimeDatabase.OverriddenBySet
+                    DatabaseError.UNAVAILABLE -> AppError.RealtimeDatabase.Unavailable
+                    DatabaseError.WRITE_CANCELED -> AppError.RealtimeDatabase.WriteCanceled
+                    DatabaseError.NETWORK_ERROR -> AppError.Generic.Network
+                    DatabaseError.OPERATION_FAILED -> AppError.RealtimeDatabase.OperationFailed
+                    else -> AppError.Generic.Unknown(error.toException())
+                }
+                trySend(DataResult.Failure(appError))
+                close()
+            }
         }
+
+        val entityLocationRef = locationsRef
+            .child(entityType)
+            .child(entityId)
+        entityLocationRef.addValueEventListener(listener)
+
+        awaitClose { entityLocationRef.removeEventListener(listener) }
+    }
 }

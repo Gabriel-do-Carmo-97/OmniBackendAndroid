@@ -25,7 +25,7 @@ class OmniPocketBaseTest {
 
         OmniPocketBase.initialize(
             context = mockContext,
-            baseUrl = testUrl
+            baseUrl = testUrl,
         )
 
         assertTrue(OmniPocketBase.initialized)

@@ -1,0 +1,29 @@
+public final class br/wgc/omnibackend/appwrite/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class br/wgc/omnibackend/appwrite/OmniAppwrite {
+	public static final field INSTANCE Lbr/wgc/omnibackend/appwrite/OmniAppwrite;
+	public final fun getAuth ()Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun getDatabase ()Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun getDatabaseId ()Ljava/lang/String;
+	public final fun getDefaultBucketId ()Ljava/lang/String;
+	public final fun getEndpoint ()Ljava/lang/String;
+	public final fun getInitialized ()Z
+	public final fun getProjectId ()Ljava/lang/String;
+	public final fun getStorage ()Lbr/wgc/omnibackend/core/repository/StorageRepository;
+	public final fun initialize (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun initialize$default (Lbr/wgc/omnibackend/appwrite/OmniAppwrite;Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
+public final class br/wgc/omnibackend/appwrite/di/AppwriteBackendModule {
+	public static final field INSTANCE Lbr/wgc/omnibackend/appwrite/di/AppwriteBackendModule;
+	public static final field QUALIFIER_NAME Ljava/lang/String;
+	public final fun provideAppwriteAuthRepository ()Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun provideAppwriteFirestoreRepository ()Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun provideAppwriteStorageRepository ()Lbr/wgc/omnibackend/core/repository/StorageRepository;
+}
+

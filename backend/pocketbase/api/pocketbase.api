@@ -1,0 +1,25 @@
+public final class br/wgc/omnibackend/pocketbase/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class br/wgc/omnibackend/pocketbase/OmniPocketBase {
+	public static final field INSTANCE Lbr/wgc/omnibackend/pocketbase/OmniPocketBase;
+	public final fun getAuth ()Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun getBaseUrl ()Ljava/lang/String;
+	public final fun getDatabase ()Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun getInitialized ()Z
+	public final fun getStorage ()Lbr/wgc/omnibackend/core/repository/StorageRepository;
+	public final fun initialize (Landroid/content/Context;Ljava/lang/String;)V
+}
+
+public final class br/wgc/omnibackend/pocketbase/di/PocketbaseBackendModule {
+	public static final field INSTANCE Lbr/wgc/omnibackend/pocketbase/di/PocketbaseBackendModule;
+	public static final field QUALIFIER_NAME Ljava/lang/String;
+	public final fun providePocketBaseAuthRepository ()Lbr/wgc/omnibackend/core/repository/AuthRepository;
+	public final fun providePocketBaseFirestoreRepository ()Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun providePocketBaseStorageRepository ()Lbr/wgc/omnibackend/core/repository/StorageRepository;
+}
+

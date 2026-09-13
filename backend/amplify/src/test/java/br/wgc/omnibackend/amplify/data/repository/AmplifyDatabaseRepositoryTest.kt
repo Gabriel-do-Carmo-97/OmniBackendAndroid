@@ -1,6 +1,5 @@
 package br.wgc.omnibackend.amplify.data.repository
 
-import br.wgc.omnibackend.core.model.firestore.FilterRequest
 import br.wgc.omnibackend.core.utils.DataResult
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

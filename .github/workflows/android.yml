@@ -56,8 +56,10 @@ jobs:
           lfs: true
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
-      - name: 🔍 Detekt, Testes e Build do Core
-        run: ./gradlew :core:detekt :core:testDebugUnitTest :core:assembleRelease :core:assembleDebug
+      - name: 🔍 Spotless & API Compatibility Check
+        run: ./gradlew spotlessCheck apiCheck --no-daemon
+      - name: 🔍 Detekt, Testes e Build do Core e Testing
+        run: ./gradlew :core:detekt :core:testDebugUnitTest :core:assembleRelease :core:assembleDebug :testing:testDebugUnitTest :testing:assembleRelease :testing:assembleDebug
       - name: 📊 Upload Reports
         if: always()
         uses: actions/upload-artifact@v4

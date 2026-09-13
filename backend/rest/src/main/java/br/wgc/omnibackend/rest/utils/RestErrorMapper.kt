@@ -20,8 +20,20 @@ internal object RestErrorMapper {
         return when (statusCode) {
             400 -> if (context == "auth") AppError.Auth.WeakPassword else AppError.Generic.Unknown(ex)
             401 -> AppError.Auth.InvalidCredentials
-            403 -> if (context == "firestore") AppError.Firestore.PermissionDenied else if (context == "storage") AppError.Storage.PermissionDenied else AppError.Auth.InvalidCredentials
-            404 -> if (context == "auth") AppError.Auth.UserNotFound else if (context == "storage") AppError.Storage.ObjectNotFound else AppError.Firestore.DocumentNotFound
+            403 -> if (context == "firestore") {
+                AppError.Firestore.PermissionDenied
+            } else if (context == "storage") {
+                AppError.Storage.PermissionDenied
+            } else {
+                AppError.Auth.InvalidCredentials
+            }
+            404 -> if (context == "auth") {
+                AppError.Auth.UserNotFound
+            } else if (context == "storage") {
+                AppError.Storage.ObjectNotFound
+            } else {
+                AppError.Firestore.DocumentNotFound
+            }
             409 -> AppError.Auth.EmailAlreadyInUse
             413 -> AppError.Storage.QuotaExceeded
             else -> when (context) {

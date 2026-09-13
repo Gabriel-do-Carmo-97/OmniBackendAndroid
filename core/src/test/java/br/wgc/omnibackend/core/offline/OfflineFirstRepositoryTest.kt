@@ -38,7 +38,7 @@ class OfflineFirstRepositoryTest {
             remoteRepository = mockRemoteRepo,
             mutationQueue = mockQueue,
             networkMonitor = mockNetworkMonitor,
-            scope = testScope
+            scope = testScope,
         )
     }
 
