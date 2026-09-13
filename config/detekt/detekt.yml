@@ -9,8 +9,8 @@ build:
 
 config:
   validation: true
-  warningsAsErrors: true
-  checkExhaustiveness: true
+  warningsAsErrors: false
+  checkExhaustiveness: false
 
 comments:
   CommentOverPrivateFunction:

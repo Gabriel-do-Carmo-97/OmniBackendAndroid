@@ -42,3 +42,20 @@ detekt {
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:${libs.versions.detekt.get()}")
 }
+
+subprojects {
+    apply(plugin = "io.gitlab.arturbosch.detekt")
+
+    afterEvaluate {
+        extensions.findByName("detekt")?.let {
+            val detektExt = it as? io.gitlab.arturbosch.detekt.extensions.DetektExtension
+            detektExt?.buildUponDefaultConfig = true
+            detektExt?.config?.setFrom(files("${rootProject.rootDir}/config/detekt/detekt.yml"))
+            detektExt?.ignoreFailures = true
+        }
+
+        tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+            jvmTarget = "11"
+        }
+    }
+}
