@@ -69,7 +69,7 @@ jobs:
             :core:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-foundation-core
           path: |
@@ -77,13 +77,13 @@ jobs:
             core/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-foundation-core
           path: core/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-foundation-core
           path: core/build/outputs/aar/*-debug.aar
@@ -110,7 +110,7 @@ jobs:
             :testing:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-foundation-testing
           path: |
@@ -118,13 +118,13 @@ jobs:
             testing/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-foundation-testing
           path: testing/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-foundation-testing
           path: testing/build/outputs/aar/*-debug.aar
@@ -155,7 +155,7 @@ jobs:
             :backend:firebase:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-firebase
           path: |
@@ -163,13 +163,13 @@ jobs:
             backend/firebase/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-firebase
           path: backend/firebase/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-firebase
           path: backend/firebase/build/outputs/aar/*-debug.aar
@@ -196,7 +196,7 @@ jobs:
             :backend:supabase:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-supabase
           path: |
@@ -204,13 +204,13 @@ jobs:
             backend/supabase/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-supabase
           path: backend/supabase/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-supabase
           path: backend/supabase/build/outputs/aar/*-debug.aar
@@ -237,7 +237,7 @@ jobs:
             :backend:appwrite:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-appwrite
           path: |
@@ -245,13 +245,13 @@ jobs:
             backend/appwrite/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-appwrite
           path: backend/appwrite/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-appwrite
           path: backend/appwrite/build/outputs/aar/*-debug.aar
@@ -278,7 +278,7 @@ jobs:
             :backend:pocketbase:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-pocketbase
           path: |
@@ -286,13 +286,13 @@ jobs:
             backend/pocketbase/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-pocketbase
           path: backend/pocketbase/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-pocketbase
           path: backend/pocketbase/build/outputs/aar/*-debug.aar
@@ -319,7 +319,7 @@ jobs:
             :backend:back4app:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-back4app
           path: |
@@ -327,13 +327,13 @@ jobs:
             backend/back4app/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-back4app
           path: backend/back4app/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-back4app
           path: backend/back4app/build/outputs/aar/*-debug.aar
@@ -360,7 +360,7 @@ jobs:
             :backend:amplify:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-amplify
           path: |
@@ -368,13 +368,13 @@ jobs:
             backend/amplify/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-amplify
           path: backend/amplify/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-amplify
           path: backend/amplify/build/outputs/aar/*-debug.aar
@@ -401,7 +401,7 @@ jobs:
             :backend:cloudflare:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-cloudflare
           path: |
@@ -409,13 +409,13 @@ jobs:
             backend/cloudflare/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-cloudflare
           path: backend/cloudflare/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-cloudflare
           path: backend/cloudflare/build/outputs/aar/*-debug.aar
@@ -442,7 +442,7 @@ jobs:
             :backend:rest:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-rest
           path: |
@@ -450,13 +450,13 @@ jobs:
             backend/rest/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-rest
           path: backend/rest/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-rest
           path: backend/rest/build/outputs/aar/*-debug.aar
@@ -487,7 +487,7 @@ jobs:
             :bundle:hybrid:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-hybrid
           path: |
@@ -495,13 +495,13 @@ jobs:
             bundle/hybrid/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-hybrid
           path: bundle/hybrid/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-hybrid
           path: bundle/hybrid/build/outputs/aar/*-debug.aar
@@ -528,7 +528,7 @@ jobs:
             :bundle:self-hosted:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-self-hosted
           path: |
@@ -536,13 +536,13 @@ jobs:
             bundle/self-hosted/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-self-hosted
           path: bundle/self-hosted/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-self-hosted
           path: bundle/self-hosted/build/outputs/aar/*-debug.aar
@@ -569,7 +569,7 @@ jobs:
             :bundle:cloud-native:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-cloud-native
           path: |
@@ -577,13 +577,13 @@ jobs:
             bundle/cloud-native/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-cloud-native
           path: bundle/cloud-native/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-cloud-native
           path: bundle/cloud-native/build/outputs/aar/*-debug.aar
@@ -610,7 +610,7 @@ jobs:
             :bundle:enterprise-hybrid:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-enterprise-hybrid
           path: |
@@ -618,13 +618,13 @@ jobs:
             bundle/enterprise-hybrid/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-enterprise-hybrid
           path: bundle/enterprise-hybrid/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-enterprise-hybrid
           path: bundle/enterprise-hybrid/build/outputs/aar/*-debug.aar
@@ -651,7 +651,7 @@ jobs:
             :bundle:edge-serverless:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-edge-serverless
           path: |
@@ -659,13 +659,13 @@ jobs:
             bundle/edge-serverless/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-edge-serverless
           path: bundle/edge-serverless/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-edge-serverless
           path: bundle/edge-serverless/build/outputs/aar/*-debug.aar
@@ -692,7 +692,7 @@ jobs:
             :bundle:baas-classic:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-baas-classic
           path: |
@@ -700,13 +700,13 @@ jobs:
             bundle/baas-classic/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-baas-classic
           path: bundle/baas-classic/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-baas-classic
           path: bundle/baas-classic/build/outputs/aar/*-debug.aar
@@ -732,20 +732,20 @@ jobs:
             :bundle:all:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-all
           path: |
             bundle/all/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-all
           path: bundle/all/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-all
           path: bundle/all/build/outputs/aar/*-debug.aar
@@ -772,7 +772,7 @@ jobs:
             :bundle:firebase-supabase:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-firebase-supabase
           path: |
@@ -780,13 +780,13 @@ jobs:
             bundle/firebase-supabase/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-firebase-supabase
           path: bundle/firebase-supabase/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-firebase-supabase
           path: bundle/firebase-supabase/build/outputs/aar/*-debug.aar
@@ -813,7 +813,7 @@ jobs:
             :bundle:firebase-amplify:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-firebase-amplify
           path: |
@@ -821,13 +821,13 @@ jobs:
             bundle/firebase-amplify/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-firebase-amplify
           path: bundle/firebase-amplify/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-firebase-amplify
           path: bundle/firebase-amplify/build/outputs/aar/*-debug.aar
@@ -854,7 +854,7 @@ jobs:
             :bundle:firebase-back4app:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-firebase-back4app
           path: |
@@ -862,13 +862,13 @@ jobs:
             bundle/firebase-back4app/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-firebase-back4app
           path: bundle/firebase-back4app/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-firebase-back4app
           path: bundle/firebase-back4app/build/outputs/aar/*-debug.aar
@@ -895,7 +895,7 @@ jobs:
             :bundle:supabase-cloudflare:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-supabase-cloudflare
           path: |
@@ -903,13 +903,13 @@ jobs:
             bundle/supabase-cloudflare/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-supabase-cloudflare
           path: bundle/supabase-cloudflare/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-supabase-cloudflare
           path: bundle/supabase-cloudflare/build/outputs/aar/*-debug.aar
@@ -955,7 +955,7 @@ jobs:
       - name: 🚀 Build App Sample (Assemble Debug)
         run: ./gradlew :app:assembleDebug
       - name: ⬆️ Upload Sample APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sample-app-apk
           path: app/build/outputs/apk/debug/*.apk
