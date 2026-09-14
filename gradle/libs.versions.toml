@@ -25,7 +25,7 @@ gson = "2.11.0"
 appwrite = "27.1.0"
 parseSdk = "4.4.0"
 amplify = "2.24.1"
-hilt = "2.51.1"
+hilt = "2.60.1"
 bcv = "0.17.0"
 spotless = "7.0.2"
 
