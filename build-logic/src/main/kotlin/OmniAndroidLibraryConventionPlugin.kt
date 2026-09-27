@@ -14,15 +14,47 @@ class OmniAndroidLibraryConventionPlugin : Plugin<Project> {
                 apply("com.android.library")
                 apply("org.jetbrains.kotlin.android")
                 apply("maven-publish")
+                apply("jacoco")
             }
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
                 defaultConfig.consumerProguardFiles("consumer-rules.pro")
 
+                buildTypes {
+                    getByName("debug") {
+                        enableUnitTestCoverage = true
+                    }
+                    getByName("release") {
+                        isMinifyEnabled = false
+                        proguardFiles(
+                            getDefaultProguardFile("proguard-android-optimize.txt"),
+                            "proguard-rules.pro",
+                        )
+                    }
+                }
+
+                testOptions {
+                    unitTests {
+                        isIncludeAndroidResources = true
+                        all { testTask ->
+                            testTask.systemProperty("robolectric.defaultSdk", "34")
+                            testTask.systemProperty("robolectric.logging", "stdout")
+                            testTask.filter.isFailOnNoMatchingTests = false
+                        }
+                    }
+                }
+
+                lint {
+                    abortOnError = true
+                    checkDependencies = true
+                    warningsAsErrors = false
+                }
+
                 publishing {
                     singleVariant("release") {
                         withSourcesJar()
+                        withJavadocJar()
                     }
                 }
             }
