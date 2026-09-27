@@ -5,10 +5,19 @@ on:
     branches: [ "master", "feat/**" ]
   pull_request:
     branches: [ "master" ]
+  schedule:
+    - cron: '0 3 * * 1'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  packages: write
+  pages: write
+  id-token: write
+  security-events: write
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,6 +51,74 @@ jobs:
             perf
             build
           requireScope: false
+
+  # =============================================================================
+  # NIVEL 0: ANALISE ESTATICA DE SEGURANCA SAST (CODEQL) & HARDENING
+  # =============================================================================
+
+  codeql-analysis:
+    name: "🛡️ CodeQL SAST Analysis (Java & Kotlin)"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: java-kotlin
+          queries: security-extended,security-and-quality
+          build-mode: manual
+
+      - name: Build Debug Artifacts
+        run: ./gradlew --no-daemon clean assembleDebug
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:java-kotlin"
+
+  secrets-scan:
+    name: "🔐 Gitleaks Secret Scanner"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
+
+  dependency-check:
+    name: "🛡️ OWASP Dependency-Check"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: Run OWASP Dependency-Check
+        run: ./gradlew dependencyCheckAnalyze --info --continue || true
+        continue-on-error: true
+      - name: Upload Dependency-Check Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: build/reports/dependency-check-report.html
+          if-no-files-found: ignore
+
 
   # =============================================================================
   # NIVEL 1: FUNDACAO AGNOSTICA & TESTES
@@ -962,12 +1039,41 @@ jobs:
           if-no-files-found: ignore
 
   # =============================================================================
+  # NIVEL 4.5: COBERTURA AGREGADA DE TESTES (JACOCO ROOT)
+  # =============================================================================
+
+  coverage-report:
+    name: "📊 Jacoco Root Coverage Report"
+    needs: [sample-app]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 📈 Generate Jacoco Root Coverage Report
+        run: ./gradlew jacocoRootReport
+      - name: 📊 Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-root-coverage-report
+          path: build/reports/jacoco/jacocoRootReport/
+          if-no-files-found: ignore
+
+  # =============================================================================
   # NIVEL 5: PUBLISH & RELEASE UNIFICADO (Padrao CommonsAndroidNative)
   # =============================================================================
 
   publish-and-release:
     name: "🚀 Publish & Release"
-    needs: [sample-app]
+    needs:
+      - sample-app
+      - coverage-report
+      - codeql-analysis
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
