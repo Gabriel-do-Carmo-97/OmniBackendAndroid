@@ -1,12 +1,17 @@
 # OmniBackendAndroid
 
 [![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
-[![Gradle](https://img.shields.io/badge/Gradle-9.5.0-02303A?logo=gradle&logoColor=white)](https://gradle.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Gradle](https://img.shields.io/badge/Gradle-9.7.1-02303A?logo=gradle&logoColor=white)](https://gradle.org/)
 [![AGP](https://img.shields.io/badge/AGP-9.3.2-blue)](https://developer.android.com/build)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20Hexagonal%20%2B%20Multi--Provider-blueviolet)](#architecture)
 
 **OmniBackend Android** é uma solução empresarial multi-provedor de abstração Backend-as-a-Service (BaaS) para aplicativos Android. Desacopla o aplicativo de provedores específicos por meio de contratos de domínio limpos, reativos e totalmente agnósticos.
+
+### 📚 Documentação Corporativa
+* 🏛️ [Diretrizes de Arquitetura e Decisões Técnicas (ARCHITECTURE.md)](ARCHITECTURE.md)
+* 📘 [Guia de Integração para Squads e Exemplos (INTEGRATION_GUIDE.md)](INTEGRATION_GUIDE.md)
+* 📝 [Histórico de Alterações e Versões (CHANGELOG.md)](CHANGELOG.md)
 
 ---
 

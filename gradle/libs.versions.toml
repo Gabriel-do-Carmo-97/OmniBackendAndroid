@@ -26,8 +26,12 @@ appwrite = "27.1.0"
 parseSdk = "4.4.0"
 amplify = "2.24.1"
 hilt = "2.51.1"
-bcv = "0.17.0"
-spotless = "7.0.2"
+bcv = "0.18.2"
+spotless = "8.10.2"
+turbine = "1.2.1"
+robolectric = "4.17"
+sonarqube = "7.4.0.8496"
+dependencyCheck = "13.0.0"
 
 [libraries]
 # Gradle build plugins para build-logic
@@ -93,6 +97,8 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 # Compose
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -115,4 +121,6 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "bcv" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
+dependency-check = { id = "org.owasp.dependencycheck", version.ref = "dependencyCheck" }
 

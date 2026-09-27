@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <!-- 
+      Supressões corporativas para falsos positivos ou riscos aceitáveis no OmniBackendAndroid.
+      Utilizado pelo OWASP Dependency Check para auditar e filtrar alertas de segurança (CVEs).
+    -->
+    
+    <!-- Supressão por dependência exclusiva de testes/compilação -->
+    <suppress>
+        <notes><![CDATA[
+            Risco aceito: Dependência utilizada exclusivamente em ambiente de teste unitário (Robolectric / MockK)
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.robolectric/.*$</packageUrl>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            Risco aceito: Dependência utilizada exclusivamente em ambiente de teste unitário (MockK)
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/io\.mockk/.*$</packageUrl>
+    </suppress>
+</suppressions>
