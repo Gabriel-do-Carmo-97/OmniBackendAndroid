@@ -1,4 +1,4 @@
-﻿package br.wgc.omnibackend.firebase.security
+package br.wgc.omnibackend.firebase.security
 
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
