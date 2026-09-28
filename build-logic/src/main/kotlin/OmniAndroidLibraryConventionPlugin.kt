@@ -49,6 +49,10 @@ class OmniAndroidLibraryConventionPlugin : Plugin<Project> {
                     abortOnError = true
                     checkDependencies = true
                     warningsAsErrors = false
+                    val lintFile = rootProject.file("config/lint/lint.xml")
+                    if (lintFile.exists()) {
+                        lintConfig = lintFile
+                    }
                 }
 
                 publishing {

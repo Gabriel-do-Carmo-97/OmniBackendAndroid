@@ -1,0 +1,12 @@
+# Global owners for OmniBackendAndroid
+* @Gabriel-do-Carmo-97
+
+# Build logic and CI/CD pipelines
+/build-logic/ @Gabriel-do-Carmo-97
+/.github/ @Gabriel-do-Carmo-97
+
+# Core, Drivers and Bundles
+/core/ @Gabriel-do-Carmo-97
+/backend/ @Gabriel-do-Carmo-97
+/bundle/ @Gabriel-do-Carmo-97
+/testing/ @Gabriel-do-Carmo-97

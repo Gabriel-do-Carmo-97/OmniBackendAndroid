@@ -18,9 +18,26 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+                includeGroupByRegex("android\\.arch.*")
+            }
+        }
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Gabriel-do-Carmo-97/OmniBackendAndroid")
+            credentials {
+                username =
+                    providers.gradleProperty("gpr.user").orNull ?: providers.environmentVariable("GITHUB_ACTOR").orNull
+                password =
+                    providers.gradleProperty("gpr.key").orNull ?: providers.environmentVariable("GITHUB_TOKEN").orNull
+            }
+        }
     }
 }
 
@@ -28,6 +45,12 @@ rootProject.name = "OmniBackendAndroid"
 include(":app")
 include(":core")
 include(":testing")
+
+buildCache {
+    local {
+        directory = file("$rootDir/.gradle/build-cache")
+    }
+}
 
 // 🚀 Registra drivers especializados da pasta backend/
 fun registerBackend(name: String) {
