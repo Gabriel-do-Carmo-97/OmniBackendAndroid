@@ -319,8 +319,94 @@ public final class br/wgc/omnibackend/core/model/messaging/OmniPushMessage {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class br/wgc/omnibackend/core/network/AuthBearerInterceptor : okhttp3/Interceptor {
+	public static final field Companion Lbr/wgc/omnibackend/core/network/AuthBearerInterceptor$Companion;
+	public fun <init> (Lbr/wgc/omnibackend/core/network/TokenProvider;)V
+	public fun intercept (Lokhttp3/Interceptor$Chain;)Lokhttp3/Response;
+}
+
+public final class br/wgc/omnibackend/core/network/AuthBearerInterceptor$Companion {
+}
+
+public final class br/wgc/omnibackend/core/network/IdempotencyInterceptor : okhttp3/Interceptor {
+	public static final field Companion Lbr/wgc/omnibackend/core/network/IdempotencyInterceptor$Companion;
+	public static final field DEFAULT_HEADER_NAME Ljava/lang/String;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/Set;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Set;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun intercept (Lokhttp3/Interceptor$Chain;)Lokhttp3/Response;
+}
+
+public final class br/wgc/omnibackend/core/network/IdempotencyInterceptor$Companion {
+	public final fun getDEFAULT_MUTATING_METHODS ()Ljava/util/Set;
+}
+
+public final class br/wgc/omnibackend/core/network/NetworkConnectivityMonitor {
+	public fun <init> (Landroid/content/Context;)V
+	public final fun getStatus ()Lkotlinx/coroutines/flow/Flow;
+	public final fun isConnected ()Lkotlinx/coroutines/flow/Flow;
+}
+
 public abstract interface class br/wgc/omnibackend/core/network/NetworkMonitor {
 	public abstract fun isOnline ()Lkotlinx/coroutines/flow/Flow;
+}
+
+public abstract interface class br/wgc/omnibackend/core/network/NetworkStatus {
+}
+
+public final class br/wgc/omnibackend/core/network/NetworkStatus$Available : br/wgc/omnibackend/core/network/NetworkStatus {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/network/NetworkStatus$Available;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/network/NetworkStatus$Lost : br/wgc/omnibackend/core/network/NetworkStatus {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/network/NetworkStatus$Lost;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/network/NetworkStatus$Unavailable : br/wgc/omnibackend/core/network/NetworkStatus {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/network/NetworkStatus$Unavailable;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class br/wgc/omnibackend/core/network/OmniHttpClientFactory {
+	public static final field INSTANCE Lbr/wgc/omnibackend/core/network/OmniHttpClientFactory;
+	public final fun createClient (Lbr/wgc/omnibackend/core/network/TokenProvider;Ljava/util/List;JJJZ)Lokhttp3/OkHttpClient;
+	public static synthetic fun createClient$default (Lbr/wgc/omnibackend/core/network/OmniHttpClientFactory;Lbr/wgc/omnibackend/core/network/TokenProvider;Ljava/util/List;JJJZILjava/lang/Object;)Lokhttp3/OkHttpClient;
+}
+
+public final class br/wgc/omnibackend/core/network/TokenAuthenticator : okhttp3/Authenticator {
+	public static final field Companion Lbr/wgc/omnibackend/core/network/TokenAuthenticator$Companion;
+	public fun <init> (Lbr/wgc/omnibackend/core/network/TokenProvider;Lkotlinx/coroutines/sync/Mutex;)V
+	public synthetic fun <init> (Lbr/wgc/omnibackend/core/network/TokenProvider;Lkotlinx/coroutines/sync/Mutex;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun authenticate (Lokhttp3/Route;Lokhttp3/Response;)Lokhttp3/Request;
+}
+
+public final class br/wgc/omnibackend/core/network/TokenAuthenticator$Companion {
+}
+
+public abstract interface class br/wgc/omnibackend/core/network/TokenProvider {
+	public abstract fun getAccessToken (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getCachedAccessToken ()Ljava/lang/String;
+	public abstract fun onSessionExpired ()V
+	public abstract fun refreshToken (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class br/wgc/omnibackend/core/network/W3CTraceInterceptor : okhttp3/Interceptor {
+	public static final field Companion Lbr/wgc/omnibackend/core/network/W3CTraceInterceptor$Companion;
+	public static final field HEADER_REQUEST_ID Ljava/lang/String;
+	public static final field HEADER_TRACEPARENT Ljava/lang/String;
+	public fun <init> ()V
+	public fun intercept (Lokhttp3/Interceptor$Chain;)Lokhttp3/Response;
+}
+
+public final class br/wgc/omnibackend/core/network/W3CTraceInterceptor$Companion {
 }
 
 public abstract interface class br/wgc/omnibackend/core/offline/MutationQueueRepository {

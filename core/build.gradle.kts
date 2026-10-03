@@ -13,8 +13,11 @@ dependencies {
     implementation(libs.google.gson)
     api(libs.javax.inject)
     api(libs.hilt.android)
+    api(libs.okhttp)
+    implementation(libs.okhttp.logging)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.okhttp.mockwebserver)
 }

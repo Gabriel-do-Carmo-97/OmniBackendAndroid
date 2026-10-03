@@ -36,5 +36,23 @@ class OmniCloudflareTest {
         assertNotNull(OmniCloudflare.auth)
         assertNotNull(OmniCloudflare.database)
         assertNotNull(OmniCloudflare.storage)
+        assertNotNull(OmniCloudflare.httpClient)
+    }
+
+    @Test
+    fun `initialize with custom httpClient configures it correctly`() {
+        val accountId = "test-account-123"
+        val workerUrl = "https://test.workers.dev"
+        val customClient = okhttp3.OkHttpClient.Builder().build()
+
+        OmniCloudflare.initialize(
+            context = mockContext,
+            accountId = accountId,
+            workerBaseUrl = workerUrl,
+            httpClient = customClient,
+        )
+
+        assertTrue(OmniCloudflare.initialized)
+        assertEquals(customClient, OmniCloudflare.httpClient)
     }
 }

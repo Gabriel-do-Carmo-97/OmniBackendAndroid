@@ -10,9 +10,11 @@ public final class br/wgc/omnibackend/rest/OmniRestBackend {
 	public final fun getAuth ()Lbr/wgc/omnibackend/core/repository/AuthRepository;
 	public final fun getBaseUrl ()Ljava/lang/String;
 	public final fun getDatabase ()Lbr/wgc/omnibackend/core/repository/FirestoreRepository;
+	public final fun getHttpClient ()Lokhttp3/OkHttpClient;
 	public final fun getInitialized ()Z
 	public final fun getStorage ()Lbr/wgc/omnibackend/core/repository/StorageRepository;
-	public final fun initialize (Landroid/content/Context;Ljava/lang/String;)V
+	public final fun initialize (Landroid/content/Context;Ljava/lang/String;Lokhttp3/OkHttpClient;)V
+	public static synthetic fun initialize$default (Lbr/wgc/omnibackend/rest/OmniRestBackend;Landroid/content/Context;Ljava/lang/String;Lokhttp3/OkHttpClient;ILjava/lang/Object;)V
 }
 
 public final class br/wgc/omnibackend/rest/di/RestBackendModule {

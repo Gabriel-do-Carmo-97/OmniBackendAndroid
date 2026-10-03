@@ -4,9 +4,11 @@ import android.content.Context
 import br.wgc.omnibackend.cloudflare.data.repository.CloudflareAuthRepositoryImpl
 import br.wgc.omnibackend.cloudflare.data.repository.CloudflareDatabaseRepositoryImpl
 import br.wgc.omnibackend.cloudflare.data.repository.CloudflareStorageRepositoryImpl
+import br.wgc.omnibackend.core.network.OmniHttpClientFactory
 import br.wgc.omnibackend.core.repository.AuthRepository
 import br.wgc.omnibackend.core.repository.FirestoreRepository
 import br.wgc.omnibackend.core.repository.StorageRepository
+import okhttp3.OkHttpClient
 
 /**
  * Ponto de entrada e Fachada corporativa do driver Cloudflare para o OmniBackend Android.
@@ -35,6 +37,7 @@ object OmniCloudflare {
 
     private lateinit var cloudflareAccountId: String
     private lateinit var cloudflareWorkerUrl: String
+    private var customHttpClient: OkHttpClient? = null
     private var appContext: Context? = null
 
     /**
@@ -43,14 +46,16 @@ object OmniCloudflare {
      * @param context Contexto da aplicação Android.
      * @param accountId Identificador da conta na Cloudflare.
      * @param workerBaseUrl URL base do Cloudflare Worker (ex: "https://meu-worker.workers.dev").
+     * @param httpClient Instância customizada de [OkHttpClient] (opcional; se omitida, usa [OmniHttpClientFactory.createClient]).
      */
-    fun initialize(context: Context, accountId: String, workerBaseUrl: String) {
+    fun initialize(context: Context, accountId: String, workerBaseUrl: String, httpClient: OkHttpClient? = null) {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
                     appContext = context.applicationContext
                     cloudflareAccountId = accountId
                     cloudflareWorkerUrl = workerBaseUrl
+                    customHttpClient = httpClient
                     isInitialized = true
                 }
             }
@@ -82,16 +87,23 @@ object OmniCloudflare {
             return cloudflareWorkerUrl
         }
 
+    /** Cliente [OkHttpClient] corporativo ativo. */
+    val httpClient: OkHttpClient
+        get() {
+            check(isInitialized) { "OmniCloudflare deve ser inicializado antes do uso." }
+            return customHttpClient ?: OmniHttpClientFactory.createClient()
+        }
+
     /** Implementação de [AuthRepository] para Cloudflare (Workers Auth). */
     val auth: AuthRepository by lazy {
         check(isInitialized) { "OmniCloudflare deve ser inicializado antes do uso." }
-        CloudflareAuthRepositoryImpl(cloudflareWorkerUrl)
+        CloudflareAuthRepositoryImpl(cloudflareWorkerUrl, httpClient = httpClient)
     }
 
     /** Implementação de [FirestoreRepository] para Cloudflare D1. */
     val database: FirestoreRepository by lazy {
         check(isInitialized) { "OmniCloudflare deve ser inicializado antes do uso." }
-        CloudflareDatabaseRepositoryImpl(cloudflareWorkerUrl)
+        CloudflareDatabaseRepositoryImpl(cloudflareWorkerUrl, httpClient = httpClient)
     }
 
     /** Implementação de [StorageRepository] para Cloudflare R2. */
@@ -100,6 +112,7 @@ object OmniCloudflare {
         CloudflareStorageRepositoryImpl(
             context = appContext ?: error("OmniCloudflare deve ser inicializado antes do uso."),
             workerBaseUrl = cloudflareWorkerUrl,
+            httpClient = httpClient,
         )
     }
 
@@ -108,6 +121,7 @@ object OmniCloudflare {
         synchronized(this) {
             isInitialized = false
             appContext = null
+            customHttpClient = null
         }
     }
 }

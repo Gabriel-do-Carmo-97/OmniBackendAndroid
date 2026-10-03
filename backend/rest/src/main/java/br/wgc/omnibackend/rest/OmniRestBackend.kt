@@ -1,12 +1,14 @@
 package br.wgc.omnibackend.rest
 
 import android.content.Context
+import br.wgc.omnibackend.core.network.OmniHttpClientFactory
 import br.wgc.omnibackend.core.repository.AuthRepository
 import br.wgc.omnibackend.core.repository.FirestoreRepository
 import br.wgc.omnibackend.core.repository.StorageRepository
 import br.wgc.omnibackend.rest.data.repository.RestAuthRepositoryImpl
 import br.wgc.omnibackend.rest.data.repository.RestDatabaseRepositoryImpl
 import br.wgc.omnibackend.rest.data.repository.RestStorageRepositoryImpl
+import okhttp3.OkHttpClient
 
 /**
  * Ponto de entrada e Fachada corporativa do driver Custom REST para o OmniBackend Android.
@@ -33,6 +35,7 @@ object OmniRestBackend {
     private var isInitialized = false
 
     private lateinit var restBaseUrl: String
+    private var customHttpClient: OkHttpClient? = null
     private var appContext: Context? = null
 
     /**
@@ -40,13 +43,15 @@ object OmniRestBackend {
      *
      * @param context Contexto da aplicação Android.
      * @param baseUrl URL base da API REST corporativa (ex: "https://api.empresa.com").
+     * @param httpClient Instância customizada de [OkHttpClient] (opcional; se omitida, usa [OmniHttpClientFactory.createClient]).
      */
-    fun initialize(context: Context, baseUrl: String) {
+    fun initialize(context: Context, baseUrl: String, httpClient: OkHttpClient? = null) {
         if (!isInitialized) {
             synchronized(this) {
                 if (!isInitialized) {
                     appContext = context.applicationContext
                     restBaseUrl = baseUrl
+                    customHttpClient = httpClient
                     isInitialized = true
                 }
             }
@@ -67,16 +72,23 @@ object OmniRestBackend {
             return restBaseUrl
         }
 
+    /** Cliente [OkHttpClient] corporativo ativo. */
+    val httpClient: OkHttpClient
+        get() {
+            check(isInitialized) { "OmniRestBackend deve ser inicializado antes do uso." }
+            return customHttpClient ?: OmniHttpClientFactory.createClient()
+        }
+
     /** Implementação de [AuthRepository] para API REST customizada. */
     val auth: AuthRepository by lazy {
         check(isInitialized) { "OmniRestBackend deve ser inicializado antes do uso." }
-        RestAuthRepositoryImpl(restBaseUrl)
+        RestAuthRepositoryImpl(restBaseUrl, httpClient = httpClient)
     }
 
     /** Implementação de [FirestoreRepository] para API REST customizada. */
     val database: FirestoreRepository by lazy {
         check(isInitialized) { "OmniRestBackend deve ser inicializado antes do uso." }
-        RestDatabaseRepositoryImpl(restBaseUrl)
+        RestDatabaseRepositoryImpl(restBaseUrl, httpClient = httpClient)
     }
 
     /** Implementação de [StorageRepository] para API REST customizada. */
@@ -85,6 +97,7 @@ object OmniRestBackend {
         RestStorageRepositoryImpl(
             context = appContext ?: error("OmniRestBackend deve ser inicializado antes do uso."),
             baseUrl = restBaseUrl,
+            httpClient = httpClient,
         )
     }
 
@@ -93,6 +106,7 @@ object OmniRestBackend {
         synchronized(this) {
             isInitialized = false
             appContext = null
+            customHttpClient = null
         }
     }
 }

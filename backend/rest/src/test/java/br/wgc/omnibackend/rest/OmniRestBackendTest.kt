@@ -33,5 +33,21 @@ class OmniRestBackendTest {
         assertNotNull(OmniRestBackend.auth)
         assertNotNull(OmniRestBackend.database)
         assertNotNull(OmniRestBackend.storage)
+        assertNotNull(OmniRestBackend.httpClient)
+    }
+
+    @Test
+    fun `initialize with custom httpClient configures it correctly`() {
+        val testUrl = "https://api.empresa.com"
+        val customClient = okhttp3.OkHttpClient.Builder().build()
+
+        OmniRestBackend.initialize(
+            context = mockContext,
+            baseUrl = testUrl,
+            httpClient = customClient,
+        )
+
+        assertTrue(OmniRestBackend.initialized)
+        assertEquals(customClient, OmniRestBackend.httpClient)
     }
 }

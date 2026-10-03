@@ -2,19 +2,26 @@ package br.wgc.omnibackend.cloudflare.data.repository
 
 import br.wgc.omnibackend.cloudflare.utils.CloudflareErrorMapper
 import br.wgc.omnibackend.core.model.firestore.FilterRequest
+import br.wgc.omnibackend.core.network.OmniHttpClientFactory
 import br.wgc.omnibackend.core.repository.FirestoreRepository
 import br.wgc.omnibackend.core.utils.DataResult
 import com.google.gson.Gson
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import java.net.HttpURLConnection
-import java.net.URL
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 
 /**
  * Implementação de [FirestoreRepository] integrando com Cloudflare D1 via Worker REST API.
  */
-internal class CloudflareDatabaseRepositoryImpl(private val workerBaseUrl: String, private val gson: Gson = Gson()) : FirestoreRepository {
+internal class CloudflareDatabaseRepositoryImpl(
+    private val workerBaseUrl: String,
+    private val gson: Gson = Gson(),
+    private val httpClient: OkHttpClient = OmniHttpClientFactory.createClient(),
+) : FirestoreRepository {
 
     override suspend fun <T : Any> addDocument(collection: String, data: T, customId: String?): DataResult<String> = runCatchingDb {
         val url = "$workerBaseUrl/d1/$collection"
@@ -86,52 +93,54 @@ internal class CloudflareDatabaseRepositoryImpl(private val workerBaseUrl: Strin
 
     @Suppress("UNCHECKED_CAST")
     private fun httpGet(urlString: String): Map<String, Any?> {
-        val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
-            requestMethod = "GET"
-            connectTimeout = 10000
-            readTimeout = 10000
+        val request = Request.Builder().url(urlString).get().build()
+        httpClient.newCall(request).execute().use { response ->
+            if (response.isSuccessful) {
+                val text = response.body?.string().orEmpty()
+                return gson.fromJson(text, Map::class.java) as Map<String, Any?>
+            } else {
+                throw IllegalStateException("Cloudflare D1 HTTP ${response.code}: ${response.message}")
+            }
         }
-        val text = conn.inputStream.use { it.bufferedReader().readText() }
-        return gson.fromJson(text, Map::class.java) as Map<String, Any?>
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun httpPost(urlString: String, data: Map<String, Any?>): Map<String, Any?> {
-        val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"
-            doOutput = true
-            setRequestProperty("Content-Type", "application/json")
-            connectTimeout = 10000
-            readTimeout = 10000
-        }
         val json = gson.toJson(data)
-        conn.outputStream.use { it.write(json.toByteArray()) }
-        val text = conn.inputStream.use { it.bufferedReader().readText() }
-        return gson.fromJson(text, Map::class.java) as Map<String, Any?>
+        val body = json.toRequestBody("application/json; charset=utf-8".toMediaType())
+        val request = Request.Builder().url(urlString).post(body).build()
+        httpClient.newCall(request).execute().use { response ->
+            if (response.isSuccessful) {
+                val text = response.body?.string().orEmpty()
+                return gson.fromJson(text, Map::class.java) as Map<String, Any?>
+            } else {
+                throw IllegalStateException("Cloudflare D1 HTTP ${response.code}: ${response.message}")
+            }
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun httpPut(urlString: String, data: Map<String, Any?>): Map<String, Any?> {
-        val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
-            requestMethod = "PUT"
-            doOutput = true
-            setRequestProperty("Content-Type", "application/json")
-            connectTimeout = 10000
-            readTimeout = 10000
-        }
         val json = gson.toJson(data)
-        conn.outputStream.use { it.write(json.toByteArray()) }
-        val text = conn.inputStream.use { it.bufferedReader().readText() }
-        return gson.fromJson(text, Map::class.java) as Map<String, Any?>
+        val body = json.toRequestBody("application/json; charset=utf-8".toMediaType())
+        val request = Request.Builder().url(urlString).put(body).build()
+        httpClient.newCall(request).execute().use { response ->
+            if (response.isSuccessful) {
+                val text = response.body?.string().orEmpty()
+                return gson.fromJson(text, Map::class.java) as Map<String, Any?>
+            } else {
+                throw IllegalStateException("Cloudflare D1 HTTP ${response.code}: ${response.message}")
+            }
+        }
     }
 
     private fun httpDelete(urlString: String) {
-        val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
-            requestMethod = "DELETE"
-            connectTimeout = 10000
-            readTimeout = 10000
+        val request = Request.Builder().url(urlString).delete().build()
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IllegalStateException("Cloudflare D1 HTTP ${response.code}: ${response.message}")
+            }
         }
-        conn.responseCode
     }
 
     private inline fun <T> runCatchingDb(block: () -> T): DataResult<T> = try {

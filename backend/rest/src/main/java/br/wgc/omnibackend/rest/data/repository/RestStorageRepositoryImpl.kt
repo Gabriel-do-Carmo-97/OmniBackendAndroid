@@ -2,20 +2,27 @@ package br.wgc.omnibackend.rest.data.repository
 
 import android.content.Context
 import android.net.Uri
+import br.wgc.omnibackend.core.network.OmniHttpClientFactory
 import br.wgc.omnibackend.core.repository.StorageRepository
 import br.wgc.omnibackend.core.utils.AppError
 import br.wgc.omnibackend.core.utils.DataResult
 import br.wgc.omnibackend.rest.utils.RestErrorMapper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.InputStream
-import java.net.HttpURLConnection
-import java.net.URL
 
 /**
  * Implementação de [StorageRepository] enviando arquivos para endpoints REST (`/api/v1/storage/{path}`).
  */
-internal class RestStorageRepositoryImpl(private val context: Context, private val baseUrl: String) : StorageRepository {
+internal class RestStorageRepositoryImpl(
+    private val context: Context,
+    private val baseUrl: String,
+    private val httpClient: OkHttpClient = OmniHttpClientFactory.createClient(),
+) : StorageRepository {
 
     override fun uploadFile(path: String, fileData: ByteArray): Flow<DataResult<Uri>> = flow {
         emit(uploadFileDirect(path, fileData))
@@ -32,19 +39,14 @@ internal class RestStorageRepositoryImpl(private val context: Context, private v
 
     override suspend fun uploadFileDirect(path: String, fileData: ByteArray): DataResult<Uri> = runCatchingStorage {
         val urlString = "$baseUrl/api/v1/storage/$path"
-        val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"
-            doOutput = true
-            setRequestProperty("Content-Type", "application/octet-stream")
-            connectTimeout = 15000
-            readTimeout = 15000
-        }
-        conn.outputStream.use { it.write(fileData) }
-        val code = conn.responseCode
-        if (code in 200..299) {
-            Uri.parse(urlString)
-        } else {
-            throw IllegalStateException("REST Storage Upload HTTP $code: ${conn.responseMessage}")
+        val body = fileData.toRequestBody("application/octet-stream".toMediaType())
+        val request = Request.Builder().url(urlString).post(body).build()
+        httpClient.newCall(request).execute().use { response ->
+            if (response.isSuccessful) {
+                Uri.parse(urlString)
+            } else {
+                throw IllegalStateException("REST Storage Upload HTTP ${response.code}: ${response.message}")
+            }
         }
     }
 
@@ -64,13 +66,12 @@ internal class RestStorageRepositoryImpl(private val context: Context, private v
 
     override suspend fun delete(path: String): DataResult<Unit> = runCatchingStorage {
         val urlString = "$baseUrl/api/v1/storage/$path"
-        val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
-            requestMethod = "DELETE"
-            connectTimeout = 10000
-            readTimeout = 10000
+        val request = Request.Builder().url(urlString).delete().build()
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IllegalStateException("REST Storage Delete HTTP ${response.code}: ${response.message}")
+            }
         }
-        conn.responseCode
-        Unit
     }
 
     private inline fun <T> runCatchingStorage(block: () -> T): DataResult<T> = try {
