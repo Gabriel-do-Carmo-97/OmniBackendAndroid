@@ -27,7 +27,7 @@ parseSdk = "4.4.0"
 amplify = "2.24.1"
 hilt = "2.51.1"
 bcv = "0.17.0"
-spotless = "7.0.2"
+spotless = "8.10.3"
 
 [libraries]
 # Gradle build plugins para build-logic
