@@ -1017,7 +1017,7 @@ jobs:
 
       - name: Download All Release AARs
         if: steps.changed_modules.outputs.any_changed == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: release-aar-*
           merge-multiple: true
