@@ -18,11 +18,11 @@ comments:
   CommentOverPrivateProperty:
     active: false
   UndocumentedPublicClass:
-    active: true
+    active: false
   UndocumentedPublicFunction:
-    active: true
+    active: false
   UndocumentedPublicProperty:
-    active: true
+    active: false
 
 complexity:
   ComplexCondition:
@@ -173,6 +173,12 @@ potential-bugs:
     active: true
 
 style:
+  MaxLineLength:
+    active: true
+    maxLineLength: 140
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: true
   ClassOrdering:
     active: false
   CollapsibleIfStatements:

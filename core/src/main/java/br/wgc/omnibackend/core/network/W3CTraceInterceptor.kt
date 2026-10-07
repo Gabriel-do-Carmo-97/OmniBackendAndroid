@@ -32,7 +32,5 @@ class W3CTraceInterceptor : Interceptor {
     companion object {
         const val HEADER_REQUEST_ID = "X-Request-ID"
         const val HEADER_TRACEPARENT = "traceparent"
-        private const val TRACE_ID_BYTE_COUNT = 16
-        private const val SPAN_ID_BYTE_COUNT = 8
     }
 }
