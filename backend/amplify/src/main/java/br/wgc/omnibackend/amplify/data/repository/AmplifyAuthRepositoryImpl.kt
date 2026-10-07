@@ -169,7 +169,7 @@ internal class AmplifyAuthRepositoryImpl : AuthRepository {
     )
 
     override suspend fun signOut(): DataResult<Unit> = runCatchingAuth {
-        val _res = Amplify.Auth.signOut()
+        Amplify.Auth.signOut()
         activeUser = null
     }
 
