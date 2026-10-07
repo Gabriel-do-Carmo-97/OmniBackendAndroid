@@ -36,7 +36,7 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - uses: amannn/action-semantic-pull-request@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -1123,7 +1123,7 @@ jobs:
 
       - name: Download All Release AARs
         if: steps.changed_modules.outputs.any_changed == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: release-aar-*
           merge-multiple: true
@@ -1201,4 +1201,4 @@ jobs:
           path: './site-docs'
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
