@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- OmniBackend Architecture & Security Lint Guidelines -->
+    <!-- Proibir hardcoded text em layouts e composables -->
+    <issue id="HardcodedText" severity="warning" />
+
+    <!-- Forçar uso de HTTPS seguro para tráfego de rede e SDKs -->
+    <issue id="UsesCleartextTraffic" severity="error" />
+
+    <!-- Prevenir exportação acidental de componentes de segurança sem permissão -->
+    <issue id="ExportedPreferenceActivity" severity="error" />
+    <issue id="ExportedReceiver" severity="error" />
+    <issue id="ExportedService" severity="error" />
+
+    <!-- Encorajar uso de bibliotecas de compatibilidade modernas -->
+    <issue id="ObsoleteSdkInt" severity="warning" />
+</lint>

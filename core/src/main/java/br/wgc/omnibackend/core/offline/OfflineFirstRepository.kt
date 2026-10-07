@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Repositório decorador agnóstico que encapsula [FirestoreRepository] e fornece resiliência offline.
@@ -31,8 +30,6 @@ class OfflineFirstRepository(
     private val scope: CoroutineScope,
     private val gson: Gson = Gson(),
 ) : FirestoreRepository {
-
-    private val localCache = ConcurrentHashMap<String, MutableMap<String, Any>>()
 
     init {
         scope.launch {

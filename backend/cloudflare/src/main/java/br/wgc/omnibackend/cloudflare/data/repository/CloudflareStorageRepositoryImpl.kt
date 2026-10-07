@@ -3,19 +3,26 @@ package br.wgc.omnibackend.cloudflare.data.repository
 import android.content.Context
 import android.net.Uri
 import br.wgc.omnibackend.cloudflare.utils.CloudflareErrorMapper
+import br.wgc.omnibackend.core.network.OmniHttpClientFactory
 import br.wgc.omnibackend.core.repository.StorageRepository
 import br.wgc.omnibackend.core.utils.AppError
 import br.wgc.omnibackend.core.utils.DataResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.InputStream
-import java.net.HttpURLConnection
-import java.net.URL
 
 /**
  * Implementação de [StorageRepository] enviando arquivos para Cloudflare R2 via Worker R2 endpoint.
  */
-internal class CloudflareStorageRepositoryImpl(private val context: Context, private val workerBaseUrl: String) : StorageRepository {
+internal class CloudflareStorageRepositoryImpl(
+    private val context: Context,
+    private val workerBaseUrl: String,
+    private val httpClient: OkHttpClient = OmniHttpClientFactory.createClient(),
+) : StorageRepository {
 
     override fun uploadFile(path: String, fileData: ByteArray): Flow<DataResult<Uri>> = flow {
         emit(uploadFileDirect(path, fileData))
@@ -32,19 +39,14 @@ internal class CloudflareStorageRepositoryImpl(private val context: Context, pri
 
     override suspend fun uploadFileDirect(path: String, fileData: ByteArray): DataResult<Uri> = runCatchingStorage {
         val urlString = "$workerBaseUrl/r2/$path"
-        val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
-            requestMethod = "PUT"
-            doOutput = true
-            setRequestProperty("Content-Type", "application/octet-stream")
-            connectTimeout = 15000
-            readTimeout = 15000
-        }
-        conn.outputStream.use { it.write(fileData) }
-        val code = conn.responseCode
-        if (code in 200..299) {
-            Uri.parse(urlString)
-        } else {
-            throw IllegalStateException("Cloudflare R2 Upload HTTP $code: ${conn.responseMessage}")
+        val body = fileData.toRequestBody("application/octet-stream".toMediaType())
+        val request = Request.Builder().url(urlString).put(body).build()
+        httpClient.newCall(request).execute().use { response ->
+            if (response.isSuccessful) {
+                Uri.parse(urlString)
+            } else {
+                throw IllegalStateException("Cloudflare R2 Upload HTTP ${response.code}: ${response.message}")
+            }
         }
     }
 
@@ -64,13 +66,12 @@ internal class CloudflareStorageRepositoryImpl(private val context: Context, pri
 
     override suspend fun delete(path: String): DataResult<Unit> = runCatchingStorage {
         val urlString = "$workerBaseUrl/r2/$path"
-        val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
-            requestMethod = "DELETE"
-            connectTimeout = 10000
-            readTimeout = 10000
+        val request = Request.Builder().url(urlString).delete().build()
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IllegalStateException("Cloudflare R2 Delete HTTP ${response.code}: ${response.message}")
+            }
         }
-        conn.responseCode
-        Unit
     }
 
     private inline fun <T> runCatchingStorage(block: () -> T): DataResult<T> = try {

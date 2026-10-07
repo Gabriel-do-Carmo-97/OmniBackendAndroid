@@ -1,4 +1,4 @@
-﻿package br.wgc.omnibackend.firebase.utils
+package br.wgc.omnibackend.firebase.utils
 
 /**
  * Objeto centralizado que contém as mensagens de erro padrão para o usuário,

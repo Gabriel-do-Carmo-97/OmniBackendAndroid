@@ -46,9 +46,16 @@ object OmniAmplify {
                     val app = context.applicationContext
                     appContext = app
                     try {
-                        AmplifyCore.addPlugin(AWSCognitoAuthPlugin())
-                        AmplifyCore.addPlugin(AWSS3StoragePlugin())
-                        AmplifyCore.configure(app)
+                        val hasAndroidKeyStore = try {
+                            java.security.KeyStore.getInstance("AndroidKeyStore") != null
+                        } catch (_: Throwable) {
+                            false
+                        }
+                        if (hasAndroidKeyStore) {
+                            AmplifyCore.addPlugin(AWSCognitoAuthPlugin())
+                            AmplifyCore.addPlugin(AWSS3StoragePlugin())
+                            AmplifyCore.configure(app)
+                        }
                     } catch (_: Throwable) {
                         // Resiliente caso já configurado previamente pelo app host ou em testes unitários JVM sem Keystore
                     }

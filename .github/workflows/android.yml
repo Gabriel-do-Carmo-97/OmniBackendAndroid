@@ -5,10 +5,19 @@ on:
     branches: [ "master", "feat/**" ]
   pull_request:
     branches: [ "master" ]
+  schedule:
+    - cron: '0 3 * * 1'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  packages: write
+  pages: write
+  id-token: write
+  security-events: write
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -27,7 +36,7 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - uses: amannn/action-semantic-pull-request@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -44,6 +53,74 @@ jobs:
           requireScope: false
 
   # =============================================================================
+  # NIVEL 0: ANALISE ESTATICA DE SEGURANCA SAST (CODEQL) & HARDENING
+  # =============================================================================
+
+  codeql-analysis:
+    name: "🛡️ CodeQL SAST Analysis (Java & Kotlin)"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: java-kotlin
+          queries: security-extended,security-and-quality
+          build-mode: manual
+
+      - name: Build Debug Artifacts
+        run: ./gradlew --no-daemon clean assembleDebug
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:java-kotlin"
+
+  secrets-scan:
+    name: "🔐 Gitleaks Secret Scanner"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
+
+  dependency-check:
+    name: "🛡️ OWASP Dependency-Check"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: Run OWASP Dependency-Check
+        run: ./gradlew dependencyCheckAnalyze --info --continue || true
+        continue-on-error: true
+      - name: Upload Dependency-Check Report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dependency-check-report
+          path: build/reports/dependency-check-report.html
+          if-no-files-found: ignore
+
+
+  # =============================================================================
   # NIVEL 1: FUNDACAO AGNOSTICA & TESTES
   # =============================================================================
 
@@ -54,7 +131,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -69,7 +146,7 @@ jobs:
             :core:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-foundation-core
           path: |
@@ -77,13 +154,13 @@ jobs:
             core/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-foundation-core
           path: core/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-foundation-core
           path: core/build/outputs/aar/*-debug.aar
@@ -97,7 +174,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -110,7 +187,7 @@ jobs:
             :testing:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-foundation-testing
           path: |
@@ -118,13 +195,13 @@ jobs:
             testing/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-foundation-testing
           path: testing/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-foundation-testing
           path: testing/build/outputs/aar/*-debug.aar
@@ -142,7 +219,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -155,7 +232,7 @@ jobs:
             :backend:firebase:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-firebase
           path: |
@@ -163,13 +240,13 @@ jobs:
             backend/firebase/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-firebase
           path: backend/firebase/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-firebase
           path: backend/firebase/build/outputs/aar/*-debug.aar
@@ -183,7 +260,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -196,7 +273,7 @@ jobs:
             :backend:supabase:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-supabase
           path: |
@@ -204,13 +281,13 @@ jobs:
             backend/supabase/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-supabase
           path: backend/supabase/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-supabase
           path: backend/supabase/build/outputs/aar/*-debug.aar
@@ -224,7 +301,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -237,7 +314,7 @@ jobs:
             :backend:appwrite:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-appwrite
           path: |
@@ -245,13 +322,13 @@ jobs:
             backend/appwrite/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-appwrite
           path: backend/appwrite/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-appwrite
           path: backend/appwrite/build/outputs/aar/*-debug.aar
@@ -265,7 +342,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -278,7 +355,7 @@ jobs:
             :backend:pocketbase:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-pocketbase
           path: |
@@ -286,13 +363,13 @@ jobs:
             backend/pocketbase/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-pocketbase
           path: backend/pocketbase/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-pocketbase
           path: backend/pocketbase/build/outputs/aar/*-debug.aar
@@ -306,7 +383,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -319,7 +396,7 @@ jobs:
             :backend:back4app:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-back4app
           path: |
@@ -327,13 +404,13 @@ jobs:
             backend/back4app/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-back4app
           path: backend/back4app/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-back4app
           path: backend/back4app/build/outputs/aar/*-debug.aar
@@ -347,7 +424,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -360,7 +437,7 @@ jobs:
             :backend:amplify:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-amplify
           path: |
@@ -368,13 +445,13 @@ jobs:
             backend/amplify/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-amplify
           path: backend/amplify/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-amplify
           path: backend/amplify/build/outputs/aar/*-debug.aar
@@ -388,7 +465,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -401,7 +478,7 @@ jobs:
             :backend:cloudflare:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-cloudflare
           path: |
@@ -409,13 +486,13 @@ jobs:
             backend/cloudflare/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-cloudflare
           path: backend/cloudflare/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-cloudflare
           path: backend/cloudflare/build/outputs/aar/*-debug.aar
@@ -429,7 +506,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -442,7 +519,7 @@ jobs:
             :backend:rest:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-driver-rest
           path: |
@@ -450,13 +527,13 @@ jobs:
             backend/rest/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-driver-rest
           path: backend/rest/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-driver-rest
           path: backend/rest/build/outputs/aar/*-debug.aar
@@ -474,7 +551,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -487,7 +564,7 @@ jobs:
             :bundle:hybrid:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-hybrid
           path: |
@@ -495,13 +572,13 @@ jobs:
             bundle/hybrid/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-hybrid
           path: bundle/hybrid/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-hybrid
           path: bundle/hybrid/build/outputs/aar/*-debug.aar
@@ -515,7 +592,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -528,7 +605,7 @@ jobs:
             :bundle:self-hosted:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-self-hosted
           path: |
@@ -536,13 +613,13 @@ jobs:
             bundle/self-hosted/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-self-hosted
           path: bundle/self-hosted/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-self-hosted
           path: bundle/self-hosted/build/outputs/aar/*-debug.aar
@@ -556,7 +633,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -569,7 +646,7 @@ jobs:
             :bundle:cloud-native:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-cloud-native
           path: |
@@ -577,13 +654,13 @@ jobs:
             bundle/cloud-native/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-cloud-native
           path: bundle/cloud-native/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-cloud-native
           path: bundle/cloud-native/build/outputs/aar/*-debug.aar
@@ -597,7 +674,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -610,7 +687,7 @@ jobs:
             :bundle:enterprise-hybrid:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-enterprise-hybrid
           path: |
@@ -618,13 +695,13 @@ jobs:
             bundle/enterprise-hybrid/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-enterprise-hybrid
           path: bundle/enterprise-hybrid/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-enterprise-hybrid
           path: bundle/enterprise-hybrid/build/outputs/aar/*-debug.aar
@@ -638,7 +715,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -651,7 +728,7 @@ jobs:
             :bundle:edge-serverless:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-edge-serverless
           path: |
@@ -659,13 +736,13 @@ jobs:
             bundle/edge-serverless/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-edge-serverless
           path: bundle/edge-serverless/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-edge-serverless
           path: bundle/edge-serverless/build/outputs/aar/*-debug.aar
@@ -679,7 +756,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -692,7 +769,7 @@ jobs:
             :bundle:baas-classic:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-baas-classic
           path: |
@@ -700,13 +777,13 @@ jobs:
             bundle/baas-classic/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-baas-classic
           path: bundle/baas-classic/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-baas-classic
           path: bundle/baas-classic/build/outputs/aar/*-debug.aar
@@ -720,7 +797,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -732,20 +809,20 @@ jobs:
             :bundle:all:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-all
           path: |
             bundle/all/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-all
           path: bundle/all/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-all
           path: bundle/all/build/outputs/aar/*-debug.aar
@@ -759,7 +836,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -772,7 +849,7 @@ jobs:
             :bundle:firebase-supabase:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-firebase-supabase
           path: |
@@ -780,13 +857,13 @@ jobs:
             bundle/firebase-supabase/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-firebase-supabase
           path: bundle/firebase-supabase/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-firebase-supabase
           path: bundle/firebase-supabase/build/outputs/aar/*-debug.aar
@@ -800,7 +877,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -813,7 +890,7 @@ jobs:
             :bundle:firebase-amplify:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-firebase-amplify
           path: |
@@ -821,13 +898,13 @@ jobs:
             bundle/firebase-amplify/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-firebase-amplify
           path: bundle/firebase-amplify/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-firebase-amplify
           path: bundle/firebase-amplify/build/outputs/aar/*-debug.aar
@@ -841,7 +918,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -854,7 +931,7 @@ jobs:
             :bundle:firebase-back4app:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-firebase-back4app
           path: |
@@ -862,13 +939,13 @@ jobs:
             bundle/firebase-back4app/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-firebase-back4app
           path: bundle/firebase-back4app/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-firebase-back4app
           path: bundle/firebase-back4app/build/outputs/aar/*-debug.aar
@@ -882,7 +959,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
@@ -895,7 +972,7 @@ jobs:
             :bundle:supabase-cloudflare:assembleDebug
       - name: 📊 Upload Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-bundle-supabase-cloudflare
           path: |
@@ -903,13 +980,13 @@ jobs:
             bundle/supabase-cloudflare/build/reports/detekt/
           if-no-files-found: ignore
       - name: ⬆️ Upload Release AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aar-bundle-supabase-cloudflare
           path: bundle/supabase-cloudflare/build/outputs/aar/*-release.aar
           if-no-files-found: error
       - name: ⬆️ Upload Debug AAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-aar-bundle-supabase-cloudflare
           path: bundle/supabase-cloudflare/build/outputs/aar/*-debug.aar
@@ -948,17 +1025,43 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with: { fetch-depth: 0, lfs: true }
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
-      - name: 🚀 Build App Sample (Assemble Debug)
-        run: ./gradlew :app:assembleDebug
+      - name: 🔍 Lint, Testes e Build do App Sample
+        run: ./gradlew :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
       - name: ⬆️ Upload Sample APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sample-app-apk
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: ignore
+
+  # =============================================================================
+  # NIVEL 4.5: COBERTURA AGREGADA DE TESTES (JACOCO ROOT)
+  # =============================================================================
+
+  coverage-report:
+    name: "📊 Jacoco Root Coverage Report"
+    needs: [sample-app]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with: { fetch-depth: 0, lfs: true }
+      - name: Setup Android & Java Environment
+        uses: ./.github/actions/setup-android-env
+      - name: 📈 Generate Jacoco Root Coverage Report
+        run: ./gradlew jacocoRootReport
+      - name: 📊 Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: jacoco-root-coverage-report
+          path: build/reports/jacoco/jacocoRootReport/
           if-no-files-found: ignore
 
   # =============================================================================
@@ -967,7 +1070,10 @@ jobs:
 
   publish-and-release:
     name: "🚀 Publish & Release"
-    needs: [sample-app]
+    needs:
+      - sample-app
+      - coverage-report
+      - codeql-analysis
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
@@ -975,7 +1081,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           lfs: true
@@ -983,7 +1089,7 @@ jobs:
 
       - name: Calculate Semantic Version
         id: semver
-        uses: PaulHatch/semantic-version@v5.4.0
+        uses: PaulHatch/semantic-version@v6.0.4
         with:
           tag_prefix: "v"
           major_pattern: "(MAJOR)"
@@ -1017,7 +1123,7 @@ jobs:
 
       - name: Download All Release AARs
         if: steps.changed_modules.outputs.any_changed == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: release-aar-*
           merge-multiple: true
@@ -1075,7 +1181,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup Android & Java Environment
         uses: ./.github/actions/setup-android-env
       - name: Generate Dokka HTML
@@ -1088,11 +1194,11 @@ jobs:
             echo "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>OmniBackend Android API Documentation</title></head><body><h1>OmniBackend Android API Documentation</h1><p>API documentation generated via Dokka for enterprise bundles and backend drivers.</p></body></html>" > ./site-docs/index.html
           fi
       - name: Setup GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: './site-docs'
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

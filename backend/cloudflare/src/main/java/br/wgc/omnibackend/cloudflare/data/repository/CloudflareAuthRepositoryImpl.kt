@@ -5,6 +5,7 @@ import br.wgc.omnibackend.cloudflare.utils.CloudflareErrorMapper
 import br.wgc.omnibackend.cloudflare.utils.CloudflareUserMapper
 import br.wgc.omnibackend.core.model.OmniUser
 import br.wgc.omnibackend.core.model.auth.RegisterUserResponse
+import br.wgc.omnibackend.core.network.OmniHttpClientFactory
 import br.wgc.omnibackend.core.repository.AuthRepository
 import br.wgc.omnibackend.core.utils.AppError
 import br.wgc.omnibackend.core.utils.DataResult
@@ -12,14 +13,20 @@ import com.google.gson.Gson
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import java.net.HttpURLConnection
-import java.net.URL
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.UUID
 
 /**
  * Implementação de [AuthRepository] delegando autenticação para Cloudflare Worker endpoints.
  */
-internal class CloudflareAuthRepositoryImpl(private val workerBaseUrl: String, private val gson: Gson = Gson()) : AuthRepository {
+internal class CloudflareAuthRepositoryImpl(
+    private val workerBaseUrl: String,
+    private val gson: Gson = Gson(),
+    private val httpClient: OkHttpClient = OmniHttpClientFactory.createClient(),
+) : AuthRepository {
 
     @Volatile
     private var activeUser: OmniUser? = null
@@ -108,7 +115,7 @@ internal class CloudflareAuthRepositoryImpl(private val workerBaseUrl: String, p
     override suspend fun loginAnonymously(): DataResult<String> = runCatchingAuth {
         val anonId = UUID.randomUUID().toString()
         val response = postJson("$workerBaseUrl/auth/anonymous", mapOf("anonId" to anonId))
-        val uid = response["uid"]?.toString() ?: anonId
+        val uid = response["id"]?.toString() ?: response["uid"]?.toString() ?: anonId
         uid
     }
 
@@ -139,28 +146,24 @@ internal class CloudflareAuthRepositoryImpl(private val workerBaseUrl: String, p
 
     @Suppress("UNCHECKED_CAST")
     private fun postJson(urlString: String, bodyMap: Map<String, Any?>): Map<String, Any?> {
-        val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"
-            doInput = true
-            doOutput = true
-            setRequestProperty("Content-Type", "application/json")
-            connectTimeout = 10000
-            readTimeout = 10000
-        }
-
         val json = gson.toJson(bodyMap)
-        conn.outputStream.use { it.write(json.toByteArray()) }
+        val body = json.toRequestBody("application/json; charset=utf-8".toMediaType())
+        val request = Request.Builder()
+            .url(urlString)
+            .post(body)
+            .build()
 
-        val code = conn.responseCode
-        if (code in 200..299) {
-            val responseText = conn.inputStream.use { it.bufferedReader().readText() }
-            return if (responseText.isNotBlank()) {
-                gson.fromJson(responseText, Map::class.java) as Map<String, Any?>
+        httpClient.newCall(request).execute().use { response ->
+            if (response.isSuccessful) {
+                val responseText = response.body?.string().orEmpty()
+                return if (responseText.isNotBlank()) {
+                    gson.fromJson(responseText, Map::class.java) as Map<String, Any?>
+                } else {
+                    emptyMap()
+                }
             } else {
-                emptyMap()
+                throw IllegalStateException("Cloudflare Worker HTTP ${response.code}: ${response.message}")
             }
-        } else {
-            throw IllegalStateException("Cloudflare Worker HTTP $code: ${conn.responseMessage}")
         }
     }
 

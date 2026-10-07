@@ -1,0 +1,42 @@
+<templateSet group="WGC OmniBackend Android">
+    <template name="omniRepo" value="class $NAME$Repository @Inject constructor(&#10;    private val authRepository: br.wgc.omnibackend.core.domain.repository.AuthRepository,&#10;    private val databaseRepository: br.wgc.omnibackend.core.domain.repository.DatabaseRepository&#10;) {&#10;    suspend fun fetchData(): br.wgc.omnibackend.core.model.DataResult&lt;$TYPE$&gt; {&#10;        return try {&#10;            $END$&#10;        } catch (e: Exception) {&#10;            br.wgc.omnibackend.core.model.DataResult.Error(br.wgc.omnibackend.core.model.AppError.GenericError(e.message ?: &quot;Unknown error&quot;))&#10;        }&#10;    }&#10;}" description="OmniBackend Repository Skeleton" toReformat="true" toShortenFQNames="true">
+        <variable name="NAME" expression="" defaultValue="&quot;Example&quot;" alwaysStopAt="true" />
+        <variable name="TYPE" expression="" defaultValue="&quot;String&quot;" alwaysStopAt="true" />
+        <context>
+            <option name="KOTLIN" value="true" />
+        </context>
+    </template>
+
+    <template name="omniCircuit" value="val circuitBreaker = br.wgc.omnibackend.core.resilience.CircuitBreaker(&#10;    failureThreshold = $THRESHOLD$,&#10;    resetTimeoutMs = $TIMEOUT$L&#10;)&#10;val result = circuitBreaker.execute(&#10;    action = { $ACTION$ },&#10;    fallback = { $FALLBACK$ }&#10;)&#10;$END$" description="OmniBackend Circuit Breaker Resilience Block" toReformat="true" toShortenFQNames="true">
+        <variable name="THRESHOLD" expression="" defaultValue="&quot;3&quot;" alwaysStopAt="true" />
+        <variable name="TIMEOUT" expression="" defaultValue="&quot;15000&quot;" alwaysStopAt="true" />
+        <variable name="ACTION" expression="" defaultValue="&quot;primaryBackend.fetch()&quot;" alwaysStopAt="true" />
+        <variable name="FALLBACK" expression="" defaultValue="&quot;secondaryBackend.fetch()&quot;" alwaysStopAt="true" />
+        <context>
+            <option name="KOTLIN_STATEMENT" value="true" />
+        </context>
+    </template>
+
+    <template name="omniRetry" value="val retryPolicy = br.wgc.omnibackend.core.resilience.ExponentialBackoffRetryPolicy(&#10;    maxRetries = $MAX_RETRIES$,&#10;    initialDelayMs = $DELAY$L&#10;)&#10;val result = retryPolicy.execute {&#10;    $END$&#10;}" description="OmniBackend Exponential Backoff Retry Block" toReformat="true" toShortenFQNames="true">
+        <variable name="MAX_RETRIES" expression="" defaultValue="&quot;3&quot;" alwaysStopAt="true" />
+        <variable name="DELAY" expression="" defaultValue="&quot;1000&quot;" alwaysStopAt="true" />
+        <context>
+            <option name="KOTLIN_STATEMENT" value="true" />
+        </context>
+    </template>
+
+    <template name="omniAuth" value="val authResult = authRepository.loginWithEmail(&#10;    email = &quot;$EMAIL$&quot;,&#10;    password = &quot;$PASSWORD$&quot;&#10;)&#10;when (authResult) {&#10;    is br.wgc.omnibackend.core.model.DataResult.Success -&gt; {&#10;        val user = authResult.data&#10;        $END$&#10;    }&#10;    is br.wgc.omnibackend.core.model.DataResult.Error -&gt; {&#10;        val error = authResult.error&#10;    }&#10;    br.wgc.omnibackend.core.model.DataResult.Loading -&gt; { }&#10;}" description="OmniBackend Authentication Handling Block" toReformat="true" toShortenFQNames="true">
+        <variable name="EMAIL" expression="" defaultValue="&quot;user@empresa.com.br&quot;" alwaysStopAt="true" />
+        <variable name="PASSWORD" expression="" defaultValue="&quot;secret&quot;" alwaysStopAt="true" />
+        <context>
+            <option name="KOTLIN_STATEMENT" value="true" />
+        </context>
+    </template>
+
+    <template name="omniTest" value="@org.junit.Test&#10;fun `$TEST_NAME$`() = kotlinx.coroutines.test.runTest {&#10;    // Given&#10;    val fakeAuth = br.wgc.omnibackend.testing.fakes.FakeAuthRepository()&#10;    fakeAuth.setMockUser(br.wgc.omnibackend.core.model.OmniUser(id = &quot;u1&quot;, email = &quot;test@example.com&quot;))&#10;&#10;    // When&#10;    val result = fakeAuth.getCurrentUser()&#10;&#10;    // Then&#10;    org.junit.Assert.assertTrue(result is br.wgc.omnibackend.core.model.DataResult.Success)&#10;    $END$&#10;}" description="OmniBackend Unit Test with Fakes" toReformat="true" toShortenFQNames="true">
+        <variable name="TEST_NAME" expression="" defaultValue="should_return_user_when_authenticated" alwaysStopAt="true" />
+        <context>
+            <option name="KOTLIN_CLASS" value="true" />
+        </context>
+    </template>
+</templateSet>

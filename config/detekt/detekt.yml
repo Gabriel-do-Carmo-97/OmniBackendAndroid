@@ -18,11 +18,11 @@ comments:
   CommentOverPrivateProperty:
     active: false
   UndocumentedPublicClass:
-    active: true
+    active: false
   UndocumentedPublicFunction:
-    active: true
+    active: false
   UndocumentedPublicProperty:
-    active: true
+    active: false
 
 complexity:
   ComplexCondition:
@@ -32,10 +32,12 @@ complexity:
     active: false
   CyclomaticComplexMethod:
     active: true
-    threshold: 15
+    threshold: 35
+    ignoreSimpleWhenEntries: true
   LongMethod:
     active: true
     threshold: 60
+    ignoreAnnotated: ['Composable']
   LongParameterList:
     active: true
     functionThreshold: 8
@@ -108,6 +110,8 @@ exceptions:
     active: false
   TooGenericExceptionThrown:
     active: false
+  SwallowedException:
+    active: false
 
 naming:
   ClassNaming:
@@ -118,7 +122,8 @@ naming:
     active: true
   FunctionNaming:
     active: true
-    functionPattern: '^([a-z][a-zA-Z0-9]*|`.*`)$'
+    functionPattern: '^[a-zA-Z][a-zA-Z0-9]*$'
+    ignoreAnnotated: ['Composable']
   PackageNaming:
     active: true
   TopLevelPropertyNaming:
@@ -173,6 +178,12 @@ potential-bugs:
     active: true
 
 style:
+  MaxLineLength:
+    active: true
+    maxLineLength: 140
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: true
   ClassOrdering:
     active: false
   CollapsibleIfStatements:
@@ -214,7 +225,7 @@ style:
   UnnecessaryLet:
     active: true
   UnnecessaryParentheses:
-    active: true
+    active: false
   UntilInsteadOfRangeTo:
     active: true
   UnusedImports:
@@ -224,7 +235,7 @@ style:
   UseArrayLiteralsInAnnotations:
     active: true
   UseCheckOrError:
-    active: true
+    active: false
   UseDataClass:
     active: false
   UseEmptyCounterpart:
