@@ -30,7 +30,7 @@ bcv = "0.18.2"
 spotless = "8.10.3"
 turbine = "1.2.1"
 robolectric = "4.17"
-sonarqube = "7.4.0.8496"
+sonarqube = "7.5.0.8588"
 dependencyCheck = "13.0.0"
 okhttp = "4.12.0"
 
